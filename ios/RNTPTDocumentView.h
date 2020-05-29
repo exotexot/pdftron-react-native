@@ -123,6 +123,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)importAnnotationCommand:(NSString *)xfdfCommand initialLoad:(BOOL)initialLoad;
 
+
+
+// Custom Search
+- (void)search:(NSString *)searchString;
+
+
+
 @end
 
 NS_ASSUME_NONNULL_END

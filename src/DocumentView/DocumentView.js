@@ -249,9 +249,26 @@ export default class DocumentView extends PureComponent {
     return Promise.resolve();
   }
 
+
+
+  // Custom Search 
+  search = (searchString) => {
+    console.log("Search event triggered")
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.search(tag, searchString);
+    }
+    return Promise.resolve();
+  }
+  // Custom Search End
+
+
+
   _setNativeRef = (ref) => {
     this._viewerRef = ref;
   };
+
+
 
   render() {
     return (

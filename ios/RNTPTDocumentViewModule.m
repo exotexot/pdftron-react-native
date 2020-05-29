@@ -198,5 +198,24 @@ RCT_REMAP_METHOD(importAnnotationCommand,
     }
 }
 
+
+
+// Custom Search
+RCT_REMAP_METHOD(search,
+                 searchForDocumentViewTag:(nonnull NSNumber *)tag
+                 searchString:(NSString *)searchString
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] searchForDocumentViewTag:tag search:searchString];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"search_failed", @"SEARCH FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+
+
 @end
-  

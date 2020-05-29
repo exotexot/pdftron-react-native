@@ -34,4 +34,11 @@
 
 - (void)importAnnotationCommandForDocumentViewTag:(NSNumber *)tag xfdfCommand:(NSString *)xfdfCommand initialLoad:(BOOL)initialLoad;
 
+
+
+// Custom Search
+- (void)searchForDocumentViewTag:(NSNumber *)tag search:(NSString *)searchString;
+
+
+
 @end

@@ -530,6 +530,22 @@ RCT_CUSTOM_VIEW_PROPERTY(longPressMenuEnabled, BOOL, RNTPTDocumentView)
     }
 }
 
+
+
+// Custom Search
+
+- (void)searchForDocumentViewTag:(NSNumber *)tag search:(NSString *)searchString
+{
+    RNTPTDocumentView *documentView = self.documentViews[tag];
+    if (documentView) {
+        [documentView search:searchString];
+    } else {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
+    }
+}
+
+
+
 #pragma mark - DocumentView attached/detached
 
 - (void)documentViewAttachedToWindow:(RNTPTDocumentView *)documentView
