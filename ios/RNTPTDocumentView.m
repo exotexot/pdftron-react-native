@@ -1899,19 +1899,34 @@ NS_ASSUME_NONNULL_END
     unsigned int mode = e_ptwhole_word;
     NSString *pattern = @"the";
     [search Begin:pdfDoc pattern:pattern mode:mode start_page:-1 end_page:-1];
-    
-    bool isFound = true;
-    while (isFound)
+
+
+    NSMutableArray *searchResults = [NSMutableArray new];
+    int resultCount = 0;
+    bool moreToFind = true;
+
+    while (moreToFind)
     {
         PTSearchResult *result = [search Run];
-        
         if (result)
         {
-            NSLog(@"found: %@", [result GetMatch]);
-            NSLog(@"pagenumber: %i", [result GetPageNumber]);
-            isFound = [result IsFound];
+            // NSLog(@"found: %@", [result GetMatch]);
+            // NSLog(@"pagenumber: %i", [result GetPageNumber]);
+
+            NSDictionary *oneSearchResult = @{
+                @"match": [result GetMatch],
+                @"pagenumber": [result GetPageNumber],
+                @"ambientstring": @"",
+                @"chapter":@"",
+            };
+            //NSLog(@"%@", oneSearchResult);
+
+            [searchResults addObject: oneSearchResult];
+            moreToFind = [result IsFound];
         }
     }
+
+    NSLog(@"%@", searchResults);
     [pdfViewCtrl Update:YES];
 }
 
