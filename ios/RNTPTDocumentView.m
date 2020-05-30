@@ -1896,13 +1896,12 @@ NS_ASSUME_NONNULL_END
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
     
     PTTextSearch *search = [[PTTextSearch alloc] init];
-    unsigned int mode = e_ptwhole_word;
+    unsigned int mode = e_ptwhole_word|e_pthighlight|e_ptambient_string;
     NSString *pattern = @"the";
     [search Begin:pdfDoc pattern:pattern mode:mode start_page:-1 end_page:-1];
-
-
+    
+    
     NSMutableArray *searchResults = [NSMutableArray new];
-    int resultCount = 0;
     bool moreToFind = true;
 
     while (moreToFind)
@@ -1910,23 +1909,55 @@ NS_ASSUME_NONNULL_END
         PTSearchResult *result = [search Run];
         if (result)
         {
-            // NSLog(@"found: %@", [result GetMatch]);
-            // NSLog(@"pagenumber: %i", [result GetPageNumber]);
+            
+            // Serach Result
+            if( [result GetMatch] != nil ) {
+                NSDictionary *oneSearchResult = @{
+                    @"match": [result GetMatch],
+                    @"page": [NSNumber numberWithInt:[result GetPageNumber]],
+                    @"ambient": [result GetAmbientString]
+                 };
+                NSLog(@"%@", oneSearchResult);
+                [searchResults addObject: oneSearchResult];
+            }
+            
+            
+            
+            // Text Highlights
+            PTHighlights *hlts = [result GetHighlights];
+            [hlts Begin: pdfDoc];
+            
+            while ( [hlts HasNext] )
+            {
+                NSLog(@"The current highlight is from page: %d", [hlts GetCurrentPageNumber]);
+                
+                PTPage *cur_page = [pdfDoc GetPage: [hlts GetCurrentPageNumber]];
+                PTVectorQuadPoint *quads = [hlts GetCurrentQuads];
+                int i = 0;
+                for ( ; i < [quads size]; ++i )
+                {
+                    //assume each quad is an axis-aligned rectangle
+                    PTQuadPoint *q = [quads get: i];
+                    double x1 = MIN(MIN(MIN([[q getP1] getX], [[q getP2] getX]), [[q getP3] getX]), [[q getP4] getX]);
+                    double x2 = MAX(MAX(MAX([[q getP1] getX], [[q getP2] getX]), [[q getP3] getX]), [[q getP4] getX]);
+                    double y1 = MIN(MIN(MIN([[q getP1] getY], [[q getP2] getY]), [[q getP3] getY]), [[q getP4] getY]);
+                    double y2 = MAX(MAX(MAX([[q getP1] getY], [[q getP2] getY]), [[q getP3] getY]), [[q getP4] getY]);
+                    PTPDFRect * rect = [[PTPDFRect alloc] initWithX1: x1 y1: y1 x2: x2 y2: y2];
 
-            NSDictionary *oneSearchResult = @{
-                @"match": [result GetMatch],
-                @"pagenumber": [result GetPageNumber],
-                @"ambientstring": @"",
-                @"chapter":@"",
-            };
-            //NSLog(@"%@", oneSearchResult);
+                    PTAction *action = [PTAction CreateURI: [pdfDoc GetSDFDoc] uri: @"http://www.pdftron.com"];
+                    PTLink *hyper_link = [PTLink CreateWithAction: [pdfDoc GetSDFDoc] pos: rect action: action];
+                    [cur_page AnnotPushBack: hyper_link];
+                }
+                [hlts Next];
+            }
+            
 
-            [searchResults addObject: oneSearchResult];
             moreToFind = [result IsFound];
         }
     }
 
-    NSLog(@"%@", searchResults);
+//  NSLog(@"Search results2: %@", searchResults);
+    NSLog(@"Search results3: %i", [searchResults count]);
     [pdfViewCtrl Update:YES];
 }
 
