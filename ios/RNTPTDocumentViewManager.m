@@ -534,11 +534,11 @@ RCT_CUSTOM_VIEW_PROPERTY(longPressMenuEnabled, BOOL, RNTPTDocumentView)
 
 // Custom Search
 
-- (void)searchForDocumentViewTag:(NSNumber *)tag search:(NSString *)searchString
+- (NSArray<NSDictionary<NSString *, NSString *> *> *)searchForDocumentViewTag:(NSNumber *)tag search:(NSString *)searchString
 {
     RNTPTDocumentView *documentView = self.documentViews[tag];
     if (documentView) {
-        [documentView search:searchString];
+        return [documentView search:searchString];
     } else {
         @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
     }

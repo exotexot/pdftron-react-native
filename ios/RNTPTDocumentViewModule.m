@@ -208,8 +208,8 @@ RCT_REMAP_METHOD(search,
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     @try {
-        [[self documentViewManager] searchForDocumentViewTag:tag search:searchString];
-        resolve(nil);
+        NSArray *results = [[self documentViewManager] searchForDocumentViewTag:tag search:searchString];
+        resolve(results);
     }
     @catch (NSException *exception) {
         reject(@"search_failed", @"SEARCH FAILED MISERABLY", [self errorFromException:exception]);

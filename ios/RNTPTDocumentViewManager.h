@@ -37,7 +37,7 @@
 
 
 // Custom Search
-- (void)searchForDocumentViewTag:(NSNumber *)tag search:(NSString *)searchString;
+- (NSArray<NSDictionary<NSString *, NSString *> *> *)searchForDocumentViewTag:(NSNumber *)tag search:(NSString *)searchString;
 
 
 
