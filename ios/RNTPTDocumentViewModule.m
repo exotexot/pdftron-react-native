@@ -218,4 +218,22 @@ RCT_REMAP_METHOD(search,
 
 
 
+// Custom Search
+RCT_REMAP_METHOD(getDimensions,
+                 getDimensionsForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        NSDictionary *dimensions = [[self documentViewManager] getDimensionsForDocumentViewTag:tag];
+        resolve(dimensions);
+    }
+    @catch (NSException *exception) {
+        reject(@"dimensions_failed", @"DIMENSIONS FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+
+
+
 @end

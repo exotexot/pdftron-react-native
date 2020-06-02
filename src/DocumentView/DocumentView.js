@@ -260,14 +260,22 @@ export default class DocumentView extends PureComponent {
     }
     return Promise.resolve();
   }
-  // Custom Search End
 
+
+   // getDimensions
+   getDimensions = () => {
+    console.log("Search event triggered")
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.getDimensions(tag);
+    }
+    return Promise.resolve();
+  }
 
 
   _setNativeRef = (ref) => {
     this._viewerRef = ref;
   };
-
 
 
   render() {

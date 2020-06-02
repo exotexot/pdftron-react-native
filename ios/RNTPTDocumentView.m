@@ -1921,8 +1921,6 @@ NS_ASSUME_NONNULL_END
                 [searchResults addObject: oneSearchResult];
             }
             
-            
-            
             // Text Highlights
             PTHighlights *hlts = [result GetHighlights];
             [hlts Begin: pdfDoc];
@@ -1944,9 +1942,9 @@ NS_ASSUME_NONNULL_END
                     double y2 = MAX(MAX(MAX([[q getP1] getY], [[q getP2] getY]), [[q getP3] getY]), [[q getP4] getY]);
                     PTPDFRect * rect = [[PTPDFRect alloc] initWithX1: x1 y1: y1 x2: x2 y2: y2];
 
-                    PTAction *action = [PTAction CreateURI: [pdfDoc GetSDFDoc] uri: @"http://www.pdftron.com"];
-                    PTLink *hyper_link = [PTLink CreateWithAction: [pdfDoc GetSDFDoc] pos: rect action: action];
-                    [cur_page AnnotPushBack: hyper_link];
+//                    PTAction *action = [PTAction CreateURI: [pdfDoc GetSDFDoc] uri: @"http://www.pdftron.com"];
+//                    PTLink *hyper_link = [PTLink CreateWithAction: [pdfDoc GetSDFDoc] pos: rect action: action];
+//                    [cur_page AnnotPushBack: hyper_link];
                 }
                 [hlts Next];
             }
@@ -1965,6 +1963,28 @@ NS_ASSUME_NONNULL_END
     [pdfViewCtrl Update:YES];
 }
 
+
+
+// Return dimensions
+- (NSDictionary<NSString *, NSNumber *> *)getDimensions
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+    PTPage *firstPage = [pdfDoc GetPage:0];
+    
+    double width = [firstPage GetPageWidth:e_ptmedia];
+    double height = [firstPage GetPageHeight:e_ptmedia];
+    
+    NSNumber *width2 = [NSNumber numberWithDouble:width];
+    NSNumber *height2 = [NSNumber numberWithDouble:height];
+    
+    NSDictionary *dimensions = @{
+       @"width": width2,
+       @"height": height2,
+    };
+
+    return dimensions;
+}
 
 
 @end
