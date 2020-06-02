@@ -111,7 +111,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 // Custom Search
-- (void)search:(NSString *)searchString;
+- (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString;
 
 
 

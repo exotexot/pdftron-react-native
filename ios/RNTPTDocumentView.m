@@ -1617,7 +1617,7 @@ NS_ASSUME_NONNULL_END
 
 
 // Custom Search
-- (void)search:(NSString *)searchString
+- (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString
 {
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
@@ -1681,7 +1681,11 @@ NS_ASSUME_NONNULL_END
 
             moreToFind = [result IsFound];
         }
+        
+        
     }
+    
+    return [searchResults copy];
 
 //  NSLog(@"Search results2: %@", searchResults);
     NSLog(@"Search results3: %i", [searchResults count]);
