@@ -114,6 +114,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString;
 
 
+- (NSDictionary<NSString *, NSNumber *> *)getDimensions;
+
+
 
 @end
 

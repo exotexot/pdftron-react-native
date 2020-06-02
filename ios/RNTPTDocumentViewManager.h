@@ -39,6 +39,7 @@
 // Custom Search
 - (NSArray<NSDictionary<NSString *, NSString *> *> *)searchForDocumentViewTag:(NSNumber *)tag search:(NSString *)searchString;
 
+- (NSDictionary<NSString *, NSNumber *> *)getDimensionsForDocumentViewTag:(NSNumber *)tag;
 
 
 @end
