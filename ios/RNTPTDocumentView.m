@@ -1965,15 +1965,15 @@ NS_ASSUME_NONNULL_END
 
 
 
-// Return dimensions
+// Return dimensions/Users/vinzenz/Repositories/pdftron-react-native/ios/RNTPTDocumentView.m
 - (NSDictionary<NSString *, NSNumber *> *)getDimensions
 {
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
-    PTPage *firstPage = [pdfDoc GetPage:0];
+    PTPage *firstPage = [pdfDoc GetPage:1];
     
-    double width = [firstPage GetPageWidth:e_ptmedia];
-    double height = [firstPage GetPageHeight:e_ptmedia];
+    double width = [firstPage GetPageWidth:e_pttrim];
+    double height = [firstPage GetPageHeight:e_pttrim];
     
     NSNumber *width2 = [NSNumber numberWithDouble:width];
     NSNumber *height2 = [NSNumber numberWithDouble:height];
