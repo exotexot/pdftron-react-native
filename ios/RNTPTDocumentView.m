@@ -1897,7 +1897,7 @@ NS_ASSUME_NONNULL_END
     
     PTTextSearch *search = [[PTTextSearch alloc] init];
     unsigned int mode = e_ptwhole_word|e_pthighlight|e_ptambient_string;
-    NSString *pattern = @"the";
+    NSString *pattern = searchString;
     [search Begin:pdfDoc pattern:pattern mode:mode start_page:-1 end_page:-1];
     
     
