@@ -1948,6 +1948,10 @@ NS_ASSUME_NONNULL_END
                     int toPage = [hlts GetCurrentPageNumber];
                     [pdfViewCtrl addFloatingView:view toPage:toPage  withPageRect: rect];
                     
+                    
+                    
+                    NSLog(@"SEARCH TEST PAGE %i", toPage);
+                    
 
                     
 
@@ -1994,9 +1998,6 @@ NS_ASSUME_NONNULL_END
 
     return dimensions;
 }
-
-
--- (_Bool)SetCurrentPage:(int)page_num;
 
 
 @end
