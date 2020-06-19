@@ -1934,30 +1934,20 @@ NS_ASSUME_NONNULL_END
                 int i = 0;
                 for ( ; i < [quads size]; ++i )
                 {
-                    //assume each quad is an axis-aligned rectangle
                     PTQuadPoint *q = [quads get: i];
                     double x1 = MIN(MIN(MIN([[q getP1] getX], [[q getP2] getX]), [[q getP3] getX]), [[q getP4] getX]);
                     double x2 = MAX(MAX(MAX([[q getP1] getX], [[q getP2] getX]), [[q getP3] getX]), [[q getP4] getX]);
                     double y1 = MIN(MIN(MIN([[q getP1] getY], [[q getP2] getY]), [[q getP3] getY]), [[q getP4] getY]);
                     double y2 = MAX(MAX(MAX([[q getP1] getY], [[q getP2] getY]), [[q getP3] getY]), [[q getP4] getY]);
                     PTPDFRect * rect = [[PTPDFRect alloc] initWithX1: x1 y1: y1 x2: x2 y2: y2];
-                    
-
+    
                     UIView *view = [[UIView alloc] init];
-                    view.backgroundColor = [UIColor redcolor];
+                    UIColor *color = [UIColor colorWithRed: 0.98 green: 0.46 blue: 0.08 alpha: 1.00];
+                    view.backgroundColor = color;
+                    view.layer.compositingFilter = @"multiplyBlendMode";
+
                     int toPage = [hlts GetCurrentPageNumber];
-                    [pdfViewCtrl addFloatingView:view toPage:toPage  withPageRect: rect];
-                    
-                    
-                    
-                    NSLog(@"SEARCH TEST PAGE %i", toPage);
-                    
-
-                    
-
-//                    PTAction *action = [PTAction CreateURI: [pdfDoc GetSDFDoc] uri: @"http://www.pdftron.com"];
-//                    PTLink *hyper_link = [PTLink CreateWithAction: [pdfDoc GetSDFDoc] pos: rect action: action];
-//                    [cur_page AnnotPushBack: hyper_link];
+                    [pdfViewCtrl addFloatingView:view toPage:toPage withPageRect:rect noZoom:NO];
                 }
                 [hlts Next];
             }
