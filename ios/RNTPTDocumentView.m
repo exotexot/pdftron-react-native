@@ -1695,7 +1695,7 @@ NS_ASSUME_NONNULL_END
 
 
 
-// Return dimensions/Users/vinzenz/Repositories/pdftron-react-native/ios/RNTPTDocumentView.m
+// Return dimensions
 - (NSDictionary<NSString *, NSNumber *> *)getDimensions
 {
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
@@ -1715,6 +1715,23 @@ NS_ASSUME_NONNULL_END
 
     return dimensions;
 }
+
+
+// Jump To Page
+- (void)jumpTo:(int)page_num
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    [pdfViewCtrl GotoLastPage];
+}
+
+
+
+
+
+
+
+
+
 
 
 @end

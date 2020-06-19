@@ -175,14 +175,14 @@ NS_ASSUME_NONNULL_END
     }
 }
 
-- (void)pdfViewCtrl:(PTPDFViewCtrl *)pdfViewCtrl downloadEventType:(PTDownloadedType)type pageNumber:(int)pageNum
-{
-    if (type == e_ptdownloadedtype_finished && !self.documentLoaded) {
-        self.needsRemoteDocumentLoaded = YES;
-    }
-
-    [super pdfViewCtrl:pdfViewCtrl downloadEventType:type pageNumber:pageNum];
-}
+//- (void)pdfViewCtrl:(PTPDFViewCtrl *)pdfViewCtrl downloadEventType:(PTDownloadedType)type pageNumber:(int)pageNum
+//{
+//    if (type == e_ptdownloadedtype_finished && !self.documentLoaded) {
+//        self.needsRemoteDocumentLoaded = YES;
+//    }
+//
+//    [super pdfViewCtrl:pdfViewCtrl downloadEventType:type pageNumber:pageNum];
+//}
 
 - (void)pdfViewCtrl:(PTPDFViewCtrl *)pdfViewCtrl pdfScrollViewDidZoom:(UIScrollView *)scrollView
 {
