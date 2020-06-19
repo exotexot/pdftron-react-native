@@ -1994,7 +1994,7 @@ NS_ASSUME_NONNULL_END
 - (void)jumpTo:(int)page_num
 {
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
-    [pdfViewCtrl GotoLastPage];
+    [pdfViewCtrl SetCurrentPage:page_num];
 }
 
 
