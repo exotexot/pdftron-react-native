@@ -1942,13 +1942,13 @@ NS_ASSUME_NONNULL_END
                     double y2 = MAX(MAX(MAX([[q getP1] getY], [[q getP2] getY]), [[q getP3] getY]), [[q getP4] getY]);
                     PTPDFRect * rect = [[PTPDFRect alloc] initWithX1: x1 y1: y1 x2: x2 y2: y2];
                     
-                    
-// https://www.pdftron.com/api/ios/Classes/PTPDFViewCtrl.html#/c:objc(cs)PTPDFViewCtrl(im)addFloatingView:toPage:withPageRect:noZoom:
-                    
-                    
+
                     UIView *view = [[UIView alloc] init];
+                    view.backgroundColor = [UIColor redcolor];
                     int toPage = [hlts GetCurrentPageNumber];
                     [pdfViewCtrl addFloatingView:view toPage:toPage  withPageRect: rect];
+                    
+
                     
 
 //                    PTAction *action = [PTAction CreateURI: [pdfDoc GetSDFDoc] uri: @"http://www.pdftron.com"];
