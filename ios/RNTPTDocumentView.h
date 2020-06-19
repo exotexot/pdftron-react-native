@@ -134,6 +134,9 @@ NS_ASSUME_NONNULL_BEGIN
 // Jump to Page
 - (void)jumpTo:(int)page_num;
 
+// Append School Logo
+- (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex;
+
 
 
 @end

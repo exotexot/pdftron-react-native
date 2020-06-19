@@ -234,7 +234,7 @@ RCT_REMAP_METHOD(getDimensions,
 }
 
 
-// setCurrentPage
+// jumpTo Page
 RCT_REMAP_METHOD(jumpTo,
                  jumpToForDocumentViewTag:(nonnull NSNumber *)tag
                  page_num:(int)page_num
@@ -247,6 +247,23 @@ RCT_REMAP_METHOD(jumpTo,
     }
     @catch (NSException *exception) {
         reject(@"setPageNum_failed", @"SET CURRENT PAGE FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+// add school Logo
+RCT_REMAP_METHOD(add,
+                 appendSchoolLogoForDocumentViewTag:(nonnull NSNumber *)tag
+                 appendSchoolLogo:(int)base64String
+                 duplex:(BOOL)isDuplex
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] appendSchoolLogoForDocumentViewTag:tag appendSchoolLogo:base64String duplex:isDuplex];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"addSchoolLogo_failed", @"ADD SCHOOL LOGO FAILED MISERABLY", [self errorFromException:exception]);
     }
 }
 

@@ -281,6 +281,16 @@ export default class DocumentView extends PureComponent {
     return Promise.resolve();
   }
 
+  // jumpTo
+  appendSchoolLogo = (base64String, duplex) => {
+    console.log("Append School Logo event triggered")
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.appendSchoolLogo(tag, base64String, duplex);
+    }
+    return Promise.resolve();
+  }
+
 
   _setNativeRef = (ref) => {
     this._viewerRef = ref;
