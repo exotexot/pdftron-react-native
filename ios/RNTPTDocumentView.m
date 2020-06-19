@@ -1679,55 +1679,66 @@ NS_ASSUME_NONNULL_END
                 [hlts Next];
             }
             
-
             moreToFind = [result IsFound];
         }
-        
-        
     }
     
     return [searchResults copy];
 
 //  NSLog(@"Search results2: %@", searchResults);
-    NSLog(@"Search results3: %i", [searchResults count]);
+//    NSLog(@"Search results3: %i", [searchResults count]);
     [pdfViewCtrl Update:YES];
 }
 
 
 
 
-- (void)clearSearchHighlights
+- (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex
 {
-    // PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
-    // (nonnull NSArray<UIView *> *)searchhighlights = 
-    // [pdfViewCtrl removeFloatingViews:searchhighlights]
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+    
+    int pages = [pdfDoc GetPageCount];
+
+    NSURL *url = [NSURL URLWithString:base64String];
+    NSData *imageData = [NSData dataWithContentsOfURL:url];
+    
+    for (int page = 1; page <= pages; page++)
+    {
+        
+        UIImage *image = [UIImage imageWithData:imageData];
+        UIImageView * imageView = [[UIImageView alloc] initWithImage:image];
+        
+        double imgX = image.size.width;
+        double imgY = image.size.height;
+        UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, imgX, imgY)];
+        
+        [view addSubview:imageView];
+        
+        PTPage *pageObject = [pdfDoc GetPage:page];
+        
+        double width = [pageObject GetPageWidth:e_pttrim];
+        double height = [pageObject GetPageHeight:e_pttrim];
+        
+
+        if (isDuplex) {
+            PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0 y1:height x2:imgX y2:(height-imgY)];
+            PTPDFRect *topRight = [[PTPDFRect alloc] initWithX1:(width - imgX) y1:height x2:width y2:(height-imgY)];
+            [pdfViewCtrl addFloatingView:view toPage:page withPageRect: (page % 2 ? topLeft : topRight) noZoom:NO];
+        } else {
+            PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0 y1:height x2:imgX y2:(height-imgY)];
+            [pdfViewCtrl addFloatingView:view toPage:page withPageRect:topLeft noZoom:NO];
+        }
+        
+    }
 }
 
 
-- (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex
+- (void)clearSearchHighlights
 {
-    // NSURL *url = [NSURL URLWithString:base64String];    
-    // NSData *imageData = [NSData dataWithContentsOfURL:url];
-    // UIImage *ret = [UIImage imageWithData:imageData];
-
-    // [UIImageView initWithBase64EncodedString:base64String]
-
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
-
-    UIView *LogoView = [[UIView alloc] initWithFrame:CGRectMake(10, 10, 300, 300)];
-    UIColor *color = [UIColor colorWithRed: 1.00 green: 0.41 blue: 0.10 alpha: 1.00];
-
-    LogoView.backgroundColor = color;
-    LogoView.layer.compositingFilter = @"multiplyBlendMode";
-
-
-    PTPDFPoint *origin = [PTPDFPoint initWithPx:(double)10 py:(dobule)10]
-
-
-
-    [pdfViewCtrl addFloatingView:LogoView toPage:1 atPagePoint:origin];
-
-
+    // PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    // (nonnull NSArray<UIView *> *)searchhighlights =
+    // [pdfViewCtrl removeFloatingViews:searchhighlights]
 }
 
 
@@ -1761,13 +1772,6 @@ NS_ASSUME_NONNULL_END
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
     [pdfViewCtrl SetCurrentPage:page_num];
 }
-
-
-
-
-
-
-
 
 
 
