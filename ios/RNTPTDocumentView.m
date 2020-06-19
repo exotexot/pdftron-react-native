@@ -1695,6 +1695,44 @@ NS_ASSUME_NONNULL_END
 
 
 
+
+- (void)clearSearchHighlights
+{
+    // PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    // (nonnull NSArray<UIView *> *)searchhighlights = 
+    // [pdfViewCtrl removeFloatingViews:searchhighlights]
+}
+
+
+- (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex
+{
+    // NSURL *url = [NSURL URLWithString:base64String];    
+    // NSData *imageData = [NSData dataWithContentsOfURL:url];
+    // UIImage *ret = [UIImage imageWithData:imageData];
+
+    // [UIImageView initWithBase64EncodedString:base64String]
+
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+
+    UIView *LogoView = [[UIView alloc] initWithFrame:CGRectMake(10, 10, 300, 300)];
+    UIColor *color = [UIColor colorWithRed: 1.00 green: 0.41 blue: 0.10 alpha: 1.00];
+
+    LogoView.backgroundColor = color;
+    LogoView.layer.compositingFilter = @"multiplyBlendMode";
+
+
+    PTPDFPoint *origin = [PTPDFPoint initWithPx:(double)10 py:(dobule)10]
+
+
+
+    [pdfViewCtrl addFloatingView:LogoView toPage:1 atPagePoint:origin];
+
+
+}
+
+
+
+
 // Return dimensions
 - (NSDictionary<NSString *, NSNumber *> *)getDimensions
 {

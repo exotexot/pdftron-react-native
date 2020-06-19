@@ -40,12 +40,14 @@
 // Custom Search
 - (NSArray<NSDictionary<NSString *, NSString *> *> *)searchForDocumentViewTag:(NSNumber *)tag search:(NSString *)searchString;
 
-// Get Documetn Dimensions
+// Get Document Dimensions
 - (NSDictionary<NSString *, NSNumber *> *)getDimensionsForDocumentViewTag:(NSNumber *)tag;
 
 // Jump to Page
 - (void)jumpToForDocumentViewTag:(NSNumber *)tag jumpTo:(int)page_num;
 
+// SchoolLogo
+- (void)appendSchoolLogoForDocumentViewTag:(NSNumber *)tag appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex
 
 
 @end
