@@ -129,7 +129,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString;
 
 
+// Get Dimensions
 - (NSDictionary<NSString *, NSNumber *> *)getDimensions;
+
+
+// GoToPage
+- (_Bool)SetCurrentPage:(int)page_num;
 
 
 
