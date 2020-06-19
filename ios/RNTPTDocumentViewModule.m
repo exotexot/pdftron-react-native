@@ -234,6 +234,23 @@ RCT_REMAP_METHOD(getDimensions,
 }
 
 
+// setCurrentPage
+RCT_REMAP_METHOD(jumpTo,
+                 jumpToForDocumentViewTag:(nonnull NSNumber *)tag
+                 page_num:(int)page_num
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] jumpToForDocumentViewTag:tag jumpTo:page_num];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"setPageNum_failed", @"SET CURRENT PAGE FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+
 
 
 @end

@@ -251,7 +251,7 @@ export default class DocumentView extends PureComponent {
 
 
 
-  // Custom Search 
+  // Custom Search
   search = (searchString) => {
     console.log("Search event triggered")
     const tag = findNodeHandle(this._viewerRef);
@@ -263,11 +263,20 @@ export default class DocumentView extends PureComponent {
 
 
    // getDimensions
-   getDimensions = () => {
-    console.log("Search event triggered")
+  getDimensions = () => {
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
       return DocumentViewManager.getDimensions(tag);
+    }
+    return Promise.resolve();
+  }
+
+  // jumpTo
+  jumpTo = (page) => {
+    console.log("Jump event triggered")
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.jumpTo(tag, page);
     }
     return Promise.resolve();
   }

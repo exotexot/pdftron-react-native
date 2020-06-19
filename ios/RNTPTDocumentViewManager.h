@@ -36,10 +36,16 @@
 
 
 
+
 // Custom Search
 - (NSArray<NSDictionary<NSString *, NSString *> *> *)searchForDocumentViewTag:(NSNumber *)tag search:(NSString *)searchString;
 
+// Get Documetn Dimensions
 - (NSDictionary<NSString *, NSNumber *> *)getDimensionsForDocumentViewTag:(NSNumber *)tag;
+
+// Jump to Page
+- (void)jumpToForDocumentViewTag:(NSNumber *)tag jumpTo:(int)page_num;
+
 
 
 @end

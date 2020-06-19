@@ -128,13 +128,11 @@ NS_ASSUME_NONNULL_BEGIN
 // Custom Search
 - (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString;
 
-
-// Get Dimensions
+// Get First Page Dimensions
 - (NSDictionary<NSString *, NSNumber *> *)getDimensions;
 
-
-// GoToPage
-- (_Bool)SetCurrentPage:(int)page_num;
+// Jump to Page
+- (void)jumpTo:(int)page_num;
 
 
 
