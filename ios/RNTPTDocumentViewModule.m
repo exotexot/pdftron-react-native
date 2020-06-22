@@ -251,9 +251,9 @@ RCT_REMAP_METHOD(jumpTo,
 }
 
 // add school Logo
-RCT_REMAP_METHOD(add,
+RCT_REMAP_METHOD(appendSchoolLogo,
                  appendSchoolLogoForDocumentViewTag:(nonnull NSNumber *)tag
-                 appendSchoolLogo:(int)base64String
+                 base64String:(NSString *)base64String
                  duplex:(BOOL)isDuplex
                  resolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
@@ -264,6 +264,23 @@ RCT_REMAP_METHOD(add,
     }
     @catch (NSException *exception) {
         reject(@"addSchoolLogo_failed", @"ADD SCHOOL LOGO FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+
+// Rotate Manager
+RCT_REMAP_METHOD(rotate,
+                 rotateForDocumentViewTag:(nonnull NSNumber *)tag
+                 ccw:(BOOL)ccw
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] rotateForDocumentViewTag:tag rotate:ccw];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"rotate_failed", @"ROTATE PAGE FAILED MISERABLY", [self errorFromException:exception]);
     }
 }
 

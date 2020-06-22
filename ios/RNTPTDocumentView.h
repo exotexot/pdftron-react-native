@@ -122,6 +122,9 @@ NS_ASSUME_NONNULL_BEGIN
 // Append School Logo
 - (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex;
 
+// Rotation Manager
+- (void)rotate:(BOOL)ccw;
+
 
 
 @end

@@ -1775,5 +1775,43 @@ NS_ASSUME_NONNULL_END
 
 
 
+// Rotate Page
+- (void)rotate:(BOOL)ccw
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+    
+    int page_number = [pdfViewCtrl GetCurrentPage];
+    PTPage *page = [pdfDoc GetPage:page_number];
+    
+    PTRotate originalRotation = [page GetRotation];
+    PTRotate newRotation;
+        
+    if (!ccw) {
+        switch (originalRotation)
+        {
+          case e_pt0:   newRotation = e_pt90;  break;
+          case e_pt90:  newRotation = e_pt180; break;
+          case e_pt180: newRotation = e_pt270; break;
+          case e_pt270: newRotation = e_pt0;   break;
+          default:      newRotation = e_pt0;   break;
+        }
+    } else {
+        switch (originalRotation)
+        {
+          case e_pt0:   newRotation = e_pt270; break;
+          case e_pt270: newRotation = e_pt180; break;
+          case e_pt180: newRotation = e_pt90;  break;
+          case e_pt90:  newRotation = e_pt0;   break;
+          default:      newRotation = e_pt0;   break;
+        }
+    }
+    
+    [page SetRotation:newRotation];
+    [ pdfViewCtrl UpdatePageLayout ];
+}
+
+
+
 
 @end

@@ -523,6 +523,16 @@ RCT_CUSTOM_VIEW_PROPERTY(overrideBehavior, NSArray, RNTPTDocumentView)
 }
 
 
+- (void)rotateForDocumentViewTag:(NSNumber *)tag rotate:(BOOL)ccw
+{
+    RNTPTDocumentView *documentView = self.documentViews[tag];
+    if (documentView) {
+        return [documentView rotate:ccw];
+    } else {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
+    }
+}
+
 
 
 
