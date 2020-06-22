@@ -125,6 +125,9 @@ NS_ASSUME_NONNULL_BEGIN
 // Rotation Manager
 - (void)rotate:(BOOL)ccw;
 
+// Outline
+- (void)getOutline;
+
 
 
 @end

@@ -566,6 +566,18 @@ NS_ASSUME_NONNULL_END
     {
         toolClass = [PTCloudCreate class];
     }
+    else if ( [toolMode isEqualToString:@"ApplePencil"])
+    {
+        if (@available(iOS 13.1, *)) {
+            toolClass = [PTPencilDrawingCreate class];
+        }
+    }
+    else if ( [toolMode isEqualToString:@"Eraser"])
+    {
+        toolClass = [PTEraser class];
+    }
+    
+    
     
     if (toolClass) {
         PTTool *tool = [self.documentViewController.toolManager changeTool:toolClass];
@@ -576,6 +588,18 @@ NS_ASSUME_NONNULL_END
             && ![tool isKindOfClass:[PTFreeHandHighlightCreate class]]) {
             ((PTFreeHandCreate *)tool).multistrokeMode = self.continuousAnnotationEditing;
         }
+        
+        if (@available(iOS 13.1, *)) {
+            if ([tool isKindOfClass:[PTPencilDrawingCreate class]])
+            {
+                ((PTPencilDrawingCreate *)tool).shouldShowToolPicker = YES;
+            } else {
+                NSLog(@"ICH VERPISS MICH JETZT" );
+            }
+        }
+        
+        NSLog(@"TOOL %@", toolClass );
+        
     }
 }
 
@@ -1810,6 +1834,54 @@ NS_ASSUME_NONNULL_END
     [page SetRotation:newRotation];
     [ pdfViewCtrl UpdatePageLayout ];
 }
+
+
+
+
+void PrintIndent(PTBookmark *item)
+{
+    int ident = [item GetIndent] - 1;
+    
+    for (int i=0; i<ident; ++i) {
+        printf("  ");
+    }
+}
+
+void PrintOutlineTree(PTBookmark *item)
+{
+    for (; [item IsValid]; item=[item GetNext]) {
+        PrintIndent(item);
+        if ([item IsOpen]) {
+            printf("- %s ACTION -> ", [[item GetTitle] UTF8String]);
+        }
+        else {
+            printf("+ %s ACTION -> ", [[item GetTitle] UTF8String]);
+        }
+        if ([item HasChildren]) {
+            PrintOutlineTree([item GetFirstChild]);
+        }
+    }
+}
+
+
+
+- (void)getOutline
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+    
+    PTBookmark *root = [pdfDoc GetFirstBookmark];
+    
+    PrintOutlineTree(root);
+}
+
+
+
+
+
+
+
+
 
 
 
