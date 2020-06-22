@@ -303,6 +303,17 @@ export default class DocumentView extends PureComponent {
   }
 
 
+  // get Outline
+  getOutline = () => {
+    console.log("Outline event triggered")
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.getOutline(tag);
+    }
+    return Promise.resolve();
+  }
+
+
 
 
 

@@ -52,7 +52,8 @@
 // ROtate Manager
 - (void)rotateForDocumentViewTag:(NSNumber *)tag rotate:(BOOL)ccw;
 
-
+// Outline Manager
+- (void)getOutlineForDocumentViewTag:(NSNumber *)tag;
 
 
 @end

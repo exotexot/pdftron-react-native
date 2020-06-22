@@ -285,6 +285,21 @@ RCT_REMAP_METHOD(rotate,
 }
 
 
+// Outline Manager
+RCT_REMAP_METHOD(getOutline,
+                 getOutlineForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] getOutlineForDocumentViewTag:tag];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"outline_failed", @"GET OUTLINE FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
 
 
 @end

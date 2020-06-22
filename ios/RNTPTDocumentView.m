@@ -625,6 +625,14 @@ NS_ASSUME_NONNULL_END
             && ![tool isKindOfClass:[PTFreeHandHighlightCreate class]]) {
             ((PTFreeHandCreate *)tool).multistrokeMode = self.continuousAnnotationEditing;
         }
+        
+        if (@available(iOS 13.1, *)) {
+            if ([tool isKindOfClass:[PTPencilDrawingCreate class]])
+            {
+                ((PTPencilDrawingCreate *)tool).shouldShowToolPicker = YES;
+            }
+        }
+        
     }
 }
 
