@@ -281,7 +281,7 @@ export default class DocumentView extends PureComponent {
     return Promise.resolve();
   }
 
-  // jumpTo
+  // Append School Logo
   appendSchoolLogo = (base64String, duplex) => {
     console.log("Append School Logo event triggered")
     const tag = findNodeHandle(this._viewerRef);
@@ -290,6 +290,21 @@ export default class DocumentView extends PureComponent {
     }
     return Promise.resolve();
   }
+
+
+  // Rotate manager
+  rotate = (ccw) => {
+    console.log("Rotate Page event triggered")
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.rotate(tag, ccw);
+    }
+    return Promise.resolve();
+  }
+
+
+
+
 
 
   _setNativeRef = (ref) => {

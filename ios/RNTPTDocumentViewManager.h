@@ -47,7 +47,12 @@
 - (void)jumpToForDocumentViewTag:(NSNumber *)tag jumpTo:(int)page_num;
 
 // SchoolLogo
-- (void)appendSchoolLogoForDocumentViewTag:(NSNumber *)tag appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex
+- (void)appendSchoolLogoForDocumentViewTag:(NSNumber *)tag appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex;
+
+// ROtate Manager
+- (void)rotateForDocumentViewTag:(NSNumber *)tag rotate:(BOOL)ccw;
+
+
 
 
 @end
