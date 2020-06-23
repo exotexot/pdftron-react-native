@@ -1775,15 +1775,12 @@ NS_ASSUME_NONNULL_END
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
     PTPage *firstPage = [pdfDoc GetPage:1];
     
-    double width = [firstPage GetPageWidth:e_pttrim];
-    double height = [firstPage GetPageHeight:e_pttrim];
-    
-    NSNumber *width2 = [NSNumber numberWithDouble:width];
-    NSNumber *height2 = [NSNumber numberWithDouble:height];
+    NSNumber *width = [NSNumber numberWithDouble:[firstPage GetPageWidth:e_pttrim]];
+    NSNumber *height = [NSNumber numberWithDouble:[firstPage GetPageHeight:e_pttrim]];
     
     NSDictionary *dimensions = @{
-       @"width": width2,
-       @"height": height2,
+       @"width": width,
+       @"height": height,
     };
 
     return dimensions;
@@ -1874,10 +1871,6 @@ void PrintOutlineTree(PTBookmark *item)
     
     PrintOutlineTree(root);
 }
-
-
-
-
 
 
 

@@ -180,6 +180,7 @@ RCT_REMAP_METHOD(setValueForFields,
     }
 }
 
+
 #pragma mark - Collaboration
 
 RCT_REMAP_METHOD(importAnnotationCommand,
@@ -200,6 +201,8 @@ RCT_REMAP_METHOD(importAnnotationCommand,
 
 
 
+#pragma mark - Custom Functions
+
 // Custom Search
 RCT_REMAP_METHOD(search,
                  searchForDocumentViewTag:(nonnull NSNumber *)tag
@@ -218,7 +221,7 @@ RCT_REMAP_METHOD(search,
 
 
 
-// Custom Search
+// DImensions
 RCT_REMAP_METHOD(getDimensions,
                  getDimensionsForDocumentViewTag:(nonnull NSNumber *)tag
                  resolver:(RCTPromiseResolveBlock)resolve
@@ -249,6 +252,7 @@ RCT_REMAP_METHOD(jumpTo,
         reject(@"setPageNum_failed", @"SET CURRENT PAGE FAILED MISERABLY", [self errorFromException:exception]);
     }
 }
+
 
 // add school Logo
 RCT_REMAP_METHOD(appendSchoolLogo,
@@ -299,7 +303,6 @@ RCT_REMAP_METHOD(getOutline,
         reject(@"outline_failed", @"GET OUTLINE FAILED MISERABLY", [self errorFromException:exception]);
     }
 }
-
 
 
 @end
