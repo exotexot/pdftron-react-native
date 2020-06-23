@@ -532,7 +532,7 @@ RCT_CUSTOM_VIEW_PROPERTY(longPressMenuEnabled, BOOL, RNTPTDocumentView)
 
 
 
-// Custom Search
+#pragma mark - Custom Functions
 
 - (NSArray<NSDictionary<NSString *, NSString *> *> *)searchForDocumentViewTag:(NSNumber *)tag search:(NSString *)searchString
 {
@@ -568,6 +568,7 @@ RCT_CUSTOM_VIEW_PROPERTY(longPressMenuEnabled, BOOL, RNTPTDocumentView)
     }
 }
 
+
 - (void)appendSchoolLogoForDocumentViewTag:(NSNumber *)tag appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex
 {
     RNTPTDocumentView *documentView = self.documentViews[tag];
@@ -599,12 +600,6 @@ RCT_CUSTOM_VIEW_PROPERTY(longPressMenuEnabled, BOOL, RNTPTDocumentView)
         @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
     }
 }
-
-
-
-
-
-
 
 
 #pragma mark - DocumentView attached/detached

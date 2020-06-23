@@ -1,13 +1,13 @@
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
+import React, { PureComponent } from "react";
+import PropTypes from "prop-types";
 import {
   requireNativeComponent,
   ViewPropTypes,
   Platform,
   Alert,
   NativeModules,
-  findNodeHandle
-} from 'react-native';
+  findNodeHandle, Text
+} from "react-native";
 const { DocumentViewManager } = NativeModules;
 
 export default class DocumentView extends PureComponent {
@@ -76,27 +76,27 @@ export default class DocumentView extends PureComponent {
     } else if (event.nativeEvent.onPageChanged) {
       if (this.props.onPageChanged) {
         this.props.onPageChanged({
-        	'previousPageNumber': event.nativeEvent.previousPageNumber,
-        	'pageNumber': event.nativeEvent.pageNumber,
+        	"previousPageNumber": event.nativeEvent.previousPageNumber,
+        	"pageNumber": event.nativeEvent.pageNumber,
         });
       }
     } else if (event.nativeEvent.onZoomChanged) {
       if (this.props.onZoomChanged) {
         this.props.onZoomChanged({
-        	'zoom': event.nativeEvent.zoom,
+        	"zoom": event.nativeEvent.zoom,
         });
       }
     } else if (event.nativeEvent.onAnnotationChanged) {
       if (this.props.onAnnotationChanged) {
         this.props.onAnnotationChanged({
-          'action': event.nativeEvent.action,
-          'annotations': event.nativeEvent.annotations,
+          "action": event.nativeEvent.action,
+          "annotations": event.nativeEvent.annotations,
         });
       }
     } else if (event.nativeEvent.onAnnotationsSelected) {
     	if (this.props.onAnnotationsSelected) {
     		this.props.onAnnotationsSelected({
-    			'annotations': event.nativeEvent.annotations,
+    			"annotations": event.nativeEvent.annotations,
     		});
     	}
     } else if (event.nativeEvent.onFormFieldValueChanged) {
@@ -122,15 +122,15 @@ export default class DocumentView extends PureComponent {
     } else if (event.nativeEvent.onExportAnnotationCommand) {
       if (this.props.onExportAnnotationCommand) {
         this.props.onExportAnnotationCommand({
-          'action': event.nativeEvent.action,
-          'xfdfCommand': event.nativeEvent.xfdfCommand,
+          "action": event.nativeEvent.action,
+          "xfdfCommand": event.nativeEvent.xfdfCommand,
         });
       }
     } else if (event.nativeEvent.onAnnotationMenuPress) {
       if (this.props.onAnnotationMenuPress) {
         this.props.onAnnotationMenuPress({
-          'annotationMenu': event.nativeEvent.annotationMenu,
-          'annotations': event.nativeEvent.annotations,
+          "annotationMenu": event.nativeEvent.annotationMenu,
+          "annotations": event.nativeEvent.annotations,
         });
       }
     } else if (event.nativeEvent.onLongPressMenuPress) {
@@ -143,8 +143,8 @@ export default class DocumentView extends PureComponent {
     } else if (event.nativeEvent.onBehaviorActivated) {
       if (this.props.onBehaviorActivated) {
         this.props.onBehaviorActivated({
-          'action': event.nativeEvent.action,
-          'data': event.nativeEvent.data,
+          "action": event.nativeEvent.action,
+          "data": event.nativeEvent.data,
         });
       }
     }
@@ -250,7 +250,6 @@ export default class DocumentView extends PureComponent {
   }
 
 
-
   // Custom Search
   search = (searchString) => {
     console.log("Search event triggered")
@@ -262,7 +261,7 @@ export default class DocumentView extends PureComponent {
   }
 
 
-   // getDimensions
+  // getDimensions
   getDimensions = () => {
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
@@ -270,6 +269,7 @@ export default class DocumentView extends PureComponent {
     }
     return Promise.resolve();
   }
+
 
   // jumpTo
   jumpTo = (page) => {
@@ -314,10 +314,6 @@ export default class DocumentView extends PureComponent {
   }
 
 
-
-
-
-
   _setNativeRef = (ref) => {
     this._viewerRef = ref;
   };
@@ -335,14 +331,14 @@ export default class DocumentView extends PureComponent {
   }
 }
 
-const name = Platform.OS === 'ios' ? 'RNTPTDocumentView' : 'RCTDocumentView';
+const name = Platform.OS === "ios" ? "RNTPTDocumentView" : "RCTDocumentView";
 
 const RCTDocumentView = requireNativeComponent(
   name,
   DocumentView,
   {
     nativeOnly: {
-      onChange: true
-    }
+      onChange: true,
+    },
   }
 );

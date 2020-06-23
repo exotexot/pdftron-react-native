@@ -5,6 +5,7 @@
 //  Copyright © 2018 PDFTron. All rights reserved.
 //
 
+#import "RNTPTDocumentView.h"
 #import "RNTPTPDFViewCtrlManager.h"
 #import "RNTPTPDFViewCtrl.h"
 
@@ -37,3 +38,25 @@ RCT_CUSTOM_VIEW_PROPERTY(document, NSString, RNTPTPDFViewCtrl)
 }
 
 @end
+
+
+// DENNIS ATTEMPT THUMBNAILVIEW
+
+// @interface RNTMPTThumbnailViewCtrlManager : RCTViewManager
+// @end
+
+// @implementation RNTMPTThumbnailViewCtrlManager
+
+// RCT_EXPORT_MODULE(RNTMPTThumbnailViewCtrl)
+
+// - (UIView *)view
+// {
+//     UIView* su = self.view.superview;
+//     RNTPTDocumentView* viewctrl = ((RNTPTDocumentView *)su);
+//     viewctrl
+//     PTThumbnailsViewController* thumbnailViewCtrl = [[PTThumbnailsViewController alloc] initWithPDFViewCtrl:(RNTPTDocumentView *)su];
+    
+//     return thumbnailViewCtrl;
+// }
+
+// @end
