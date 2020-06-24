@@ -1873,6 +1873,20 @@ void PrintOutlineTree(PTBookmark *item)
 }
 
 
+- (void)addBookmark
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+    
+    PTBookmarkManager *bookmarks = [[PTBookmarkManager alloc] init];
+    
+    int page_number = [pdfViewCtrl GetCurrentPage];
+    PTUserBookmark *thisBookmark = [[PTUserBookmark alloc] initWithTitle:@"test" pageNumber:page_number];
+    
+    [bookmarks addBookmark:thisBookmark forDoc:pdfDoc];
+}
+
+
 
 
 

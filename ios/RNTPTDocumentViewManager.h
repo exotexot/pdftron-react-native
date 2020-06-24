@@ -56,4 +56,6 @@
 - (void)getOutlineForDocumentViewTag:(NSNumber *)tag;
 
 
+- (void)addBookmarkForDocumentViewTag:(NSNumber *)tag;
+
 @end
