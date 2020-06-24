@@ -314,6 +314,17 @@ export default class DocumentView extends PureComponent {
   }
 
 
+  // Bookmark 
+  addBookmark = () => {
+    console.log("Outline event triggered")
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.addBookmark(tag);
+    }
+    return Promise.resolve();
+  }
+
+
   _setNativeRef = (ref) => {
     this._viewerRef = ref;
   };

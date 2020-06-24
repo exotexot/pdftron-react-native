@@ -305,4 +305,20 @@ RCT_REMAP_METHOD(getOutline,
 }
 
 
+// Bookmark
+RCT_REMAP_METHOD(addBookmark,
+                 addBookmarkForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] addBookmarkForDocumentViewTag:tag];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"bookmark_failed", @"ADD BOOKMARK FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+
 @end

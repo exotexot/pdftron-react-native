@@ -143,6 +143,7 @@ NS_ASSUME_NONNULL_BEGIN
 // Outline
 - (void)getOutline;
 
+- (void)addBookmark;
 
 
 @end
