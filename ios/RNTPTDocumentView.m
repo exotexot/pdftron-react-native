@@ -1092,8 +1092,8 @@ NS_ASSUME_NONNULL_END
     
     // Top toolbar.
     if (!self.topToolbarEnabled) {
-        self.documentViewController.hidesControlsOnTap = NO;
-        self.documentViewController.controlsHidden = YES;
+        self.documentViewController.hidesControlsOnTap = YES;
+        self.documentViewController.controlsHidden = NO;
     } else {
         self.documentViewController.hidesControlsOnTap = YES;
         self.documentViewController.controlsHidden = NO;
@@ -1926,6 +1926,7 @@ NS_ASSUME_NONNULL_END
                     @"ambient": [result GetAmbientString]
                  };
                 NSLog(@"%@", oneSearchResult);
+                
                 [searchResults addObject: oneSearchResult];
             }
             
@@ -1973,6 +1974,26 @@ NS_ASSUME_NONNULL_END
 
 
 
+- (void)clearSearch
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    [pdfViewCtrl clearFloatingViews];
+}
+
+
+
+- (void)findText:(NSString *)searchString
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+//    [pdfViewCtrl FindText:searchString MatchCase:NO MatchWholeWord:NO SearchUp:NO RegExp:NO];
+    
+    PTFindTextToolbar *findText = [[PTFindTextToolbar alloc] initWithPDFViewCtrl:pdfViewCtrl];
+    
+    [findText removeButtons:NO];
+}
+
+
+
 
 - (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex
 {
@@ -2013,16 +2034,6 @@ NS_ASSUME_NONNULL_END
         
     }
 }
-
-
-- (void)clearSearchHighlights
-{
-    // PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
-    // (nonnull NSArray<UIView *> *)searchhighlights =
-    // [pdfViewCtrl removeFloatingViews:searchhighlights]
-}
-
-
 
 
 // Return dimensions
@@ -2088,6 +2099,26 @@ NS_ASSUME_NONNULL_END
     [page SetRotation:newRotation];
     [ pdfViewCtrl UpdatePageLayout ];
 }
+
+
+
+
+- (void)addBookmark
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+    
+    PTBookmarkManager *bookmarks = [[PTBookmarkManager alloc] init];
+    
+    int page_number = [pdfViewCtrl GetCurrentPage];
+    PTUserBookmark *thisBookmark = [[PTUserBookmark alloc] initWithTitle:@"test" pageNumber:page_number];
+    
+    [bookmarks addBookmark:thisBookmark forDoc:pdfDoc];
+}
+
+
+
+
 
 
 
