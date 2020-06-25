@@ -39,6 +39,7 @@
 
 // Custom Search
 - (NSArray<NSDictionary<NSString *, NSString *> *> *)searchForDocumentViewTag:(NSNumber *)tag search:(NSString *)searchString;
+- (void)clearSearchForDocumentViewTag:(NSNumber *)tag;
 
 // Get Document Dimensions
 - (NSDictionary<NSString *, NSNumber *> *)getDimensionsForDocumentViewTag:(NSNumber *)tag;
@@ -53,9 +54,14 @@
 - (void)rotateForDocumentViewTag:(NSNumber *)tag rotate:(BOOL)ccw;
 
 // Outline Manager
-- (void)getOutlineForDocumentViewTag:(NSNumber *)tag;
-
+- (id)getOutlineForDocumentViewTag:(NSNumber *)tag;
 
 - (void)addBookmarkForDocumentViewTag:(NSNumber *)tag;
+
+- (void)findTextForDocumentViewTag:(NSNumber *)tag findText:(NSString *)searchString;
+
+
+
+
 
 @end

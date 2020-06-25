@@ -593,12 +593,8 @@ NS_ASSUME_NONNULL_END
             if ([tool isKindOfClass:[PTPencilDrawingCreate class]])
             {
                 ((PTPencilDrawingCreate *)tool).shouldShowToolPicker = YES;
-            } else {
-                NSLog(@"ICH VERPISS MICH JETZT" );
             }
         }
-        
-        NSLog(@"TOOL %@", toolClass );
         
     }
 }
@@ -1045,8 +1041,8 @@ NS_ASSUME_NONNULL_END
     
     // Top toolbar.
     if (!self.topToolbarEnabled) {
-        self.documentViewController.hidesControlsOnTap = NO;
-        self.documentViewController.controlsHidden = YES;
+        self.documentViewController.hidesControlsOnTap = YES;
+        self.documentViewController.controlsHidden = NO;
     } else {
         self.documentViewController.hidesControlsOnTap = YES;
         self.documentViewController.controlsHidden = NO;
@@ -1669,6 +1665,7 @@ NS_ASSUME_NONNULL_END
                     @"ambient": [result GetAmbientString]
                  };
                 NSLog(@"%@", oneSearchResult);
+                
                 [searchResults addObject: oneSearchResult];
             }
             
@@ -1716,6 +1713,26 @@ NS_ASSUME_NONNULL_END
 
 
 
+- (void)clearSearch
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    [pdfViewCtrl clearFloatingViews];
+}
+
+
+
+- (void)findText:(NSString *)searchString
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+//    [pdfViewCtrl FindText:searchString MatchCase:NO MatchWholeWord:NO SearchUp:NO RegExp:NO];
+    
+    PTFindTextToolbar *findText = [[PTFindTextToolbar alloc] initWithPDFViewCtrl:pdfViewCtrl];
+    
+    [findText removeButtons:NO];
+}
+
+
+
 
 - (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex
 {
@@ -1756,16 +1773,6 @@ NS_ASSUME_NONNULL_END
         
     }
 }
-
-
-- (void)clearSearchHighlights
-{
-    // PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
-    // (nonnull NSArray<UIView *> *)searchhighlights =
-    // [pdfViewCtrl removeFloatingViews:searchhighlights]
-}
-
-
 
 
 // Return dimensions
@@ -1834,43 +1841,67 @@ NS_ASSUME_NONNULL_END
 
 
 
+//
+//void PrintIndent(PTBookmark *item)
+//{
+//    int ident = [item GetIndent] - 1;
+//
+//    for (int i=0; i<ident; ++i) {
+//        printf("  ");
+//    }
+//}
+//
+//id PrintOutlineTree(PTBookmark *item)
+//{
+//    for (; [item IsValid]; item=[item GetNext]) {
+//        PrintIndent(item);
+//        if ([item IsOpen]) {
+//            printf("- %s ACTION -> ", [[item GetTitle] UTF8String]);
+//        }
+//        else {
+//            printf("+ %s ACTION -> ", [[item GetTitle] UTF8String]);
+//        }
+//        if ([item HasChildren]) {
+//            PrintOutlineTree([item GetFirstChild]);
+//        }
+//    }
+//}
 
-void PrintIndent(PTBookmark *item)
-{
-    int ident = [item GetIndent] - 1;
-    
-    for (int i=0; i<ident; ++i) {
-        printf("  ");
-    }
-}
-
-void PrintOutlineTree(PTBookmark *item)
-{
-    for (; [item IsValid]; item=[item GetNext]) {
-        PrintIndent(item);
-        if ([item IsOpen]) {
-            printf("- %s ACTION -> ", [[item GetTitle] UTF8String]);
-        }
-        else {
-            printf("+ %s ACTION -> ", [[item GetTitle] UTF8String]);
-        }
-        if ([item HasChildren]) {
-            PrintOutlineTree([item GetFirstChild]);
-        }
-    }
-}
 
 
+//- (NSMutableArray<NSDictionary<NSString *, NSString *> *> *)getOutline
+//{
+//    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+//    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+//
+//    PTBookmark *root = [pdfDoc GetFirstBookmark];
+//
+//    NSMutableArray *outline = [NSMutableArray new];
+//    outline = PrintOutlineTree(root);
+//
+//    return outline;
+//}
+//
+//
+//
+//NSMutableArray* PrintOutlineTree(PTBookmark *item)
+//{
+//    for (; [item IsValid]; item=[item GetNext]) {
+//
+//        if ([item HasChildren]) {
+//            PrintOutlineTree([item GetFirstChild]);
+//        } else {
+//            NSDictionary *outlineElement = @{
+//               @"name": [item GetTitle],
+////               @"indent": [NSNumber numberWithInt:[item GetIndent]],
+////               @"page": @10
+//            };
+//
+//            [outline addObject:outlineElement];
+//        }
+//    }
+//}
 
-- (void)getOutline
-{
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
-    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
-    
-    PTBookmark *root = [pdfDoc GetFirstBookmark];
-    
-    PrintOutlineTree(root);
-}
 
 
 - (void)addBookmark

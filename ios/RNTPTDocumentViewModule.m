@@ -220,6 +220,39 @@ RCT_REMAP_METHOD(search,
 }
 
 
+// Clear Search
+RCT_REMAP_METHOD(clearSearch,
+                 clearSearchForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] clearSearchForDocumentViewTag:tag];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"clearSearch_Failed", @"CLEAR SEARCH FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+
+
+RCT_REMAP_METHOD(findText,
+                 findTextForDocumentViewTag:(nonnull NSNumber *)tag
+                 searchString:(NSString *)searchString
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] findTextForDocumentViewTag:tag findText:searchString];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"findText_failed", @"FIND TEXT FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+
 
 // DImensions
 RCT_REMAP_METHOD(getDimensions,
@@ -296,8 +329,8 @@ RCT_REMAP_METHOD(getOutline,
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     @try {
-        [[self documentViewManager] getOutlineForDocumentViewTag:tag];
-        resolve(nil);
+        NSDictionary *outline = [[self documentViewManager] getOutlineForDocumentViewTag:tag];
+        resolve(outline);
     }
     @catch (NSException *exception) {
         reject(@"outline_failed", @"GET OUTLINE FAILED MISERABLY", [self errorFromException:exception]);

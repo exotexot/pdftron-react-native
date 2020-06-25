@@ -112,6 +112,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Custom Search
 - (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString;
+- (void)clearSearch;
 
 // Get First Page Dimensions
 - (NSDictionary<NSString *, NSNumber *> *)getDimensions;
@@ -126,9 +127,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)rotate:(BOOL)ccw;
 
 // Outline
-- (void)getOutline;
+- (id)getOutline;
 
+// addBookmark
 - (void)addBookmark;
+
+- (void)findText:(NSString *)searchString;
 
 
 @end
