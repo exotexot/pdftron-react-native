@@ -171,6 +171,7 @@ NS_ASSUME_NONNULL_END
     navigationController.navigationBar.translucent = translucent;
     self.documentViewController.thumbnailSliderController.toolbar.translucent = translucent;
     
+    
     UIView *controllerView = navigationController.view;
     
     // View controller containment.
@@ -1040,14 +1041,10 @@ NS_ASSUME_NONNULL_END
     self.documentViewController.automaticallySavesDocument = self.autoSaveEnabled;
     
     // Top toolbar.
-    if (!self.topToolbarEnabled) {
-        self.documentViewController.hidesControlsOnTap = YES;
-        self.documentViewController.controlsHidden = NO;
-    } else {
-        self.documentViewController.hidesControlsOnTap = YES;
-        self.documentViewController.controlsHidden = NO;
-    }
-    const BOOL translucent = self.documentViewController.hidesControlsOnTap;
+    self.documentViewController.hidesControlsOnTap = NO;
+    self.documentViewController.controlsHidden = YES;
+    
+    const BOOL translucent = YES;
     self.documentViewController.thumbnailSliderController.toolbar.translucent = translucent;
     self.documentViewController.navigationController.navigationBar.translucent = translucent;
     
@@ -1705,10 +1702,6 @@ NS_ASSUME_NONNULL_END
     }
     
     return [searchResults copy];
-
-//  NSLog(@"Search results2: %@", searchResults);
-//    NSLog(@"Search results3: %i", [searchResults count]);
-    [pdfViewCtrl Update:YES];
 }
 
 
@@ -1721,16 +1714,35 @@ NS_ASSUME_NONNULL_END
 
 
 
-- (void)findText:(NSString *)searchString
+- (void)findText
 {
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
-//    [pdfViewCtrl FindText:searchString MatchCase:NO MatchWholeWord:NO SearchUp:NO RegExp:NO];
-    
-    PTFindTextToolbar *findText = [[PTFindTextToolbar alloc] initWithPDFViewCtrl:pdfViewCtrl];
-    
-    [findText removeButtons:NO];
+    PTDocumentViewController *docViewCtrl = self.documentViewController;
+    [docViewCtrl showSearchViewController];
 }
 
+
+
+- (void)showSettings
+{
+    PTDocumentViewController *docViewCtrl = self.documentViewController;
+    [docViewCtrl settingsViewController];
+}
+
+
+
+- (void)showSlider
+{
+    PTDocumentViewController *docViewCtrl = self.documentViewController;
+    
+    BOOL sliderHidden = [docViewCtrl isThumbnailSliderHidden];
+    NSLog(@"SLIDER HIDDEN %d", sliderHidden);
+    
+    if (sliderHidden) {
+        [docViewCtrl setThumbnailSliderHidden:NO animated:YES];
+    } else {
+        [docViewCtrl setThumbnailSliderHidden:YES animated:YES];
+    }
+}
 
 
 
@@ -1792,6 +1804,20 @@ NS_ASSUME_NONNULL_END
 
     return dimensions;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // Jump To Page
@@ -1901,6 +1927,82 @@ NS_ASSUME_NONNULL_END
 //        }
 //    }
 //}
+
+
+
+
+//- (NSDictionary<NSString *, id> *)getOutline
+//{
+//    for (; [item IsValid]; item=[item GetNext]) {
+//
+//    if ([item HasChildren]) {
+//        PrintOutlineTree([item GetFirstChild]);
+//    } else {
+//        NSDictionary *outlineElement = @{
+//           @"name": [item GetTitle],
+//           @"indent": [NSNumber numberWithInt:[item GetIndent]],
+//           @"page": @10
+//        };
+//
+//        [outline addObject:outlineElement];
+//    }
+//    }
+//
+//    return nil;
+//}
+
+
+
+
+
+
+
+
+//NSMutableArray * wholeOutline = [[NSMutableArray alloc] init];
+//
+//
+//- (NSArray<NSDictionary<NSString *, id> *> *)getOutline
+//{
+//    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+//    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+//
+//    PTBookmark *root = [pdfDoc GetFirstBookmark];
+//
+//
+////    outline = PrintOutlineTree(root);
+//
+//
+//    NSArray *outline = outline;
+//
+//    return outline;
+//}
+//
+//
+//
+//NSMutableArray* PrintOutlineTree(PTBookmark *item)
+//{
+//    for (; [item IsValid]; item=[item GetNext]) {
+//
+//        if ([item HasChildren]) {
+//            PrintOutlineTree([item GetFirstChild]);
+//        } else {
+//            NSDictionary *outlineElement = @{
+//               @"name": [item GetTitle],
+//               @"indent": [NSNumber numberWithInt:[item GetIndent]],
+//               @"page": @10
+//            };
+//
+////            [outline addObject:outlineElement];
+//        }
+//    }
+//}
+
+
+
+
+
+
+
 
 
 

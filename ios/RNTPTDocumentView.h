@@ -132,7 +132,10 @@ NS_ASSUME_NONNULL_BEGIN
 // addBookmark
 - (void)addBookmark;
 
-- (void)findText:(NSString *)searchString;
+- (void)findText;
+- (void)showSettings;
+- (void)showSlider;
+- (void)hideSlider;
 
 
 @end

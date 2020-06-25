@@ -232,11 +232,21 @@ export default class DocumentView extends PureComponent {
 
 
   // FindText
-  findText = (searchString) => {
+  findText = () => {
     console.log("Search event triggered")
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
-      return DocumentViewManager.findText(tag, searchString);
+      return DocumentViewManager.findText(tag);
+    }
+    return Promise.resolve();
+  }
+
+  // FindText
+  showSettings = () => {
+    console.log("Search event triggered")
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.showSettings(tag);
     }
     return Promise.resolve();
   }
@@ -304,6 +314,32 @@ export default class DocumentView extends PureComponent {
     }
     return Promise.resolve();
   }
+
+
+  // Slider Show 
+  showSlider = () => {
+    console.log("Show Slider event triggered")
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.showSlider(tag);
+    }
+    return Promise.resolve();
+  }
+
+  // Slider HIdden 
+  hideSlider = () => {
+    console.log("Hide Slider event triggered")
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.hideSlider(tag);
+    }
+    return Promise.resolve();
+  }
+
+
+
+
+
 
 
   _setNativeRef = (ref) => {

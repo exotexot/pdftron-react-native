@@ -239,18 +239,64 @@ RCT_REMAP_METHOD(clearSearch,
 
 RCT_REMAP_METHOD(findText,
                  findTextForDocumentViewTag:(nonnull NSNumber *)tag
-                 searchString:(NSString *)searchString
                  resolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     @try {
-        [[self documentViewManager] findTextForDocumentViewTag:tag findText:searchString];
+        [[self documentViewManager] findTextForDocumentViewTag:tag];
         resolve(nil);
     }
     @catch (NSException *exception) {
         reject(@"findText_failed", @"FIND TEXT FAILED MISERABLY", [self errorFromException:exception]);
     }
 }
+
+
+RCT_REMAP_METHOD(showSettings,
+                 showSettingsForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] showSettingsForDocumentViewTag:tag];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"searchSettings_failed", @"SEARCH SETTINGS FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+
+RCT_REMAP_METHOD(showSlider,
+                 showSliderForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] showSliderForDocumentViewTag:tag ];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"showSlider_failed", @"SHOW SLIDER FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+
+RCT_REMAP_METHOD(hideSlider,
+                 hdieSliderForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] hideSliderForDocumentViewTag:tag ];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"hideSlider_failed", @"HIDE SLIDER FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+
 
 
 

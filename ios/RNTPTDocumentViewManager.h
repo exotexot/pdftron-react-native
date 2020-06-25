@@ -58,8 +58,13 @@
 
 - (void)addBookmarkForDocumentViewTag:(NSNumber *)tag;
 
-- (void)findTextForDocumentViewTag:(NSNumber *)tag findText:(NSString *)searchString;
+- (void)findTextForDocumentViewTag:(NSNumber *)tag;
 
+- (void)showSettingsForDocumentViewTag:(NSNumber *)tag;
+
+- (void)showSliderForDocumentViewTag:(NSNumber *)tag;
+
+- (void)hideSliderForDocumentViewTag:(NSNumber *)tag;
 
 
 
