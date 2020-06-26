@@ -182,6 +182,19 @@ NS_ASSUME_NONNULL_END
 
 #pragma mark - DocumentViewController loading
 
+
+
+
+- (void) handleTapFrom: (UITapGestureRecognizer *)recognizer
+{
+    //Code to handle the gesture
+    NSLog(@"TEST OKOKOK TEST");
+    
+    recognizer.numberOfTapsRequired=1;
+}
+
+
+
 - (void)loadDocumentViewController
 {
     if (!self.documentViewController) {
@@ -221,14 +234,33 @@ NS_ASSUME_NONNULL_END
     UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:self.documentViewController];
     
     const BOOL translucent = self.documentViewController.hidesControlsOnTap;
-    navigationController.navigationBar.translucent = translucent;
-    self.documentViewController.thumbnailSliderController.toolbar.translucent = translucent;
+    navigationController.navigationBar.translucent = YES;
+    self.documentViewController.thumbnailSliderController.toolbar.translucent = YES;
+    
+    
+    
+    
+    UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapFrom:)];
+    [self.documentViewController.pdfViewCtrl handleTap:tapGestureRecognizer];
+    
+    
+    
+
+    
+    
+    
+    
     
     
     UIView *controllerView = navigationController.view;
     
     // View controller containment.
     [parentController addChildViewController:navigationController];
+    
+    
+    
+    
+    
     
     controllerView.frame = self.bounds;
     controllerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
