@@ -53,9 +53,6 @@
 // ROtate Manager
 - (void)rotateForDocumentViewTag:(NSNumber *)tag rotate:(BOOL)ccw;
 
-// Outline Manager
-- (id)getOutlineForDocumentViewTag:(NSNumber *)tag;
-
 - (void)addBookmarkForDocumentViewTag:(NSNumber *)tag;
 
 - (void)findTextForDocumentViewTag:(NSNumber *)tag;
@@ -65,6 +62,12 @@
 - (void)showSliderForDocumentViewTag:(NSNumber *)tag;
 
 - (void)hideSliderForDocumentViewTag:(NSNumber *)tag;
+
+- (NSArray<NSString *> *)thumbnailsTestForDocumentViewTag:(NSNumber *)tag;
+
+
+// Outline Manager
+- (NSArray<NSDictionary<NSString *, id> *> *)getOutlineForDocumentViewTag:(NSNumber *)tag;
 
 
 

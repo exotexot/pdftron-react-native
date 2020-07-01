@@ -33,8 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign) BOOL needsCustomHeadersUpdate;
 
-// Array of wrapped PTExtendedAnnotTypes.
-@property (nonatomic, strong, nullable) NSArray<NSNumber *> *hideAnnotMenuToolsAnnotTypes;
+@property (nonatomic, strong, nullable) NSArray<NSNumber*>* hideAnnotMenuToolsAnnotTypes;
 
 @end
 
@@ -171,6 +170,10 @@ NS_ASSUME_NONNULL_END
         
         [self applyLayoutMode];
     }
+    
+    
+    // Adjustment custom Init function for better clearity
+    [self customInit];
 }
 
 -(void)setDocument:(NSString *)document
@@ -181,19 +184,6 @@ NS_ASSUME_NONNULL_END
 }
 
 #pragma mark - DocumentViewController loading
-
-
-
-
-- (void) handleTapFrom: (UITapGestureRecognizer *)recognizer
-{
-    //Code to handle the gesture
-    NSLog(@"TEST OKOKOK TEST");
-    
-    recognizer.numberOfTapsRequired=1;
-}
-
-
 
 - (void)loadDocumentViewController
 {
@@ -234,33 +224,13 @@ NS_ASSUME_NONNULL_END
     UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:self.documentViewController];
     
     const BOOL translucent = self.documentViewController.hidesControlsOnTap;
-    navigationController.navigationBar.translucent = YES;
-    self.documentViewController.thumbnailSliderController.toolbar.translucent = YES;
-    
-    
-    
-    
-    UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapFrom:)];
-    [self.documentViewController.pdfViewCtrl handleTap:tapGestureRecognizer];
-    
-    
-    
-
-    
-    
-    
-    
-    
+    navigationController.navigationBar.translucent = translucent;
+    self.documentViewController.thumbnailSliderController.toolbar.translucent = translucent;
     
     UIView *controllerView = navigationController.view;
     
     // View controller containment.
     [parentController addChildViewController:navigationController];
-    
-    
-    
-    
-    
     
     controllerView.frame = self.bounds;
     controllerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -641,6 +611,14 @@ NS_ASSUME_NONNULL_END
     }
     else if ( [toolMode isEqualToString:@"AnnotationCreateDistanceMeasurement"]) {
         toolClass = [PTRulerCreate class];
+    }  
+    
+    // Adjustment - Apple Pencil and Eraser Tools
+    else if ( [toolMode isEqualToString:@"ApplePencil"])
+    {
+        if (@available(iOS 13.1, *)) {
+            toolClass = [PTPencilDrawingCreate class];
+        }
     }
     else if ( [toolMode isEqualToString:@"AnnotationCreatePerimeterMeasurement"]) {
         toolClass = [PTPerimeterCreate class];
@@ -648,7 +626,6 @@ NS_ASSUME_NONNULL_END
     else if ( [toolMode isEqualToString:@"AnnotationCreateAreaMeasurement"]) {
         toolClass = [PTAreaCreate class];
     }
-    
     if (toolClass) {
         PTTool *tool = [self.documentViewController.toolManager changeTool:toolClass];
         
@@ -659,13 +636,13 @@ NS_ASSUME_NONNULL_END
             ((PTFreeHandCreate *)tool).multistrokeMode = self.continuousAnnotationEditing;
         }
         
+        // Adjustment - Apple Pencil
         if (@available(iOS 13.1, *)) {
             if ([tool isKindOfClass:[PTPencilDrawingCreate class]])
             {
                 ((PTPencilDrawingCreate *)tool).shouldShowToolPicker = YES;
             }
         }
-        
     }
 }
 
@@ -1092,7 +1069,7 @@ NS_ASSUME_NONNULL_END
 
 -(void)setHideAnnotMenuTools:(NSArray<NSString *> *)hideAnnotMenuTools
 {
-    _hideAnnotMenuTools = hideAnnotMenuTools;
+//    _hideAnnotMenuTools = hideAnnotMenuTools;
     
     NSMutableArray* hideMenuTools = [[NSMutableArray alloc] init];
     
@@ -1102,6 +1079,7 @@ NS_ASSUME_NONNULL_END
     }
     
     self.hideAnnotMenuToolsAnnotTypes = [hideMenuTools copy];
+    
 }
 
 #pragma mark -
@@ -1124,10 +1102,14 @@ NS_ASSUME_NONNULL_END
     self.documentViewController.automaticallySavesDocument = self.autoSaveEnabled;
     
     // Top toolbar.
-    self.documentViewController.hidesControlsOnTap = NO;
-    self.documentViewController.controlsHidden = YES;
-    
-    const BOOL translucent = YES;
+    if (!self.topToolbarEnabled) {
+        self.documentViewController.hidesControlsOnTap = NO;
+        self.documentViewController.controlsHidden = YES;
+    } else {
+        self.documentViewController.hidesControlsOnTap = YES;
+        self.documentViewController.controlsHidden = NO;
+    }
+    const BOOL translucent = self.documentViewController.hidesControlsOnTap;
     self.documentViewController.thumbnailSliderController.toolbar.translucent = translucent;
     self.documentViewController.navigationController.navigationBar.translucent = translucent;
     
@@ -1185,6 +1167,10 @@ NS_ASSUME_NONNULL_END
     
     // Custom HTTP request headers.
     [self applyCustomHeaders];
+    
+
+    // Adjustment custom Init function for better clearity
+    [self customInit];
 }
 
 - (void)applyLayoutMode
@@ -1926,6 +1912,119 @@ NS_ASSUME_NONNULL_END
 
 
 
+
+
+
+
+#pragma mark - Custom CAT Functions
+
+- (void)customInit
+{
+    // Gesture Control
+    UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapFrom:)];
+    [self.documentViewController.pdfViewCtrl handleTap:tapGestureRecognizer];
+    self.documentViewController.hidesControlsOnTap = NO;
+
+
+    // Settings Button
+    self.documentViewController.viewerSettingsButtonHidden = YES;
+    self.documentViewController.settingsViewController.popoverPresentationController.permittedArrowDirections = (UIPopoverArrowDirectionUp|UIPopoverArrowDirectionDown);
+    self.documentViewController.thumbnailSliderController.trailingToolbarItem = self.documentViewController.settingsButtonItem; // you don't need to create a new UIBarButtonItem object
+    
+    
+    // Translucent Thumbnail Slider
+    self.documentViewController.navigationController.navigationBar.translucent = YES;
+    self.documentViewController.thumbnailSliderController.toolbar.translucent = YES;
+    
+    UIViewController *bookmarks = self.documentViewController.navigationListsViewController.bookmarkViewController;
+    [self.documentViewController.navigationListsViewController removeListViewController:bookmarks];
+    
+    UIViewController *annotations = self.documentViewController.navigationListsViewController.annotationViewController;
+    [self.documentViewController.navigationListsViewController removeListViewController:annotations];
+    
+    
+    UIViewController *thumbnails = self.documentViewController.thumbnailsViewController;
+    [self.documentViewController.navigationListsViewController addListViewController:thumbnails];
+    
+    
+    UIViewController *newCtrl = [[UIViewController alloc] init];
+    newCtrl.view.backgroundColor = [UIColor redColor];
+    
+//    UIView *spacer = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
+//    spacer.backgroundColor =[UIColor greenColor];
+//    [newCtrl.view addSubview:spacer];
+//
+//    UISearchBar *searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 200, 200, 40)];
+//
+//    [newCtrl.view addSubview:searchBar];
+//
+    
+    [self.documentViewController.navigationListsViewController addListViewController:newCtrl];
+}
+
+
+
+
+- (void) handleTapFrom: (UITapGestureRecognizer *)recognizer
+{
+    //Code to handle the gesture
+    NSLog(@"THIS IS A TEST EVENT");
+}
+
+
+
+- (NSArray<NSString *> *)thumbnailsTest
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+    
+    NSMutableArray *thumbnails = [NSMutableArray new];
+    int pageCount = [pdfDoc GetPageCount];
+    
+    for(int page = 1; page <= pageCount; page++ ) {
+        
+//       [pdfViewCtrl GetThumbAsync:page completion:^(UIImage *thumb) {
+        
+////          NSLog(@"Image %d %f %f", page, thumb.size.width, thumb.size.height);
+////          NSString *base64Image = [UIImagePNGRepresentation(thumb) base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+////          [thumbnails addObject:[NSString stringWithFormat:@"LOOP : %d", page]];
+//           [thumbnails addObject:@"MISHA"];
+//       }];
+//
+//        [thumbnails addObject:@"FICKDICH"];
+//        [thumbnails addObject:[NSString stringWithFormat:@"THIS IS A STRING WITH AN INT: %d", page]];
+        
+        
+//        dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+//        __block UIImage *thumb;
+//        [pdfViewCtrl GetThumbAsync:page completion:^(UIImage *t) {
+//            thumb = t;
+//            dispatch_semaphore_signal(sem);
+//        }];
+//        dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+//        NSLog(@"Image %f %f", thumb.size.width, thumb.size.height);
+        
+        
+        
+    
+        
+        
+    }
+    
+    
+    [thumbnails addObject:@"TESTMICH"];
+    
+    NSLog(@"%@", thumbnails);
+    
+    return thumbnails.copy;
+}
+
+
+
+
+
+
+
 // Custom Search
 - (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString
 {
@@ -2101,18 +2200,6 @@ NS_ASSUME_NONNULL_END
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 // Jump To Page
 - (void)jumpTo:(int)page_num
 {
@@ -2160,27 +2247,57 @@ NS_ASSUME_NONNULL_END
 
 
 
+// Outline Manager
+- (NSArray<NSDictionary<NSString *, id> *> *)PrintOutlineTree:(PTBookmark *)item outlineArr:(NSMutableArray *)outlineArr
+{
+    for (; [item IsValid]; item=[item GetNext]) {
+
+        PTAction *action = [item GetAction];
+        PTDestination *dest = [action GetDest];
+        PTPage *page = [dest GetPage];
+            
+        NSDictionary *outlineElement = @{
+           @"name": [item GetTitle],
+           @"indent": [NSNumber numberWithInt:[item GetIndent]],
+           @"page": [NSNumber numberWithInt:[page GetIndex]],
+        };
+
+        
+        // NSLog(@"Outline Element: %@", outlineElement);
+        
+        
+        // Some CAT PDFs have broken outlines, leading to mutlitple nested outlines
+        // Luckily the redundant broken outlines all come with page = 0
+        if ( [page GetIndex] != 0) {
+            [outlineArr addObject:outlineElement];
+        }
+
+        
+        // If this Bookmark has children do it again
+        if ([item HasChildren]) {
+            [self PrintOutlineTree:[item GetFirstChild] outlineArr:outlineArr];
+        }
+    }
+    
+    return [outlineArr copy];
+}
 
 
-//- (NSDictionary<NSString *, id> *)getOutline
-//{
-//    for (; [item IsValid]; item=[item GetNext]) {
-//
-//    if ([item HasChildren]) {
-//        PrintOutlineTree([item GetFirstChild]);
-//    } else {
-//        NSDictionary *outlineElement = @{
-//           @"name": [item GetTitle],
-//           @"indent": [NSNumber numberWithInt:[item GetIndent]],
-//           @"page": @10
-//        };
-//
-//        [outline addObject:outlineElement];
-//    }
-//    }
-//
-//    return nil;
-//}
+- (NSArray<NSDictionary<NSString *, id> *> *)getOutline
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+
+    PTBookmark *root = [pdfDoc GetFirstBookmark];
+    
+    NSMutableArray *outline = [[NSMutableArray alloc] init];
+    
+    NSArray *test = [[NSArray alloc] initWithArray:[self PrintOutlineTree:root outlineArr:outline]];
+
+    NSLog(@"Final array %@", [test copy]);
+
+    return [outline copy];
+}
 
 
 

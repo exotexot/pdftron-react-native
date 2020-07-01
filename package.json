@@ -1,29 +1,58 @@
 {
-  "name": "react-native-pdftron",
-  "title": "React Native Pdftron",
-  "version": "2.0.1-beta.3",
-  "description": "React Native Pdftron",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
+  "_args": [
+    [
+      "github:exotexot/pdftron-react-native",
+      "/Users/vinzenz/Repositories/cat.europe"
+    ]
+  ],
+  "_from": "github:exotexot/pdftron-react-native",
+  "_id": "react-native-pdftron@github:exotexot/pdftron-react-native#253696d06fd314ea95651a90694007b919d34f9e",
+  "_inBundle": false,
+  "_integrity": "",
+  "_location": "/react-native-pdftron",
+  "_phantomChildren": {},
+  "_requested": {
     "type": "git",
-    "url": "git+https://github.com/PDFTron/pdftron-react-native.git",
-    "baseUrl": "https://github.com/PDFTron/pdftron-react-native"
+    "raw": "github:exotexot/pdftron-react-native",
+    "rawSpec": "github:exotexot/pdftron-react-native",
+    "saveSpec": "github:exotexot/pdftron-react-native",
+    "fetchSpec": null,
+    "gitCommittish": null
   },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "github:exotexot/pdftron-react-native#253696d06fd314ea95651a90694007b919d34f9e",
+  "_spec": "github:exotexot/pdftron-react-native",
+  "_where": "/Users/vinzenz/Repositories/cat.europe",
+  "bugs": {
+    "url": "https://github.com/PDFTron/pdftron-react-native/issues"
+  },
+  "description": "React Native Pdftron",
+  "devDependencies": {
+    "react": "*"
+  },
+  "homepage": "https://github.com/PDFTron/pdftron-react-native#readme",
   "keywords": [
     "react-native",
     "PDFTron",
     "pdf",
     "office"
   ],
-  "readmeFilename": "README.md",
+  "main": "index.js",
+  "name": "react-native-pdftron",
   "peerDependencies": {
     "react": "*",
     "react-native": "*"
   },
-  "devDependencies": {
-    "react": "*"
-  }
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PDFTron/pdftron-react-native.git",
+    "baseUrl": "https://github.com/PDFTron/pdftron-react-native"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "title": "React Native Pdftron",
+  "version": "1.0.0"
 }

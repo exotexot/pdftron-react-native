@@ -368,6 +368,7 @@ RCT_REMAP_METHOD(rotate,
 }
 
 
+
 // Outline Manager
 RCT_REMAP_METHOD(getOutline,
                  getOutlineForDocumentViewTag:(nonnull NSNumber *)tag
@@ -375,7 +376,7 @@ RCT_REMAP_METHOD(getOutline,
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     @try {
-        NSDictionary *outline = [[self documentViewManager] getOutlineForDocumentViewTag:tag];
+        NSArray *outline = [[self documentViewManager] getOutlineForDocumentViewTag:tag];
         resolve(outline);
     }
     @catch (NSException *exception) {
@@ -396,6 +397,22 @@ RCT_REMAP_METHOD(addBookmark,
     }
     @catch (NSException *exception) {
         reject(@"bookmark_failed", @"ADD BOOKMARK FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+
+// Thumbnails
+RCT_REMAP_METHOD(thumbnailsTest,
+                 thumbnailsTestForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        NSArray *results = [[self documentViewManager] thumbnailsTestForDocumentViewTag:tag];
+        resolve(results);
+    }
+    @catch (NSException *exception) {
+        reject(@"thumbnails_failed", @"Thumbnails FAILED MISERABLY", [self errorFromException:exception]);
     }
 }
 
