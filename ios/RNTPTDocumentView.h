@@ -127,7 +127,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)rotate:(BOOL)ccw;
 
 // Outline
-- (id)getOutline;
+- (NSArray<NSDictionary<NSString *, id> *> *)getOutline;
 
 // addBookmark
 - (void)addBookmark;
@@ -136,6 +136,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)showSettings;
 - (void)showSlider;
 - (void)hideSlider;
+
+- (NSArray<NSString *> *)thumbnailsTest;
 
 
 @end

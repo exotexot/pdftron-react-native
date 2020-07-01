@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B0EE9F7124AA2EC2002ECC46 /* RNTMapManager.m in Sources */ = {isa = PBXBuildFile; fileRef = B0EE9F7024AA2EC2002ECC46 /* RNTMapManager.m */; };
 		B3E7B58A1CC2AC0600A0062D /* RNPdftron.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RNPdftron.m */; };
 		CE0885F020E2C9F400AB7A9B /* RNTPTDocumentView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0885EF20E2C9F400AB7A9B /* RNTPTDocumentView.m */; };
 		CE0885F320E2CA1300AB7A9B /* RNTPTDocumentViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0885F220E2CA1300AB7A9B /* RNTPTDocumentViewManager.m */; };
@@ -29,6 +30,8 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRNPdftron.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNPdftron.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B04C59B024AA33C50015E3B5 /* RNTMapManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNTMapManager.h; sourceTree = "<group>"; };
+		B0EE9F7024AA2EC2002ECC46 /* RNTMapManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNTMapManager.m; sourceTree = "<group>"; };
 		B3E7B5881CC2AC0600A0062D /* RNPdftron.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNPdftron.h; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* RNPdftron.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNPdftron.m; sourceTree = "<group>"; };
 		CE0885EE20E2C9F400AB7A9B /* RNTPTDocumentView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNTPTDocumentView.h; sourceTree = "<group>"; };
@@ -72,6 +75,8 @@
 				CE0885F120E2CA1300AB7A9B /* RNTPTDocumentViewManager.h */,
 				CE0885F220E2CA1300AB7A9B /* RNTPTDocumentViewManager.m */,
 				CE0885EE20E2C9F400AB7A9B /* RNTPTDocumentView.h */,
+				B04C59B024AA33C50015E3B5 /* RNTMapManager.h */,
+				B0EE9F7024AA2EC2002ECC46 /* RNTMapManager.m */,
 				CE0885EF20E2C9F400AB7A9B /* RNTPTDocumentView.m */,
 				B3E7B5881CC2AC0600A0062D /* RNPdftron.h */,
 				B3E7B5891CC2AC0600A0062D /* RNPdftron.m */,
@@ -120,6 +125,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 58B511D21A9E6C8500147676;
@@ -140,6 +146,7 @@
 				D30BB17922EFA8D000D90D24 /* RNTPTDocumentViewModule.m in Sources */,
 				CE0885F020E2C9F400AB7A9B /* RNTPTDocumentView.m in Sources */,
 				B3E7B58A1CC2AC0600A0062D /* RNPdftron.m in Sources */,
+				B0EE9F7124AA2EC2002ECC46 /* RNTMapManager.m in Sources */,
 				CE0885F320E2CA1300AB7A9B /* RNTPTDocumentViewManager.m in Sources */,
 				CE0885F920E2CACB00AB7A9B /* RNTPTPDFViewCtrlManager.m in Sources */,
 				CE0885F620E2CAB100AB7A9B /* RNTPTPDFViewCtrl.m in Sources */,
