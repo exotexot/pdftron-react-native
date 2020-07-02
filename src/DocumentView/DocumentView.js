@@ -316,22 +316,12 @@ export default class DocumentView extends PureComponent {
   }
 
 
-  // Slider Show 
-  showSlider = () => {
+  // Slider Toggle 
+  toggleSlider = (bool) => {
     console.log("Show Slider event triggered")
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
-      return DocumentViewManager.showSlider(tag);
-    }
-    return Promise.resolve();
-  }
-
-  // Slider HIdden 
-  hideSlider = () => {
-    console.log("Hide Slider event triggered")
-    const tag = findNodeHandle(this._viewerRef);
-    if (tag != null) {
-      return DocumentViewManager.hideSlider(tag);
+      return DocumentViewManager.toggleSlider(tag, bool);
     }
     return Promise.resolve();
   }

@@ -59,9 +59,8 @@
 
 - (void)showSettingsForDocumentViewTag:(NSNumber *)tag;
 
-- (void)showSliderForDocumentViewTag:(NSNumber *)tag;
+- (void)toggleSliderForDocumentViewTag:(NSNumber *)tag toggle:(BOOL)toggle;
 
-- (void)hideSliderForDocumentViewTag:(NSNumber *)tag;
 
 - (NSArray<NSString *> *)thumbnailsTestForDocumentViewTag:(NSNumber *)tag;
 

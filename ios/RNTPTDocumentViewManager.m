@@ -592,25 +592,16 @@ RCT_CUSTOM_VIEW_PROPERTY(overrideBehavior, NSArray, RNTPTDocumentView)
 }
 
 
-- (void)showSliderForDocumentViewTag:(NSNumber *)tag
+- (void)toggleSliderForDocumentViewTag:(NSNumber *)tag toggle:(BOOL)toggle
 {
     RNTPTDocumentView *documentView = self.documentViews[tag];
     if (documentView) {
-        return [documentView showSlider];
+        return [documentView toggleSlider:toggle];
     } else {
         @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
     }
 }
 
-- (void)hideSliderForDocumentViewTag:(NSNumber *)tag
-{
-    RNTPTDocumentView *documentView = self.documentViews[tag];
-    if (documentView) {
-        return [documentView hideSlider];
-    } else {
-        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
-    }
-}
 
 - (NSArray<NSString *> *)thumbnailsTestForDocumentViewTag:(NSNumber *)tag
 {
