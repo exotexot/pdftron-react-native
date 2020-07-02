@@ -149,8 +149,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)findText;
 - (void)showSettings;
-- (void)showSlider;
-- (void)hideSlider;
+- (void)toggleSlider:(BOOL)toggle;
 
 - (NSArray<NSString *> *)thumbnailsTest;
 

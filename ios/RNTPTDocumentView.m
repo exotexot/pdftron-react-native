@@ -2122,14 +2122,14 @@ NS_ASSUME_NONNULL_END
 
 
 
-- (void)showSlider
+- (void)toggleSlider:(BOOL)toggle;
 {
     PTDocumentViewController *docViewCtrl = self.documentViewController;
     
-    BOOL sliderHidden = [docViewCtrl isThumbnailSliderHidden];
-    NSLog(@"SLIDER HIDDEN %d", sliderHidden);
+//    BOOL sliderHidden = [docViewCtrl isThumbnailSliderHidden];
+//    NSLog(@"SLIDER HIDDEN %d", sliderHidden);
     
-    if (sliderHidden) {
+    if (toggle) {
         [docViewCtrl setThumbnailSliderHidden:NO animated:YES];
     } else {
         [docViewCtrl setThumbnailSliderHidden:YES animated:YES];
@@ -2148,16 +2148,22 @@ NS_ASSUME_NONNULL_END
     NSURL *url = [NSURL URLWithString:base64String];
     NSData *imageData = [NSData dataWithContentsOfURL:url];
     
+    
+    int maxImageWidth = 100;
+    int maxImageHeight = 100;
+    
+    int offsetTop = 30;
+    int offsetHorizontal = 50;
+    
+
     for (int page = 1; page <= pages; page++)
     {
-        
         UIImage *image = [UIImage imageWithData:imageData];
         UIImageView * imageView = [[UIImageView alloc] initWithImage:image];
+        imageView.frame = CGRectMake(0, 0, maxImageWidth, maxImageHeight);
+        imageView.contentMode = UIViewContentModeScaleAspectFit;
         
-        double imgX = image.size.width;
-        double imgY = image.size.height;
-        UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, imgX, imgY)];
-        
+        UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, maxImageWidth, maxImageHeight)];
         [view addSubview:imageView];
         
         PTPage *pageObject = [pdfDoc GetPage:page];
@@ -2165,16 +2171,14 @@ NS_ASSUME_NONNULL_END
         double width = [pageObject GetPageWidth:e_pttrim];
         double height = [pageObject GetPageHeight:e_pttrim];
         
-
         if (isDuplex) {
-            PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0 y1:height x2:imgX y2:(height-imgY)];
-            PTPDFRect *topRight = [[PTPDFRect alloc] initWithX1:(width - imgX) y1:height x2:width y2:(height-imgY)];
+            PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0 y1:height x2:maxImageWidth y2:(height-maxImageHeight)];
+            PTPDFRect *topRight = [[PTPDFRect alloc] initWithX1:(width - maxImageWidth) y1:height x2:width y2:(height-maxImageHeight)];
             [pdfViewCtrl addFloatingView:view toPage:page withPageRect: (page % 2 ? topLeft : topRight) noZoom:NO];
         } else {
-            PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0 y1:height x2:imgX y2:(height-imgY)];
+            PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0 y1:height x2:maxImageWidth y2:maxImageHeight];
             [pdfViewCtrl addFloatingView:view toPage:page withPageRect:topLeft noZoom:NO];
         }
-        
     }
 }
 

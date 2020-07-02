@@ -267,32 +267,20 @@ RCT_REMAP_METHOD(showSettings,
 }
 
 
-RCT_REMAP_METHOD(showSlider,
-                 showSliderForDocumentViewTag:(nonnull NSNumber *)tag
+
+// Rotate Manager
+RCT_REMAP_METHOD(toggleSlider,
+                 toggleSliderForDocumentViewTag:(nonnull NSNumber *)tag
+                 toggle:(BOOL)toggle
                  resolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     @try {
-        [[self documentViewManager] showSliderForDocumentViewTag:tag ];
+        [[self documentViewManager] toggleSliderForDocumentViewTag:tag toggle:toggle];
         resolve(nil);
     }
     @catch (NSException *exception) {
-        reject(@"showSlider_failed", @"SHOW SLIDER FAILED MISERABLY", [self errorFromException:exception]);
-    }
-}
-
-
-RCT_REMAP_METHOD(hideSlider,
-                 hdieSliderForDocumentViewTag:(nonnull NSNumber *)tag
-                 resolver:(RCTPromiseResolveBlock)resolve
-                 rejecter:(RCTPromiseRejectBlock)reject)
-{
-    @try {
-        [[self documentViewManager] hideSliderForDocumentViewTag:tag ];
-        resolve(nil);
-    }
-    @catch (NSException *exception) {
-        reject(@"hideSlider_failed", @"HIDE SLIDER FAILED MISERABLY", [self errorFromException:exception]);
+        reject(@"rotate_failed", @"ROTATE PAGE FAILED MISERABLY", [self errorFromException:exception]);
     }
 }
 
