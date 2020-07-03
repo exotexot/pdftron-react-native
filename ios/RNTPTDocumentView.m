@@ -1756,6 +1756,9 @@ NS_ASSUME_NONNULL_END
     self.documentViewController.navigationController.navigationBar.translucent = YES;
     self.documentViewController.thumbnailSliderController.toolbar.translucent = YES;
     
+    
+    
+    // Native Sidebar Tests
     UIViewController *bookmarks = self.documentViewController.navigationListsViewController.bookmarkViewController;
     [self.documentViewController.navigationListsViewController removeListViewController:bookmarks];
     
@@ -1785,15 +1788,7 @@ NS_ASSUME_NONNULL_END
 
 
 
-- (void) handleTapFrom: (UITapGestureRecognizer *)recognizer
-{
-    //Code to handle the gesture
-    NSLog(@"THIS IS A TEST EVENT");
-}
-
-
-
-- (NSArray<NSString *> *)thumbnailsTest
+- (NSArray<NSString *> *)getThumbnails:(NSString *)fileName
 {
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
@@ -1801,43 +1796,44 @@ NS_ASSUME_NONNULL_END
     NSMutableArray *thumbnails = [NSMutableArray new];
     int pageCount = [pdfDoc GetPageCount];
     
-    for(int page = 1; page <= pageCount; page++ ) {
-        
-//       [pdfViewCtrl GetThumbAsync:page completion:^(UIImage *thumb) {
-        
-////          NSLog(@"Image %d %f %f", page, thumb.size.width, thumb.size.height);
-////          NSString *base64Image = [UIImagePNGRepresentation(thumb) base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
-////          [thumbnails addObject:[NSString stringWithFormat:@"LOOP : %d", page]];
-//           [thumbnails addObject:@"MISHA"];
-//       }];
-//
-//        [thumbnails addObject:@"FICKDICH"];
-//        [thumbnails addObject:[NSString stringWithFormat:@"THIS IS A STRING WITH AN INT: %d", page]];
-        
-        
-//        dispatch_semaphore_t sem = dispatch_semaphore_create(0);
-//        __block UIImage *thumb;
-//        [pdfViewCtrl GetThumbAsync:page completion:^(UIImage *t) {
-//            thumb = t;
-//            dispatch_semaphore_signal(sem);
-//        }];
-//        dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
-//        NSLog(@"Image %f %f", thumb.size.width, thumb.size.height);
-        
-        
-        
+    NSError *error = nil;
     
+    for(int pageNumber = 1; pageNumber <= pageCount; pageNumber++ ) {
         
-        
+        [pdfViewCtrl DocLockReadWithBlock:^(PTPDFDoc * _Nullable doc) {
+            
+            PTPDFDraw* draw = [[PTPDFDraw alloc] initWithDpi:72];
+            PTPage* page = [doc GetPage:pageNumber];
+            
+            // First, we need to save the document to the apps sandbox.
+            NSString *name = [NSString stringWithFormat:@"%@-%i.png", fileName, pageNumber];
+            NSString* fullFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:name];
+            
+            PTPDFRect* cropBox = [page GetCropBox];
+            int width = [cropBox Width];
+            int height = [cropBox Height];
+
+            [draw SetImageSize:200 height:300 preserve_aspect_ratio:false];
+            [draw Export:page filename:fullFileName format:@"png"];
+            
+            [thumbnails addObject:fullFileName];
+            
+        } error:&error];
+    
     }
     
-    
-    [thumbnails addObject:@"TESTMICH"];
-    
-    NSLog(@"%@", thumbnails);
-    
-    return thumbnails.copy;
+    return thumbnails;
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2003,6 +1999,7 @@ NS_ASSUME_NONNULL_END
 }
 
 
+
 // Return dimensions
 - (NSDictionary<NSString *, NSNumber *> *)getDimensions
 {
@@ -2020,7 +2017,6 @@ NS_ASSUME_NONNULL_END
 
     return dimensions;
 }
-
 
 
 
@@ -2107,6 +2103,7 @@ NS_ASSUME_NONNULL_END
 }
 
 
+
 - (NSArray<NSDictionary<NSString *, id> *> *)getOutline
 {
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
@@ -2125,59 +2122,6 @@ NS_ASSUME_NONNULL_END
 
 
 
-
-
-
-
-
-//NSMutableArray * wholeOutline = [[NSMutableArray alloc] init];
-//
-//
-//- (NSArray<NSDictionary<NSString *, id> *> *)getOutline
-//{
-//    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
-//    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
-//
-//    PTBookmark *root = [pdfDoc GetFirstBookmark];
-//
-//
-////    outline = PrintOutlineTree(root);
-//
-//
-//    NSArray *outline = outline;
-//
-//    return outline;
-//}
-//
-//
-//
-//NSMutableArray* PrintOutlineTree(PTBookmark *item)
-//{
-//    for (; [item IsValid]; item=[item GetNext]) {
-//
-//        if ([item HasChildren]) {
-//            PrintOutlineTree([item GetFirstChild]);
-//        } else {
-//            NSDictionary *outlineElement = @{
-//               @"name": [item GetTitle],
-//               @"indent": [NSNumber numberWithInt:[item GetIndent]],
-//               @"page": @10
-//            };
-//
-////            [outline addObject:outlineElement];
-//        }
-//    }
-//}
-
-
-
-
-
-
-
-
-
-
 - (void)addBookmark
 {
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
@@ -2190,11 +2134,6 @@ NS_ASSUME_NONNULL_END
     
     [bookmarks addBookmark:thisBookmark forDoc:pdfDoc];
 }
-
-
-
-
-
 
 
 

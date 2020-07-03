@@ -603,11 +603,11 @@ RCT_CUSTOM_VIEW_PROPERTY(overrideBehavior, NSArray, RNTPTDocumentView)
 }
 
 
-- (NSArray<NSString *> *)thumbnailsTestForDocumentViewTag:(NSNumber *)tag
+- (NSArray<NSString *> *)getThumbnailsForDocumentViewTag:(NSNumber *)tag fileName:(NSString *)fileName
 {
     RNTPTDocumentView *documentView = self.documentViews[tag];
     if (documentView) {
-        return [documentView thumbnailsTest];
+        return [documentView getThumbnails:fileName];
     } else {
         @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
     }
