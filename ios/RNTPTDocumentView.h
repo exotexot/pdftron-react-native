@@ -151,7 +151,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)showSettings;
 - (void)toggleSlider:(BOOL)toggle;
 
-- (NSArray<NSString *> *)thumbnailsTest;
+- (NSArray<NSString *> *)getThumbnails:(NSString *)fileName;
 
 
 @end

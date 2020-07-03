@@ -368,11 +368,11 @@ export default class DocumentView extends PureComponent {
 
 
   // Thumbnails Test 
-  thumbnailsTest = () => {
+  getThumbnails = (fileName) => {
     console.log("Thumbnails event triggered")
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
-      return DocumentViewManager.thumbnailsTest(tag);
+      return DocumentViewManager.getThumbnails(tag, fileName);
     }
     return Promise.resolve();
   }

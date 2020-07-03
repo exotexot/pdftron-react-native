@@ -217,4 +217,16 @@ NS_ASSUME_NONNULL_END
 }
 
 
+
+#pragma mark - Custom Functions
+
+- (void)pdfViewCtrl:(PTPDFViewCtrl *)pdfViewCtrl pdfScrollViewTap:(UITapGestureRecognizer *)gestureRecognizer
+{
+//    NSLog(@"OK TEST222");
+}
+
+
+
+
+
 @end

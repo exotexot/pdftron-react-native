@@ -62,7 +62,7 @@
 - (void)toggleSliderForDocumentViewTag:(NSNumber *)tag toggle:(BOOL)toggle;
 
 
-- (NSArray<NSString *> *)thumbnailsTestForDocumentViewTag:(NSNumber *)tag;
+- (NSArray<NSString *> *)getThumbnailsForDocumentViewTag:(NSNumber *)tag fileName:(NSString *)fileName;
 
 
 // Outline Manager
