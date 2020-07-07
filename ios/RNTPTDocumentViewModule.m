@@ -207,11 +207,13 @@ RCT_REMAP_METHOD(importAnnotationCommand,
 RCT_REMAP_METHOD(search,
                  searchForDocumentViewTag:(nonnull NSNumber *)tag
                  searchString:(NSString *)searchString
+                 case:(BOOL)isCase
+                 whole:(BOOL)isWhole
                  resolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     @try {
-        NSArray *results = [[self documentViewManager] searchForDocumentViewTag:tag search:searchString];
+        NSArray *results = [[self documentViewManager] searchForDocumentViewTag:tag search:searchString case:isCase whole:isWhole];
         resolve(results);
     }
     @catch (NSException *exception) {

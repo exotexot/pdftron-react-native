@@ -1979,28 +1979,46 @@ NS_ASSUME_NONNULL_END
     NSError *error = nil;
     
     for(int pageNumber = 1; pageNumber <= pageCount; pageNumber++ ) {
-        
+
         [pdfViewCtrl DocLockReadWithBlock:^(PTPDFDoc * _Nullable doc) {
-            
+
             PTPDFDraw* draw = [[PTPDFDraw alloc] initWithDpi:72];
             PTPage* page = [doc GetPage:pageNumber];
-            
+
             // First, we need to save the document to the apps sandbox.
             NSString *name = [NSString stringWithFormat:@"%@-%i.png", fileName, pageNumber];
             NSString* fullFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:name];
-            
-            PTPDFRect* cropBox = [page GetCropBox];
-            int width = [cropBox Width];
-            int height = [cropBox Height];
 
             [draw SetImageSize:200 height:300 preserve_aspect_ratio:false];
             [draw Export:page filename:fullFileName format:@"png"];
-            
+
             [thumbnails addObject:fullFileName];
-            
+
         } error:&error];
-    
+
     }
+    
+    
+//    for(int pageNumber = 1; pageNumber <= pageCount; pageNumber++ ) {
+//
+//        NSLog(@"loop # %i", pageNumber);
+//
+//        [pdfViewCtrl GetThumbAsync:pageNumber completion:^(UIImage *thumb) {
+//            [thumbnails addObject:@"TEST"];
+//
+//            NSLog(@"Image %d %f %f", pageNumber, thumb.size.width, thumb.size.height); // This will be successfully executed.
+//
+//            if (pageNumber == pageCount) {
+//                NSLog(@"finished %@", thumbnails);
+////                return thumbnails;
+//            }
+////
+//        }];
+//
+//    }
+//
+//
+//    NSLog(@"finished %@", thumbnails);
     
     return thumbnails;
 }
@@ -2022,13 +2040,28 @@ NS_ASSUME_NONNULL_END
 
 
 // Custom Search
-- (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString
+- (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString case:(BOOL)isCase whole:(BOOL)isWhole
 {
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
     
     PTTextSearch *search = [[PTTextSearch alloc] init];
-    unsigned int mode = e_ptwhole_word|e_pthighlight|e_ptambient_string;
+    
+    
+    // Whack mode setting
+    unsigned int mode = 0;
+    if (isCase && !isWhole) {
+        mode = e_pthighlight|e_ptambient_string|e_ptcase_sensitive;
+    } else if (!isCase && isWhole) {
+        mode = e_pthighlight|e_ptambient_string|e_ptwhole_word;
+    } else if (isCase && isWhole) {
+        mode = e_pthighlight|e_ptambient_string|e_ptwhole_word|e_ptcase_sensitive;
+    } else {
+        mode = e_pthighlight|e_ptambient_string;
+    }
+    
+    
+                    
     NSString *pattern = searchString;
     [search Begin:pdfDoc pattern:pattern mode:mode start_page:-1 end_page:-1];
     

@@ -250,12 +250,20 @@ export default class DocumentView extends PureComponent {
   }
 
 
+
+
+
+
+
+
+
+
   // Custom Search
-  search = (searchString) => {
+  search = (searchString, isCase, isWhole) => {
     console.log("Search event triggered")
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
-      return DocumentViewManager.search(tag, searchString);
+      return DocumentViewManager.search(tag, searchString, isCase, isWhole);
     }
     return Promise.resolve();
   }
