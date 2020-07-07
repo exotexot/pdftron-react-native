@@ -38,7 +38,7 @@
 
 
 // Custom Search
-- (NSArray<NSDictionary<NSString *, NSString *> *> *)searchForDocumentViewTag:(NSNumber *)tag search:(NSString *)searchString;
+- (NSArray<NSDictionary<NSString *, NSString *> *> *)searchForDocumentViewTag:(NSNumber *)tag search:(NSString *)searchString case:(BOOL)isCase whole:(BOOL)isWhole;
 - (void)clearSearchForDocumentViewTag:(NSNumber *)tag;
 
 // Get Document Dimensions

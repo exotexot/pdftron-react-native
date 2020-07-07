@@ -111,7 +111,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 // Custom Search
-- (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString;
+- (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString case:(BOOL)isCase whole:(BOOL)isWhole;
 - (void)clearSearch;
 
 // Get First Page Dimensions
