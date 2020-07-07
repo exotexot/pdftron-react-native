@@ -123,37 +123,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)importAnnotationCommand:(NSString *)xfdfCommand initialLoad:(BOOL)initialLoad;
 
-
-
-// Custom Search
-- (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString case:(BOOL)isCase whole:(BOOL)isWhole;
-- (void)clearSearch;
-
-// Get First Page Dimensions
-- (NSDictionary<NSString *, NSNumber *> *)getDimensions;
-
-// Jump to Page
-- (void)jumpTo:(int)page_num;
-
-// Append School Logo
-- (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex;
-
-// Rotation Manager
-- (void)rotate:(BOOL)ccw;
-
-// Outline
-- (NSArray<NSDictionary<NSString *, id> *> *)getOutline;
-
-// addBookmark
-- (void)addBookmark;
-
-- (void)findText;
-- (void)showSettings;
-- (void)toggleSlider:(BOOL)toggle;
-
-- (NSArray<NSString *> *)getThumbnails:(NSString *)fileName;
-
-
 @end
 
 NS_ASSUME_NONNULL_END
