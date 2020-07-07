@@ -168,6 +168,10 @@ NS_ASSUME_NONNULL_END
         
         [self applyLayoutMode];
     }
+    
+    
+    // Adjustment custom Init function for better clearity
+    [self customInit];
 }
 
 -(void)setDocument:(NSString *)document
@@ -595,6 +599,18 @@ NS_ASSUME_NONNULL_END
         toolClass = [PTCloudCreate class];
     }
     
+    // Adjustment - Apple Pencil and Eraser Tools
+    else if ( [toolMode isEqualToString:@"ApplePencil"])
+    {
+        if (@available(iOS 13.1, *)) {
+            toolClass = [PTPencilDrawingCreate class];
+        }
+    }
+    else if ( [toolMode isEqualToString:@"Eraser"])
+    {
+        toolClass = [PTEraser class];
+    }
+    
     if (toolClass) {
         PTTool *tool = [self.documentViewController.toolManager changeTool:toolClass];
         
@@ -603,6 +619,14 @@ NS_ASSUME_NONNULL_END
         if ([tool isKindOfClass:[PTFreeHandCreate class]]
             && ![tool isKindOfClass:[PTFreeHandHighlightCreate class]]) {
             ((PTFreeHandCreate *)tool).multistrokeMode = self.continuousAnnotationEditing;
+        }
+        
+        // Adjustment - Apple Pencil
+        if (@available(iOS 13.1, *)) {
+            if ([tool isKindOfClass:[PTPencilDrawingCreate class]])
+            {
+                ((PTPencilDrawingCreate *)tool).shouldShowToolPicker = YES;
+            }
         }
     }
 }
@@ -1120,6 +1144,10 @@ NS_ASSUME_NONNULL_END
     
     // Custom HTTP request headers.
     [self applyCustomHeaders];
+    
+
+    // Adjustment custom Init function for better clearity
+    [self customInit];
 }
 
 - (void)applyLayoutMode
@@ -1800,5 +1828,445 @@ NS_ASSUME_NONNULL_END
         } action:@"remove"];
     }
 }
+
+
+
+
+
+
+
+#pragma mark - Custom CAT Functions
+
+- (void)customInit
+{
+    // Gesture Control
+    UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapFrom:)];
+    [self.documentViewController.pdfViewCtrl handleTap:tapGestureRecognizer];
+    self.documentViewController.hidesControlsOnTap = NO;
+
+
+    // Settings Button
+    self.documentViewController.viewerSettingsButtonHidden = YES;
+    self.documentViewController.settingsViewController.popoverPresentationController.permittedArrowDirections = (UIPopoverArrowDirectionUp|UIPopoverArrowDirectionDown);
+    self.documentViewController.thumbnailSliderController.trailingToolbarItem = self.documentViewController.settingsButtonItem; // you don't need to create a new UIBarButtonItem object
+    
+    
+    // Translucent Thumbnail Slider
+    self.documentViewController.navigationController.navigationBar.translucent = YES;
+    self.documentViewController.thumbnailSliderController.toolbar.translucent = YES;
+    
+    
+    
+    // Native Sidebar Tests
+    UIViewController *bookmarks = self.documentViewController.navigationListsViewController.bookmarkViewController;
+    [self.documentViewController.navigationListsViewController removeListViewController:bookmarks];
+    
+    UIViewController *annotations = self.documentViewController.navigationListsViewController.annotationViewController;
+    [self.documentViewController.navigationListsViewController removeListViewController:annotations];
+    
+    
+    UIViewController *thumbnails = self.documentViewController.thumbnailsViewController;
+    [self.documentViewController.navigationListsViewController addListViewController:thumbnails];
+    
+    
+    UIViewController *newCtrl = [[UIViewController alloc] init];
+    newCtrl.view.backgroundColor = [UIColor redColor];
+    
+//    UIView *spacer = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
+//    spacer.backgroundColor =[UIColor greenColor];
+//    [newCtrl.view addSubview:spacer];
+//
+//    UISearchBar *searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 200, 200, 40)];
+//
+//    [newCtrl.view addSubview:searchBar];
+//
+    
+    [self.documentViewController.navigationListsViewController addListViewController:newCtrl];
+}
+
+
+
+
+- (NSArray<NSString *> *)getThumbnails:(NSString *)fileName
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+    
+    NSMutableArray *thumbnails = [NSMutableArray new];
+    int pageCount = [pdfDoc GetPageCount];
+    
+    NSError *error = nil;
+    
+    for(int pageNumber = 1; pageNumber <= pageCount; pageNumber++ ) {
+
+        [pdfViewCtrl DocLockReadWithBlock:^(PTPDFDoc * _Nullable doc) {
+
+            PTPDFDraw* draw = [[PTPDFDraw alloc] initWithDpi:72];
+            PTPage* page = [doc GetPage:pageNumber];
+
+            // First, we need to save the document to the apps sandbox.
+            NSString *name = [NSString stringWithFormat:@"%@-%i.png", fileName, pageNumber];
+            NSString* fullFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:name];
+
+            [draw SetImageSize:200 height:300 preserve_aspect_ratio:false];
+            [draw Export:page filename:fullFileName format:@"png"];
+
+            [thumbnails addObject:fullFileName];
+
+        } error:&error];
+
+    }
+    
+    
+//    for(int pageNumber = 1; pageNumber <= pageCount; pageNumber++ ) {
+//
+//        NSLog(@"loop # %i", pageNumber);
+//
+//        [pdfViewCtrl GetThumbAsync:pageNumber completion:^(UIImage *thumb) {
+//            [thumbnails addObject:@"TEST"];
+//
+//            NSLog(@"Image %d %f %f", pageNumber, thumb.size.width, thumb.size.height); // This will be successfully executed.
+//
+//            if (pageNumber == pageCount) {
+//                NSLog(@"finished %@", thumbnails);
+////                return thumbnails;
+//            }
+////
+//        }];
+//
+//    }
+//
+//
+//    NSLog(@"finished %@", thumbnails);
+    
+    return thumbnails;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Custom Search
+- (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString case:(BOOL)isCase whole:(BOOL)isWhole
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+    
+    PTTextSearch *search = [[PTTextSearch alloc] init];
+    
+    
+    // Whack mode setting
+    unsigned int mode = 0;
+    if (isCase && !isWhole) {
+        mode = e_pthighlight|e_ptambient_string|e_ptcase_sensitive;
+    } else if (!isCase && isWhole) {
+        mode = e_pthighlight|e_ptambient_string|e_ptwhole_word;
+    } else if (isCase && isWhole) {
+        mode = e_pthighlight|e_ptambient_string|e_ptwhole_word|e_ptcase_sensitive;
+    } else {
+        mode = e_pthighlight|e_ptambient_string;
+    }
+    
+    
+                    
+    NSString *pattern = searchString;
+    [search Begin:pdfDoc pattern:pattern mode:mode start_page:-1 end_page:-1];
+    
+    
+    NSMutableArray *searchResults = [NSMutableArray new];
+    bool moreToFind = true;
+
+    while (moreToFind)
+    {
+        PTSearchResult *result = [search Run];
+        if (result)
+        {
+            
+            // Serach Result
+            if( [result GetMatch] != nil ) {
+                NSDictionary *oneSearchResult = @{
+                    @"match": [result GetMatch],
+                    @"page": [NSNumber numberWithInt:[result GetPageNumber]],
+                    @"ambient": [result GetAmbientString]
+                 };
+                NSLog(@"%@", oneSearchResult);
+                
+                [searchResults addObject: oneSearchResult];
+            }
+            
+            // Text Highlights
+            PTHighlights *hlts = [result GetHighlights];
+            [hlts Begin: pdfDoc];
+            
+            while ( [hlts HasNext] )
+            {
+                NSLog(@"The current highlight is from page: %d", [hlts GetCurrentPageNumber]);
+                
+                PTPage *cur_page = [pdfDoc GetPage: [hlts GetCurrentPageNumber]];
+                PTVectorQuadPoint *quads = [hlts GetCurrentQuads];
+                int i = 0;
+                for ( ; i < [quads size]; ++i )
+                {
+                    PTQuadPoint *q = [quads get: i];
+                    double x1 = MIN(MIN(MIN([[q getP1] getX], [[q getP2] getX]), [[q getP3] getX]), [[q getP4] getX]);
+                    double x2 = MAX(MAX(MAX([[q getP1] getX], [[q getP2] getX]), [[q getP3] getX]), [[q getP4] getX]);
+                    double y1 = MIN(MIN(MIN([[q getP1] getY], [[q getP2] getY]), [[q getP3] getY]), [[q getP4] getY]);
+                    double y2 = MAX(MAX(MAX([[q getP1] getY], [[q getP2] getY]), [[q getP3] getY]), [[q getP4] getY]);
+                    PTPDFRect * rect = [[PTPDFRect alloc] initWithX1: x1 y1: y1 x2: x2 y2: y2];
+    
+                    UIView *view = [[UIView alloc] init];
+                    UIColor *color = [UIColor colorWithRed: 0.98 green: 0.46 blue: 0.08 alpha: 1.00];
+                    view.backgroundColor = color;
+                    view.layer.compositingFilter = @"multiplyBlendMode";
+
+                    int toPage = [hlts GetCurrentPageNumber];
+                    [pdfViewCtrl addFloatingView:view toPage:toPage withPageRect:rect noZoom:NO];
+                }
+                [hlts Next];
+            }
+            
+            moreToFind = [result IsFound];
+        }
+    }
+    
+    return [searchResults copy];
+}
+
+
+
+- (void)clearSearch
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    [pdfViewCtrl clearFloatingViews];
+}
+
+
+
+- (void)findText
+{
+    PTDocumentViewController *docViewCtrl = self.documentViewController;
+    [docViewCtrl showSearchViewController];
+}
+
+
+
+- (void)showSettings
+{
+    PTDocumentViewController *docViewCtrl = self.documentViewController;
+    [docViewCtrl settingsViewController];
+}
+
+
+
+- (void)toggleSlider:(BOOL)toggle;
+{
+    PTDocumentViewController *docViewCtrl = self.documentViewController;
+    
+//    BOOL sliderHidden = [docViewCtrl isThumbnailSliderHidden];
+//    NSLog(@"SLIDER HIDDEN %d", sliderHidden);
+    
+    if (toggle) {
+        [docViewCtrl setThumbnailSliderHidden:NO animated:YES];
+    } else {
+        [docViewCtrl setThumbnailSliderHidden:YES animated:YES];
+    }
+}
+
+
+
+- (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+    
+    int pages = [pdfDoc GetPageCount];
+
+    NSURL *url = [NSURL URLWithString:base64String];
+    NSData *imageData = [NSData dataWithContentsOfURL:url];
+    
+    
+    int maxImageWidth = 100;
+    int maxImageHeight = 100;
+    
+    int offsetTop = 30;
+    int offsetHorizontal = 50;
+    
+
+    for (int page = 1; page <= pages; page++)
+    {
+        UIImage *image = [UIImage imageWithData:imageData];
+        UIImageView * imageView = [[UIImageView alloc] initWithImage:image];
+        imageView.frame = CGRectMake(0, 0, maxImageWidth, maxImageHeight);
+        imageView.contentMode = UIViewContentModeScaleAspectFit;
+        
+        UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, maxImageWidth, maxImageHeight)];
+        [view addSubview:imageView];
+        
+        PTPage *pageObject = [pdfDoc GetPage:page];
+        
+        double width = [pageObject GetPageWidth:e_pttrim];
+        double height = [pageObject GetPageHeight:e_pttrim];
+        
+        if (isDuplex) {
+            PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0 y1:height x2:maxImageWidth y2:(height-maxImageHeight)];
+            PTPDFRect *topRight = [[PTPDFRect alloc] initWithX1:(width - maxImageWidth) y1:height x2:width y2:(height-maxImageHeight)];
+            [pdfViewCtrl addFloatingView:view toPage:page withPageRect: (page % 2 ? topLeft : topRight) noZoom:NO];
+        } else {
+            PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0 y1:height x2:maxImageWidth y2:maxImageHeight];
+            [pdfViewCtrl addFloatingView:view toPage:page withPageRect:topLeft noZoom:NO];
+        }
+    }
+}
+
+
+
+// Return dimensions
+- (NSDictionary<NSString *, NSNumber *> *)getDimensions
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+    PTPage *firstPage = [pdfDoc GetPage:1];
+    
+    NSNumber *width = [NSNumber numberWithDouble:[firstPage GetPageWidth:e_pttrim]];
+    NSNumber *height = [NSNumber numberWithDouble:[firstPage GetPageHeight:e_pttrim]];
+    
+    NSDictionary *dimensions = @{
+       @"width": width,
+       @"height": height,
+    };
+
+    return dimensions;
+}
+
+
+
+// Jump To Page
+- (void)jumpTo:(int)page_num
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    [pdfViewCtrl SetCurrentPage:page_num];
+}
+
+
+
+// Rotate Page
+- (void)rotate:(BOOL)ccw
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+    
+    int page_number = [pdfViewCtrl GetCurrentPage];
+    PTPage *page = [pdfDoc GetPage:page_number];
+    
+    PTRotate originalRotation = [page GetRotation];
+    PTRotate newRotation;
+        
+    if (!ccw) {
+        switch (originalRotation)
+        {
+          case e_pt0:   newRotation = e_pt90;  break;
+          case e_pt90:  newRotation = e_pt180; break;
+          case e_pt180: newRotation = e_pt270; break;
+          case e_pt270: newRotation = e_pt0;   break;
+          default:      newRotation = e_pt0;   break;
+        }
+    } else {
+        switch (originalRotation)
+        {
+          case e_pt0:   newRotation = e_pt270; break;
+          case e_pt270: newRotation = e_pt180; break;
+          case e_pt180: newRotation = e_pt90;  break;
+          case e_pt90:  newRotation = e_pt0;   break;
+          default:      newRotation = e_pt0;   break;
+        }
+    }
+    
+    [page SetRotation:newRotation];
+    [ pdfViewCtrl UpdatePageLayout ];
+}
+
+
+
+// Outline Manager
+- (NSArray<NSDictionary<NSString *, id> *> *)PrintOutlineTree:(PTBookmark *)item outlineArr:(NSMutableArray *)outlineArr
+{
+    for (; [item IsValid]; item=[item GetNext]) {
+
+        PTAction *action = [item GetAction];
+        PTDestination *dest = [action GetDest];
+        PTPage *page = [dest GetPage];
+            
+        NSDictionary *outlineElement = @{
+           @"name": [item GetTitle],
+           @"indent": [NSNumber numberWithInt:[item GetIndent]],
+           @"page": [NSNumber numberWithInt:[page GetIndex]],
+        };
+
+        
+        // NSLog(@"Outline Element: %@", outlineElement);
+        
+        
+        // Some CAT PDFs have broken outlines, leading to mutlitple nested outlines
+        // Luckily the redundant broken outlines all come with page = 0
+        if ( [page GetIndex] != 0) {
+            [outlineArr addObject:outlineElement];
+        }
+
+        
+        // If this Bookmark has children do it again
+        if ([item HasChildren]) {
+            [self PrintOutlineTree:[item GetFirstChild] outlineArr:outlineArr];
+        }
+    }
+    
+    return [outlineArr copy];
+}
+
+
+
+- (NSArray<NSDictionary<NSString *, id> *> *)getOutline
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+
+    PTBookmark *root = [pdfDoc GetFirstBookmark];
+    
+    NSMutableArray *outline = [[NSMutableArray alloc] init];
+    
+    NSArray *test = [[NSArray alloc] initWithArray:[self PrintOutlineTree:root outlineArr:outline]];
+
+    NSLog(@"Final array %@", [test copy]);
+
+    return [outline copy];
+}
+
+
+
+- (void)addBookmark
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+    
+    PTBookmarkManager *bookmarks = [[PTBookmarkManager alloc] init];
+    
+    int page_number = [pdfViewCtrl GetCurrentPage];
+    PTUserBookmark *thisBookmark = [[PTUserBookmark alloc] initWithTitle:@"test" pageNumber:page_number];
+    
+    [bookmarks addBookmark:thisBookmark forDoc:pdfDoc];
+}
+
+
 
 @end
