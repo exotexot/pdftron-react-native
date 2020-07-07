@@ -26,12 +26,25 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)annotationMenuPressed:(RNTPTDocumentView *)sender annotationMenu:(NSString *)annotationMenu annotations:(NSArray<NSDictionary<NSString *, id> *> *)annotations;
 
+- (void)longPressMenuPressed:(RNTPTDocumentView *)sender longPressMenu:(NSString *)longPressMenu longPressText:(NSString *)longPressText;
+
 @end
 
 @interface RNTPTDocumentView : UIView
 
 @property (nonatomic, copy, nullable) NSArray<NSString *> *disabledElements;
 @property (nonatomic, copy, nullable) NSArray<NSString *> *disabledTools;
+
+
+// annotation selection menu customization
+@property (nonatomic, copy, nullable) NSArray<NSString *> *overrideAnnotationMenuBehavior;
+@property (nonatomic, copy, nullable) NSArray<NSString *> *overrideBehavior;
+@property (nonatomic, copy, nullable) NSArray<NSString *> *hideAnnotMenuTools;
+
+// long-press menu customization
+
+@property (nonatomic, copy, nullable) NSArray<NSString *> *overrideLongPressMenuBehavior;
+@property (nonatomic, copy, nullable) NSArray<NSString *> *longPressMenuItems;
 
 // viewer options
 @property (nonatomic, assign) BOOL nightModeEnabled;
@@ -75,10 +88,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign) BOOL selectAnnotationAfterCreation;
 
-@property (nonatomic, copy, nullable) NSArray<NSString *> *overrideAnnotationMenuBehavior;
-
-@property (nonatomic, copy, nullable) NSArray<NSString *> *overrideBehavior;
-
 @property (nonatomic, strong, nullable) PTCollaborationManager *collaborationManager;
 
 @property (nonatomic, copy, nullable) RCTBubblingEventBlock onChange;
@@ -107,37 +116,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setValueForFields:(NSDictionary<NSString *, id> *)map;
 
 - (void)importAnnotationCommand:(NSString *)xfdfCommand initialLoad:(BOOL)initialLoad;
-
-
-
-// Custom Search
-- (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString case:(BOOL)isCase whole:(BOOL)isWhole;
-- (void)clearSearch;
-
-// Get First Page Dimensions
-- (NSDictionary<NSString *, NSNumber *> *)getDimensions;
-
-// Jump to Page
-- (void)jumpTo:(int)page_num;
-
-// Append School Logo
-- (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex;
-
-// Rotation Manager
-- (void)rotate:(BOOL)ccw;
-
-// Outline
-- (NSArray<NSDictionary<NSString *, id> *> *)getOutline;
-
-// addBookmark
-- (void)addBookmark;
-
-- (void)findText;
-- (void)showSettings;
-- (void)toggleSlider:(BOOL)toggle;
-
-- (NSArray<NSString *> *)getThumbnails:(NSString *)fileName;
-
 
 @end
 

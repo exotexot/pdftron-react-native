@@ -110,17 +110,24 @@ NS_ASSUME_NONNULL_END
         return NO;
     }
     
-    [self.pdfViewCtrl DocLockReadWithBlock:^(PTPDFDoc * _Nullable doc) {
-        if (![annotation IsValid]) {
-            return;
+    BOOL showMenu = YES;
+    if (annotation) {
+        if ([self.delegate respondsToSelector:@selector(rnt_documentViewController:
+                                                        filterMenuItemsForAnnotationSelectionMenu:
+                                                        forAnnotation:)]) {
+            showMenu = [self.delegate rnt_documentViewController:self
+                       filterMenuItemsForAnnotationSelectionMenu:menuController
+                                                   forAnnotation:annotation];
         }
-        
-        if ([self.delegate respondsToSelector:@selector(rnt_documentViewController:filterMenuItemsForAnnotationSelectionMenu:)]) {
-            [self.delegate rnt_documentViewController:self filterMenuItemsForAnnotationSelectionMenu:menuController];
+    } else {
+        if ([self.delegate respondsToSelector:@selector(rnt_documentViewController:
+                                                        filterMenuItemsForLongPressMenu:)]) {
+            showMenu = [self.delegate rnt_documentViewController:self
+                                 filterMenuItemsForLongPressMenu:menuController];
         }
-    } error:nil];
+    }
     
-    return YES;
+    return showMenu;
 }
 
 - (BOOL)toolManager:(PTToolManager *)toolManager shouldHandleLinkAnnotation:(PTAnnot *)annotation orLinkInfo:(PTLinkInfo *)linkInfo onPageNumber:(unsigned long)pageNumber
@@ -173,16 +180,19 @@ NS_ASSUME_NONNULL_END
     else if (!self.local && !self.documentLoaded && self.needsRemoteDocumentLoaded) {
         self.needsDocumentLoaded = YES;
     }
+    else if (!self.local && !self.documentLoaded && self.coordinatedDocument.fileURL) {
+        self.needsDocumentLoaded = YES;
+    }
 }
 
-//- (void)pdfViewCtrl:(PTPDFViewCtrl *)pdfViewCtrl downloadEventType:(PTDownloadedType)type pageNumber:(int)pageNum
-//{
-//    if (type == e_ptdownloadedtype_finished && !self.documentLoaded) {
-//        self.needsRemoteDocumentLoaded = YES;
-//    }
-//
-//    [super pdfViewCtrl:pdfViewCtrl downloadEventType:type pageNumber:pageNum];
-//}
+- (void)pdfViewCtrl:(PTPDFViewCtrl *)pdfViewCtrl downloadEventType:(PTDownloadedType)type pageNumber:(int)pageNum message:(NSString *)message
+{
+    if (type == e_ptdownloadedtype_finished && !self.documentLoaded) {
+        self.needsRemoteDocumentLoaded = YES;
+    }
+    
+    [super pdfViewCtrl:pdfViewCtrl downloadEventType:type pageNumber:pageNum message:message];
+}
 
 - (void)pdfViewCtrl:(PTPDFViewCtrl *)pdfViewCtrl pdfScrollViewDidZoom:(UIScrollView *)scrollView
 {
@@ -205,18 +215,6 @@ NS_ASSUME_NONNULL_END
 {
     [bookmarkViewController dismissViewControllerAnimated:YES completion:nil];
 }
-
-
-
-#pragma mark - Custom Functions
-
-- (void)pdfViewCtrl:(PTPDFViewCtrl *)pdfViewCtrl pdfScrollViewTap:(UITapGestureRecognizer *)gestureRecognizer
-{
-//    NSLog(@"OK TEST222");
-}
-
-
-
 
 
 @end

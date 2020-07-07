@@ -14,6 +14,7 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.pdftron.common.PDFNetException;
+import com.pdftron.pdf.utils.PdfViewCtrlSettingsManager;
 import com.pdftron.reactnative.views.DocumentView;
 
 public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
@@ -176,6 +177,16 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
         documentView.setAnnotationMenuItems(items);
     }
 
+    @ReactProp(name = "longPressMenuItems")
+    public void setLongPressMenuItems(DocumentView documentView, @NonNull ReadableArray items) {
+        documentView.setLongPressMenuItems(items);
+    }
+    
+    @ReactProp(name = "hideAnnotationMenu")
+    public void setHideAnnotationMenu(DocumentView documentView, @NonNull ReadableArray tools) {
+        documentView.setHideAnnotationMenu(tools);
+    }
+
     @ReactProp(name = "pageChangeOnTap")
     public void setPageChangeOnTap(DocumentView documentView, boolean pageChangeOnTap) {
         documentView.setPageChangeOnTap(pageChangeOnTap);
@@ -196,9 +207,19 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
         documentView.setOverrideAnnotationMenuBehavior(items);
     }
 
+    @ReactProp(name = "overrideLongPressMenuBehavior")
+    public void setOverrideLongPressMenuBehavior(DocumentView documentView, @NonNull ReadableArray items) {
+        documentView.setOverrideLongPressMenuBehavior(items);
+    }
+
     @ReactProp(name = "overrideBehavior")
     public void setOverrideBehavior(DocumentView documentView, @NonNull ReadableArray items) {
         documentView.setOverrideBehavior(items);
+    }
+
+    @ReactProp(name = "followSystemDarkMode")
+    public void setFollowSystemDarkMode(DocumentView documentView, boolean followSystem) {
+        PdfViewCtrlSettingsManager.setFollowSystemDarkMode(documentView.getContext(), followSystem);
     }
 
     public void importAnnotationCommand(int tag, String xfdfCommand, boolean initialLoad) throws PDFNetException {
