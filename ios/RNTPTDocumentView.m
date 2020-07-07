@@ -611,7 +611,13 @@ NS_ASSUME_NONNULL_END
     }
     else if ( [toolMode isEqualToString:@"AnnotationCreateDistanceMeasurement"]) {
         toolClass = [PTRulerCreate class];
-    }  
+    }
+    else if ( [toolMode isEqualToString:@"AnnotationCreatePerimeterMeasurement"]) {
+        toolClass = [PTPerimeterCreate class];
+    }
+    else if ( [toolMode isEqualToString:@"AnnotationCreateAreaMeasurement"]) {
+        toolClass = [PTAreaCreate class];
+    }
     
     // Adjustment - Apple Pencil and Eraser Tools
     else if ( [toolMode isEqualToString:@"ApplePencil"])
@@ -620,12 +626,11 @@ NS_ASSUME_NONNULL_END
             toolClass = [PTPencilDrawingCreate class];
         }
     }
-    else if ( [toolMode isEqualToString:@"AnnotationCreatePerimeterMeasurement"]) {
-        toolClass = [PTPerimeterCreate class];
+    else if ( [toolMode isEqualToString:@"Eraser"])
+    {
+        toolClass = [PTEraser class];
     }
-    else if ( [toolMode isEqualToString:@"AnnotationCreateAreaMeasurement"]) {
-        toolClass = [PTAreaCreate class];
-    }
+    
     if (toolClass) {
         PTTool *tool = [self.documentViewController.toolManager changeTool:toolClass];
         
