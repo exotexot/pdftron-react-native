@@ -40,6 +40,7 @@ import com.pdftron.pdf.PDFViewCtrl;
 import com.pdftron.pdf.Page;
 import com.pdftron.pdf.ViewChangeCollection;
 import com.pdftron.pdf.config.PDFViewCtrlConfig;
+import com.pdftron.pdf.config.ToolConfig;
 import com.pdftron.pdf.config.ToolManagerBuilder;
 import com.pdftron.pdf.config.ViewerConfig;
 import com.pdftron.pdf.controls.PdfViewCtrlTabFragment;
@@ -144,6 +145,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     private boolean mPadStatusBar;
 
     private boolean mAutoSaveEnabled = true;
+
+    private boolean mUseStylusAsPen = false;
 
     // collab
     private CollabManager mCollabManager;
@@ -356,6 +359,10 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
     public void setAutoSaveEnabled(boolean autoSaveEnabled) {
         mAutoSaveEnabled = autoSaveEnabled;
+    }
+
+    public void setUseStylusAsPen(boolean useStylusAsPen) {
+        mUseStylusAsPen = useStylusAsPen;
     }
 
     public void setCollabEnabled(boolean collabEnabled) {
@@ -590,6 +597,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             mode = ToolManager.ToolMode.CALLOUT_CREATE;
         } else if ("stampToolButton".equals(item) || "AnnotationCreateStamp".equals(item)) {
             mode = ToolManager.ToolMode.STAMPER;
+        } else if ("AnnotationCreateRubberStamp".equals(item)) {
+            mode = ToolManager.ToolMode.RUBBER_STAMPER;
         } else if ("AnnotationCreateDistanceMeasurement".equals(item)) {
             mode = ToolManager.ToolMode.RULER_CREATE;
         } else if ("AnnotationCreatePerimeterMeasurement".equals(item)) {
@@ -633,6 +642,10 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     private void checkQuickMenu(List<QuickMenuItem> menuItems, ArrayList<Object> keepList, List<QuickMenuItem> removeList) {
         for (QuickMenuItem item : menuItems) {
             int menuId = item.getItemId();
+            if (ToolConfig.getInstance().getToolModeByQMItemId(menuId) != null) {
+                // skip real annotation tools
+                return;
+            }
             String menuStr = convQuickMenuIdToString(menuId);
             if (!keepList.contains(menuStr)) {
                 removeList.add(item);
@@ -1176,6 +1189,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         getToolManager().addAnnotationModificationListener(mAnnotationModificationListener);
         getToolManager().addAnnotationsSelectionListener(mAnnotationsSelectionListener);
 
+        getToolManager().setStylusAsPen(mUseStylusAsPen);
+
         getPdfViewCtrlTabFragment().addQuickMenuListener(mQuickMenuListener);
 
         ActionUtils.getInstance().setActionInterceptCallback(mActionInterceptCallback);
@@ -1522,6 +1537,17 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             }
         }
         return false;
+    }
+
+    public boolean canExitViewer() {
+        PdfViewCtrlTabFragment currentFragment = getPdfViewCtrlTabFragment();
+        if (currentFragment.isAnnotationMode()) {
+            return false;
+        }
+        if (currentFragment.isSearchMode()) {
+            return false;
+        }
+        return true;
     }
 
     public PdfViewCtrlTabFragment getPdfViewCtrlTabFragment() {

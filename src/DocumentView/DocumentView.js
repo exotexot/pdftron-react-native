@@ -57,6 +57,7 @@ export default class DocumentView extends PureComponent {
     autoSaveEnabled: PropTypes.bool,
     pageChangeOnTap: PropTypes.bool,
     followSystemDarkMode: PropTypes.bool,
+    useStylusAsPen: PropTypes.bool,
     ...ViewPropTypes,
   };
 
@@ -217,6 +218,14 @@ export default class DocumentView extends PureComponent {
     const tag = findNodeHandle(this._viewerRef);
     if(tag != null) {
       return DocumentViewManager.setValueForFields(tag, fieldsMap);
+    }
+    return Promise.resolve();
+  }
+
+  canExitViewer = () => {
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.canExitViewer(tag);
     }
     return Promise.resolve();
   }

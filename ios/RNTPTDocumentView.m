@@ -56,6 +56,8 @@ NS_ASSUME_NONNULL_END
     _pageChangeOnTap = NO;
     _thumbnailViewEditingEnabled = YES;
     _selectAnnotationAfterCreation = YES;
+
+    _useStylusAsPen = YES;
 }
 
 -(instancetype)initWithFrame:(CGRect)frame
@@ -167,11 +169,10 @@ NS_ASSUME_NONNULL_END
         [self.documentViewController openDocumentWithPDFDoc:doc];
         
         [self applyLayoutMode];
+
+        // Adjustment custom Init function for better clearity
+        [self customInit];
     }
-    
-    
-    // Adjustment custom Init function for better clearity
-    [self customInit];
 }
 
 -(void)setDocument:(NSString *)document
@@ -476,7 +477,7 @@ NS_ASSUME_NONNULL_END
             }
             else if ([string isEqualToString:@"AnnotationCreateStamp"] ||
                      [string isEqualToString:@"stampToolButton"]) {
-                self.toolManager.stampAnnotationOptions.canCreate = value;
+                self.toolManager.imageStampAnnotationOptions.canCreate = value;
             }
             else if ([string isEqualToString:@"AnnotationCreateRectangle"] ||
                      [string isEqualToString:@"rectangleToolButton"]) {
@@ -560,7 +561,7 @@ NS_ASSUME_NONNULL_END
     }
     else if ( [toolMode isEqualToString:@"AnnotationCreateCallout"])
     {
-        // not supported
+        toolClass = [PTCalloutCreate class];
     }
     else if ( [toolMode isEqualToString:@"AnnotationCreateSignature"])
     {
@@ -580,7 +581,7 @@ NS_ASSUME_NONNULL_END
     }
     else if ( [toolMode isEqualToString:@"AnnotationCreateStamp"])
     {
-        // not implemented
+        toolClass = [PTImageStampCreate class];
     }
     else if ( [toolMode isEqualToString:@"AnnotationCreateRectangle"])
     {
@@ -597,6 +598,15 @@ NS_ASSUME_NONNULL_END
     else if ( [toolMode isEqualToString:@"AnnotationCreatePolygonCloud"])
     {
         toolClass = [PTCloudCreate class];
+    }
+    else if ( [toolMode isEqualToString:@"AnnotationCreateDistanceMeasurement"]) {
+        toolClass = [PTRulerCreate class];
+    }
+    else if ( [toolMode isEqualToString:@"AnnotationCreatePerimeterMeasurement"]) {
+        toolClass = [PTPerimeterCreate class];
+    }
+    else if ( [toolMode isEqualToString:@"AnnotationCreateAreaMeasurement"]) {
+        toolClass = [PTAreaCreate class];
     }
     
     // Adjustment - Apple Pencil and Eraser Tools
@@ -1136,6 +1146,13 @@ NS_ASSUME_NONNULL_END
     // Shows saved signatures.
     self.toolManager.showDefaultSignature = self.showSavedSignatures;
     
+    // Use Apple Pencil as a pen
+    Class pencilTool = [PTFreeHandCreate class];
+    if (@available(iOS 13.0, *)) {
+        pencilTool = [PTPencilDrawingCreate class];
+    }
+    self.toolManager.pencilTool = self.useStylusAsPen ? pencilTool : [PTPanTool class];
+
     // Disable UI elements.
     [self disableElementsInternal:self.disabledElements];
     
@@ -1262,6 +1279,15 @@ NS_ASSUME_NONNULL_END
     [self applyViewerSettings];
 }
 
+#pragma mark - Stylus
+
+- (void)setUseStylusAsPen:(BOOL)useStylusAsPen
+{
+    _useStylusAsPen = useStylusAsPen;
+
+    [self applyViewerSettings];
+}
+
 #pragma mark - Actions
 
 - (void)navButtonClicked
@@ -1300,7 +1326,7 @@ NS_ASSUME_NONNULL_END
         @"AnnotationCreateLine" : @(PTExtendedAnnotTypeLine),
         @"AnnotationCreateArrow" : @(PTExtendedAnnotTypeArrow),
         @"AnnotationCreatePolyline" : @(PTExtendedAnnotTypePolyline),
-        @"AnnotationCreateStamp" : @(PTExtendedAnnotTypeStamp),
+        @"AnnotationCreateStamp" : @(PTExtendedAnnotTypeImageStamp),
         @"AnnotationCreateRectangle" : @(PTExtendedAnnotTypeSquare),
         @"AnnotationCreateEllipse" : @(PTExtendedAnnotTypeCircle),
         @"AnnotationCreatePolygon" : @(PTExtendedAnnotTypePolygon),
@@ -1572,6 +1598,12 @@ NS_ASSUME_NONNULL_END
         @"Share": @"share",
         @"Read": @"read",
     };
+    NSArray<NSString *> *whitelist = @[
+        PTLocalizedString(@"Highlight", nil),
+        PTLocalizedString(@"Strikeout", nil),
+        PTLocalizedString(@"Underline", nil),
+        PTLocalizedString(@"Squiggly", nil),
+    ];
     // Get the localized title for each menu item.
     NSMutableDictionary<NSString *, NSString *> *localizedMap = [NSMutableDictionary dictionary];
     for (NSString *key in map) {
@@ -1590,7 +1622,10 @@ NS_ASSUME_NONNULL_END
             [permittedItems addObject:menuItem];
         }
         else {
-            if (menuItemId && [self.longPressMenuItems containsObject:menuItemId]) {
+            if ([whitelist containsObject:menuItem.title]) {
+                [permittedItems addObject:menuItem];
+            }
+            else if (menuItemId && [self.longPressMenuItems containsObject:menuItemId]) {
                 [permittedItems addObject:menuItem];
             }
         }

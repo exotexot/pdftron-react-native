@@ -157,6 +157,11 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
         documentView.setAutoSaveEnabled(autoSaveEnabled);
     }
 
+    @ReactProp(name = "useStylusAsPen")
+    public void setUseStylusAsPen(DocumentView documentView, boolean useStylusAsPen) {
+        documentView.setUseStylusAsPen(useStylusAsPen);
+    }
+
     @ReactProp(name = "collabEnabled")
     public void setCollabEnabled(DocumentView documentView, boolean collabEnabled) {
         documentView.setCollabEnabled(collabEnabled);
@@ -318,6 +323,15 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
             documentView.deleteAnnotations(annots);
         } else {
             throw new PDFNetException("", 0L, getName(), "deleteAnnotations", "Unable to find DocumentView.");
+        }
+    }
+
+    public boolean canExitViewer(int tag) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            return documentView.canExitViewer();
+        } else {
+            throw new PDFNetException("", 0L, getName(), "canExitViewer", "Unable to find DocumentView.");
         }
     }
 
