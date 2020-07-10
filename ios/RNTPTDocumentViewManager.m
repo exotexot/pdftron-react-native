@@ -671,6 +671,18 @@ RCT_CUSTOM_VIEW_PROPERTY(longPressMenuEnabled, BOOL, RNTPTDocumentView)
 
 
 
+- (int)currentPageForDocumentViewTag:(NSNumber *)tag
+{
+    RNTPTDocumentView *documentView = self.documentViews[tag];
+    if (documentView) {
+        return [documentView currentPage];
+    } else {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
+    }
+}
+
+
+
 
 #pragma mark - DocumentView attached/detached
 

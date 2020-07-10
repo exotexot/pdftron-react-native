@@ -36,21 +36,17 @@
 
 
 
+# pragma mark CAT EUROPE
 
-// Custom Search
 - (NSArray<NSDictionary<NSString *, NSString *> *> *)searchForDocumentViewTag:(NSNumber *)tag search:(NSString *)searchString case:(BOOL)isCase whole:(BOOL)isWhole;
 - (void)clearSearchForDocumentViewTag:(NSNumber *)tag;
 
-// Get Document Dimensions
 - (NSDictionary<NSString *, NSNumber *> *)getDimensionsForDocumentViewTag:(NSNumber *)tag;
 
-// Jump to Page
 - (void)jumpToForDocumentViewTag:(NSNumber *)tag jumpTo:(int)page_num;
 
-// SchoolLogo
 - (void)appendSchoolLogoForDocumentViewTag:(NSNumber *)tag appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex;
 
-// ROtate Manager
 - (void)rotateForDocumentViewTag:(NSNumber *)tag rotate:(BOOL)ccw;
 
 - (void)addBookmarkForDocumentViewTag:(NSNumber *)tag;
@@ -61,13 +57,11 @@
 
 - (void)toggleSliderForDocumentViewTag:(NSNumber *)tag toggle:(BOOL)toggle;
 
-
 - (NSArray<NSString *> *)getThumbnailsForDocumentViewTag:(NSNumber *)tag fileName:(NSString *)fileName;
 
-
-// Outline Manager
 - (NSArray<NSDictionary<NSString *, id> *> *)getOutlineForDocumentViewTag:(NSNumber *)tag;
 
+- (int)currentPageForDocumentViewTag:(NSNumber *)tag;
 
 
 

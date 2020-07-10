@@ -153,6 +153,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSArray<NSString *> *)getThumbnails:(NSString *)fileName;
 
+- (int)currentPage;
+
 
 @end
 
