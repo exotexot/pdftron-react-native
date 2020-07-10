@@ -288,7 +288,7 @@ export default class DocumentView extends PureComponent {
 
   // FindText
   findText = () => {
-    console.log("Search event triggered")
+    // console.log("Search event triggered")
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
       return DocumentViewManager.findText(tag);
@@ -298,7 +298,7 @@ export default class DocumentView extends PureComponent {
 
   // FindText
   showSettings = () => {
-    console.log("Search event triggered")
+    // console.log("Search event triggered")
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
       return DocumentViewManager.showSettings(tag);
@@ -319,7 +319,7 @@ export default class DocumentView extends PureComponent {
 
   // jumpTo
   jumpTo = (page) => {
-    console.log("Jump event triggered")
+    // console.log("Jump event triggered")
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
       return DocumentViewManager.jumpTo(tag, page);
@@ -329,7 +329,7 @@ export default class DocumentView extends PureComponent {
 
   // Append School Logo
   appendSchoolLogo = (base64String, duplex) => {
-    console.log("Append School Logo event triggered")
+    // console.log("Append School Logo event triggered")
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
       return DocumentViewManager.appendSchoolLogo(tag, base64String, duplex);
@@ -340,7 +340,7 @@ export default class DocumentView extends PureComponent {
 
   // Rotate manager
   rotate = (ccw) => {
-    console.log("Rotate Page event triggered")
+    // console.log("Rotate Page event triggered")
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
       return DocumentViewManager.rotate(tag, ccw);
@@ -351,7 +351,7 @@ export default class DocumentView extends PureComponent {
 
   // get Outline
   getOutline = () => {
-    console.log("Outline event triggered")
+    // console.log("Outline event triggered")
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
       return DocumentViewManager.getOutline(tag);
@@ -362,7 +362,7 @@ export default class DocumentView extends PureComponent {
 
   // Bookmark 
   addBookmark = () => {
-    console.log("Outline event triggered")
+    // console.log("Outline event triggered")
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
       return DocumentViewManager.addBookmark(tag);
@@ -373,7 +373,7 @@ export default class DocumentView extends PureComponent {
 
   // Slider Toggle 
   toggleSlider = (bool) => {
-    console.log("Show Slider event triggered")
+    // console.log("Show Slider event triggered")
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
       return DocumentViewManager.toggleSlider(tag, bool);
@@ -384,7 +384,7 @@ export default class DocumentView extends PureComponent {
 
   // Thumbnails Test 
   getThumbnails = (fileName) => {
-    console.log("Thumbnails event triggered")
+    // console.log("Thumbnails event triggered")
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
       return DocumentViewManager.getThumbnails(tag, fileName);
