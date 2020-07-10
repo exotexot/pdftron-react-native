@@ -407,4 +407,22 @@ RCT_REMAP_METHOD(getThumbnails,
 }
 
 
+// CurrentPage
+RCT_REMAP_METHOD(currentPage,
+                 currentPageForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        
+        NSNumber *page = [NSNumber numberWithInt:[[self documentViewManager] currentPageForDocumentViewTag:tag]];
+        resolve(page);
+    }
+    @catch (NSException *exception) {
+        reject(@"rotate_failed", @"CURRENT PAGE FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+
+
 @end

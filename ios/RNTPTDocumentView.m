@@ -2358,6 +2358,11 @@ NS_ASSUME_NONNULL_END
     [bookmarks addBookmark:thisBookmark forDoc:pdfDoc];
 }
 
+- (int)currentPage
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    return [pdfViewCtrl GetCurrentPage];
+}
 
 
 @end
