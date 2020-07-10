@@ -364,7 +364,15 @@ export default class DocumentView extends PureComponent {
   }
 
 
-
+  // Current Page Test 
+  currentPage = () => {
+    // console.log("Current event triggered")
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.currentPage(tag);
+    }
+    return Promise.resolve();
+  }
 
 
 
