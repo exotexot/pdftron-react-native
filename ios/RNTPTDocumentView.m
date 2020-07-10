@@ -1887,6 +1887,9 @@ NS_ASSUME_NONNULL_END
 
 
 
+
+
+
 - (NSArray<NSString *> *)getThumbnails:(NSString *)fileName
 {
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
@@ -1895,52 +1898,105 @@ NS_ASSUME_NONNULL_END
     NSMutableArray *thumbnails = [NSMutableArray new];
     int pageCount = [pdfDoc GetPageCount];
     
-    NSError *error = nil;
+    
     
     for(int pageNumber = 1; pageNumber <= pageCount; pageNumber++ ) {
 
-        [pdfViewCtrl DocLockReadWithBlock:^(PTPDFDoc * _Nullable doc) {
+        NSLog(@"loop # %i", pageNumber);
 
-            PTPDFDraw* draw = [[PTPDFDraw alloc] initWithDpi:72];
-            PTPage* page = [doc GetPage:pageNumber];
+        [pdfViewCtrl GetThumbAsync:pageNumber];
+        
 
-            // First, we need to save the document to the apps sandbox.
-            NSString *name = [NSString stringWithFormat:@"%@-%i.png", fileName, pageNumber];
-            NSString* fullFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:name];
-
-            [draw SetImageSize:200 height:300 preserve_aspect_ratio:false];
-            [draw Export:page filename:fullFileName format:@"png"];
-
-            [thumbnails addObject:fullFileName];
-
-        } error:&error];
-
-    }
+    };
     
     
+    for(int pageNumber = 1; pageNumber <= pageCount; pageNumber++ ) {
+        
+        UIImage *img = [UIImage new];
+        
+        NSLog(@"size: %i", img.size.width);
+
+    };
+    
+    
+    
+
+    NSLog(@"finished %@", thumbnails);
+    
+    return thumbnails;
+}
+
+
+
+
+
+
+
+
+// BacKUP
+
+//
+//- (NSArray<NSString *> *)getThumbnails:(NSString *)fileName
+//{
+//    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+//    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+//
+//    NSMutableArray *thumbnails = [NSMutableArray new];
+//    int pageCount = [pdfDoc GetPageCount];
+//
+//    NSError *error = nil;
+//
 //    for(int pageNumber = 1; pageNumber <= pageCount; pageNumber++ ) {
 //
-//        NSLog(@"loop # %i", pageNumber);
+//        [pdfViewCtrl DocLockReadWithBlock:^(PTPDFDoc * _Nullable doc) {
 //
-//        [pdfViewCtrl GetThumbAsync:pageNumber completion:^(UIImage *thumb) {
-//            [thumbnails addObject:@"TEST"];
+//            PTPDFDraw* draw = [[PTPDFDraw alloc] initWithDpi:72];
+//            PTPage* page = [doc GetPage:pageNumber];
 //
-//            NSLog(@"Image %d %f %f", pageNumber, thumb.size.width, thumb.size.height); // This will be successfully executed.
+//            // First, we need to save the document to the apps sandbox.
+//            NSString *name = [NSString stringWithFormat:@"%@-%i.png", fileName, pageNumber];
+//            NSString* fullFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:name];
 //
-//            if (pageNumber == pageCount) {
-//                NSLog(@"finished %@", thumbnails);
-////                return thumbnails;
-//            }
-////
-//        }];
+//            [draw SetImageSize:200 height:300 preserve_aspect_ratio:false];
+//            [draw Export:page filename:fullFileName format:@"png"];
+//
+//            [thumbnails addObject:fullFileName];
+//
+//        } error:&error];
 //
 //    }
 //
 //
-//    NSLog(@"finished %@", thumbnails);
-    
-    return thumbnails;
-}
+////    for(int pageNumber = 1; pageNumber <= pageCount; pageNumber++ ) {
+////
+////        NSLog(@"loop # %i", pageNumber);
+////
+////        [pdfViewCtrl GetThumbAsync:pageNumber completion:^(UIImage *thumb) {
+////            [thumbnails addObject:@"TEST"];
+////
+////            NSLog(@"Image %d %f %f", pageNumber, thumb.size.width, thumb.size.height); // This will be successfully executed.
+////
+////            if (pageNumber == pageCount) {
+////                NSLog(@"finished %@", thumbnails);
+//////                return thumbnails;
+////            }
+//////
+////        }];
+////
+////    }
+////
+////
+////    NSLog(@"finished %@", thumbnails);
+//
+//    return thumbnails;
+//}
+
+
+
+
+
+
+
 
 
 
