@@ -18,6 +18,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)pageChanged:(RNTPTDocumentView *)sender previousPageNumber:(int)previousPageNumber;
 - (void)zoomChanged:(RNTPTDocumentView *)sender zoom:(double)zoom;
 
+
+- (void)thumbnailCreated:(RNTPTDocumentView *)sender page:(int)page base64String:(NSString *)base64String;
+
+
+
+
 - (void)annotationsSelected:(RNTPTDocumentView *)sender annotations:(NSArray<NSDictionary<NSString *, id> *> *)annotations;
 
 - (void)annotationChanged:(RNTPTDocumentView *)sender annotation:(NSDictionary *)annotation action:(NSString *)action;
@@ -151,7 +157,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)showSettings;
 - (void)toggleSlider:(BOOL)toggle;
 
-- (NSArray<NSString *> *)getThumbnails:(NSString *)fileName;
+- (void)getThumbnails;
 
 - (int)currentPage;
 

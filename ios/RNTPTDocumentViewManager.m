@@ -337,6 +337,21 @@ RCT_CUSTOM_VIEW_PROPERTY(longPressMenuEnabled, BOOL, RNTPTDocumentView)
     }
 }
 
+
+
+- (void)thumbnailCreated:(RNTPTDocumentView *)sender page:(int)page base64String:(NSString *)base64String
+{
+    if (sender.onChange) {
+        sender.onChange(@{
+            @"onThumbnailCreated": @"onThumbnailCreated",
+            @"page": @(page),
+            @"base64String": base64String,
+        });
+    }
+}
+
+
+
 - (void)zoomChanged:(RNTPTDocumentView *)sender zoom:(double)zoom
 {
     if (sender.onChange) {
@@ -659,11 +674,11 @@ RCT_CUSTOM_VIEW_PROPERTY(longPressMenuEnabled, BOOL, RNTPTDocumentView)
 }
 
 
-- (NSArray<NSString *> *)getThumbnailsForDocumentViewTag:(NSNumber *)tag fileName:(NSString *)fileName
+- (void)getThumbnailsForDocumentViewTag:(NSNumber *)tag
 {
     RNTPTDocumentView *documentView = self.documentViews[tag];
     if (documentView) {
-        return [documentView getThumbnails:fileName];
+        return [documentView getThumbnails];
     } else {
         @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
     }

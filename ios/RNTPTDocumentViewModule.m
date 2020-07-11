@@ -390,21 +390,22 @@ RCT_REMAP_METHOD(addBookmark,
 }
 
 
+
 // Thumbnails
 RCT_REMAP_METHOD(getThumbnails,
                  getThumbnailsForDocumentViewTag:(nonnull NSNumber *)tag
-                 fileName:(NSString *)fileName
                  resolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     @try {
-        NSArray *thumbs = [[self documentViewManager] getThumbnailsForDocumentViewTag:tag fileName:fileName];
-        resolve(thumbs);
+        [[self documentViewManager] getThumbnailsForDocumentViewTag:tag];
+        resolve(nil);
     }
     @catch (NSException *exception) {
         reject(@"rotate_failed", @"ROTATE PAGE FAILED MISERABLY", [self errorFromException:exception]);
     }
 }
+
 
 
 // CurrentPage

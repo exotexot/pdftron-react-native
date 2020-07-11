@@ -1803,6 +1803,8 @@ NS_ASSUME_NONNULL_END
     }
 }
 
+
+
 - (void)toolManagerDidAddAnnotationWithNotification:(NSNotification *)notification
 {
     if (notification.object != self.documentViewController.toolManager) {
@@ -1976,40 +1978,33 @@ NS_ASSUME_NONNULL_END
 
 
 
-- (NSArray<NSString *> *)getThumbnails:(NSString *)fileName
+- (void)getThumbnails
 {
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
     
     NSMutableArray *thumbnails = [NSMutableArray new];
     int pageCount = [pdfDoc GetPageCount];
-    
-    
-    
+
     for(int pageNumber = 1; pageNumber <= pageCount; pageNumber++ ) {
 
-        NSLog(@"loop # %i", pageNumber);
+        [pdfViewCtrl GetThumbAsync:pageNumber completion:^(UIImage *thumb) {
+//            [thumbnails addObject:@"TEST"];
+//            NSLog(@"Image %d %f %f", pageNumber, thumb.size.width, thumb.size.height); // This will be successfully executed.
+//
+//
+            NSData *data = UIImagePNGRepresentation(thumb);
+            NSString *base64Str = [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+            
+            // Notify delegate of change.
 
-        [pdfViewCtrl GetThumbAsync:pageNumber];
-        
+            [self.delegate thumbnailCreated:self page:pageNumber base64String:base64Str];
+                        
+            
+        }];
 
     };
     
-    
-    for(int pageNumber = 1; pageNumber <= pageCount; pageNumber++ ) {
-        
-        UIImage *img = [UIImage new];
-        
-        NSLog(@"size: %i", img.size.width);
-
-    };
-    
-    
-    
-
-    NSLog(@"finished %@", thumbnails);
-    
-    return thumbnails;
 }
 
 
@@ -2389,7 +2384,7 @@ NS_ASSUME_NONNULL_END
     
     NSArray *test = [[NSArray alloc] initWithArray:[self PrintOutlineTree:root outlineArr:outline]];
 
-    NSLog(@"Final array %@", [test copy]);
+//    NSLog(@"Final array %@", [test copy]);
 
     return [outline copy];
 }

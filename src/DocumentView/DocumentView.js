@@ -61,6 +61,7 @@ export default class DocumentView extends PureComponent {
     pageChangeOnTap: PropTypes.bool,
     followSystemDarkMode: PropTypes.bool,
     useStylusAsPen: PropTypes.bool,
+    onThumbnailCreated: PropTypes.func,
     ...ViewPropTypes,
   };
 
@@ -155,6 +156,21 @@ export default class DocumentView extends PureComponent {
         });
       }
     }
+
+
+    else if (event.nativeEvent.onThumbnailCreated) {
+      if (this.props.onThumbnailCreated) {
+        this.props.onThumbnailCreated({
+          'page': event.nativeEvent.page,
+          'base64String': event.nativeEvent.base64String,
+        });
+      }
+    }
+
+
+
+
+
   }
 
   setToolMode = (toolMode) => {
@@ -391,17 +407,15 @@ export default class DocumentView extends PureComponent {
 
 
   // Thumbnails Test 
-  getThumbnails = (fileName) => {
+  getThumbnails = () => {
     // console.log("Thumbnails event triggered")
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
-      return DocumentViewManager.getThumbnails(tag, fileName);
+      return DocumentViewManager.getThumbnails(tag);
     }
     return Promise.resolve();
   }
   
-
-
 
 
 
