@@ -281,7 +281,7 @@ RCT_REMAP_METHOD(toggleSlider,
         resolve(nil);
     }
     @catch (NSException *exception) {
-        reject(@"rotate_failed", @"ROTATE PAGE FAILED MISERABLY", [self errorFromException:exception]);
+        reject(@"rotate_failed", @"TOGGLE SLIDER PAGE FAILED MISERABLY", [self errorFromException:exception]);
     }
 }
 
@@ -402,7 +402,7 @@ RCT_REMAP_METHOD(getThumbnails,
         resolve(nil);
     }
     @catch (NSException *exception) {
-        reject(@"rotate_failed", @"ROTATE PAGE FAILED MISERABLY", [self errorFromException:exception]);
+        reject(@"rotate_failed", @"THUMBNAILS FAILED MISERABLY", [self errorFromException:exception]);
     }
 }
 
@@ -423,6 +423,8 @@ RCT_REMAP_METHOD(currentPage,
         reject(@"rotate_failed", @"CURRENT PAGE FAILED MISERABLY", [self errorFromException:exception]);
     }
 }
+
+
 
 
 
