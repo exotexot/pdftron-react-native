@@ -57,7 +57,7 @@
 
 - (void)toggleSliderForDocumentViewTag:(NSNumber *)tag toggle:(BOOL)toggle;
 
-- (NSArray<NSString *> *)getThumbnailsForDocumentViewTag:(NSNumber *)tag fileName:(NSString *)fileName;
+- (void)getThumbnailsForDocumentViewTag:(NSNumber *)tag;
 
 - (NSArray<NSDictionary<NSString *, id> *> *)getOutlineForDocumentViewTag:(NSNumber *)tag;
 
