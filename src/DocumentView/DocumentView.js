@@ -59,6 +59,7 @@ export default class DocumentView extends PureComponent {
     followSystemDarkMode: PropTypes.bool,
     useStylusAsPen: PropTypes.bool,
     onThumbnailCreated: PropTypes.func,
+    onToggleSidebar: PropTypes.func,
     ...ViewPropTypes,
   };
 
@@ -138,6 +139,13 @@ export default class DocumentView extends PureComponent {
           'page': event.nativeEvent.page,
           'base64String': event.nativeEvent.base64String,
         });
+      }
+    }
+
+
+    else if (event.nativeEvent.onToggleSidebar) {
+      if (this.props.onToggleSidebar) {
+        this.props.onToggleSidebar();
       }
     }
 
