@@ -407,6 +407,19 @@ RCT_REMAP_METHOD(getThumbnail,
     }
 }
 
+RCT_REMAP_METHOD(abortGetThumbnail,
+                 abortGetThumbnailForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] abortGetThumbnailForDocumentViewTag:tag];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"rotate_failed", @"THUMBNAILS FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
 
 
 // CurrentPage

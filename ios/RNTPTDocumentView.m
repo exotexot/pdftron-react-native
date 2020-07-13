@@ -2046,7 +2046,7 @@ static NSMutableArray* globalSearchResults;
                     @"page": [NSNumber numberWithInt:[result GetPageNumber]],
                     @"ambient": [result GetAmbientString]
                  };
-                NSLog(@"%@", oneSearchResult);
+//                NSLog(@"%@", oneSearchResult);
                 
                 [searchResults addObject: oneSearchResult];
             }
@@ -2057,9 +2057,6 @@ static NSMutableArray* globalSearchResults;
             
             while ( [hlts HasNext] )
             {
-                NSLog(@"The current highlight is from page: %d", [hlts GetCurrentPageNumber]);
-                
-                PTPage *cur_page = [pdfDoc GetPage: [hlts GetCurrentPageNumber]];
                 PTVectorQuadPoint *quads = [hlts GetCurrentQuads];
                 int i = 0;
                 for ( ; i < [quads size]; ++i )
