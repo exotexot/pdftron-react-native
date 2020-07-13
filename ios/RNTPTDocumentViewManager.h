@@ -55,9 +55,10 @@
 
 - (void)showSettingsForDocumentViewTag:(NSNumber *)tag;
 
-- (void)toggleSliderForDocumentViewTag:(NSNumber *)tag toggle:(BOOL)toggle;
+- (void)toggleSliderForDocumentViewTag:(NSNumber *)tag toggleSlider:(BOOL)toggle;
 
-- (void)getThumbnailsForDocumentViewTag:(NSNumber *)tag;
+- (void)getThumbnailForDocumentViewTag:(NSNumber *)tag getThumbnail:(int)pageNumber;
+- (void)abortGetThumbnailForDocumentViewTag:(NSNumber *)tag;
 
 - (NSArray<NSDictionary<NSString *, id> *> *)getOutlineForDocumentViewTag:(NSNumber *)tag;
 

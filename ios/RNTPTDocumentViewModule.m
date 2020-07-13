@@ -277,7 +277,7 @@ RCT_REMAP_METHOD(toggleSlider,
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     @try {
-        [[self documentViewManager] toggleSliderForDocumentViewTag:tag toggle:toggle];
+        [[self documentViewManager] toggleSliderForDocumentViewTag:tag toggleSlider:toggle];
         resolve(nil);
     }
     @catch (NSException *exception) {
@@ -392,13 +392,14 @@ RCT_REMAP_METHOD(addBookmark,
 
 
 // Thumbnails
-RCT_REMAP_METHOD(getThumbnails,
-                 getThumbnailsForDocumentViewTag:(nonnull NSNumber *)tag
+RCT_REMAP_METHOD(getThumbnail,
+                 getThumbnailForDocumentViewTag:(nonnull NSNumber *)tag
+                 pageNumber:(int)pageNumber
                  resolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     @try {
-        [[self documentViewManager] getThumbnailsForDocumentViewTag:tag];
+        [[self documentViewManager] getThumbnailForDocumentViewTag:tag getThumbnail:pageNumber];
         resolve(nil);
     }
     @catch (NSException *exception) {

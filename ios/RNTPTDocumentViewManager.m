@@ -660,7 +660,7 @@ RCT_CUSTOM_VIEW_PROPERTY(overrideLongPressMenuBehavior, NSArray, RNTPTDocumentVi
 }
 
 
-- (void)toggleSliderForDocumentViewTag:(NSNumber *)tag toggle:(BOOL)toggle
+- (void)toggleSliderForDocumentViewTag:(NSNumber *)tag toggleSlider:(BOOL)toggle
 {
     RNTPTDocumentView *documentView = self.documentViews[tag];
     if (documentView) {
@@ -671,11 +671,21 @@ RCT_CUSTOM_VIEW_PROPERTY(overrideLongPressMenuBehavior, NSArray, RNTPTDocumentVi
 }
 
 
-- (void)getThumbnailsForDocumentViewTag:(NSNumber *)tag
+- (void)getThumbnailForDocumentViewTag:(NSNumber *)tag getThumbnail:(int)pageNumber
 {
     RNTPTDocumentView *documentView = self.documentViews[tag];
     if (documentView) {
-        return [documentView getThumbnails];
+        return [documentView getThumbnail:pageNumber];
+    } else {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
+    }
+}
+
+- (void)abortGetThumbnailForDocumentViewTag:(NSNumber *)tag
+{
+    RNTPTDocumentView *documentView = self.documentViews[tag];
+    if (documentView) {
+        return [documentView abortGetThumbnail];
     } else {
         @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
     }
