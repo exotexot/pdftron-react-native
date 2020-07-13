@@ -103,6 +103,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign, getter=isLongPressMenuEnabled) BOOL longPressMenuEnabled;
 
+
+
 #pragma mark - Methods
 
 - (void)setToolMode:(NSString *)toolMode;
@@ -154,7 +156,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)showSettings;
 - (void)toggleSlider:(BOOL)toggle;
 
-- (void)getThumbnails;
+- (void)getThumbnail:(int)pageNumber;
+- (void)abortGetThumbnail;
 
 - (int)currentPage;
 

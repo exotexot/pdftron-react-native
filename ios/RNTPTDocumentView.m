@@ -41,6 +41,10 @@ NS_ASSUME_NONNULL_END
 
 @implementation RNTPTDocumentView
 
+static NSMutableArray* globalSearchResults;
+
+
+
 - (void)RNTPTDocumentView_commonInit
 {
     _topToolbarEnabled = YES;
@@ -1992,88 +1996,57 @@ NS_ASSUME_NONNULL_END
     self.documentViewController.navigationController.navigationBar.translucent = YES;
     self.documentViewController.thumbnailSliderController.toolbar.translucent = YES;
     
+    globalSearchResults = [NSMutableArray array];
+    
+    
     
     // Custom Sidebar Button
     
+//    NSString * strEncodeData = @"data:image/png;base64,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";
+//
+//    NSData *data = [[NSData alloc] initWithBase64EncodedString:strEncodeData options:NSDataBase64DecodingIgnoreUnknownCharacters];
+//
+//
+//
+//
+//    UIImage *navImage = [UIImage imageWithData:data];
+//    UIBarButtonItem *sidebarButton = [[UIBarButtonItem alloc] initWithImage:navImage
+//                                                              style:UIBarButtonItemStylePlain
+//                                                              target:self
+//                                                              action:@selector(toggleSidebar)];
     
 
-    
-    
-       
-          
-    NSString * strEncodeData = @"data:image/png;base64,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";
-    
-    NSData *data = [[NSData alloc] initWithBase64EncodedString:strEncodeData options:NSDataBase64DecodingIgnoreUnknownCharacters];
-
-    
-    
-    
-    UIImage *navImage = [UIImage imageWithData:data];
-    UIBarButtonItem *sidebarButton = [[UIBarButtonItem alloc] initWithImage:navImage
-                                                              style:UIBarButtonItemStylePlain
-                                                              target:self
-                                                              action:@selector(toggleSidebar)];
-    
-    
-    
-    
-    UIBarButtonItem *testButton = [[UIBarButtonItem alloc] initWithTitle:@"TEST" style:UIBarButtonItemStylePlain target:self action:@selector(toggleSidebar)];
+    UIBarButtonItem *testButton = [[UIBarButtonItem alloc] initWithTitle:@"SIDEBAR" style:UIBarButtonItemStylePlain target:self action:@selector(toggleSidebar)];
     self.documentViewController.thumbnailSliderController.leadingToolbarItem = testButton;
-
-    
-    
-    
 }
 
 
 
 
-
-
-
-
-
-- (void)getThumbnails
+- (void)getThumbnail:(int)pageNumber
 {
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
-    
     int pageCount = [pdfDoc GetPageCount];
-
-    for(int pageNumber = 1; pageNumber <= pageCount; pageNumber++ ) {
-
-        [pdfViewCtrl GetThumbAsync:pageNumber completion:^(UIImage *thumb) {
-            NSData *data = UIImagePNGRepresentation(thumb);
-            NSString *base64Str = [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
-            [self.delegate thumbnailCreated:self page:pageNumber base64String:base64Str];
-        }];
-
-    };
     
+    if (pageNumber > pageCount) return;
+    
+    [pdfViewCtrl GetThumbAsync:pageNumber completion:^(UIImage *thumb) {
+        NSData *data = UIImagePNGRepresentation(thumb);
+        NSString *base64Str = [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+        [self.delegate thumbnailCreated:self page:pageNumber base64String:base64Str];
+    }];
 }
 
 
 
+- (void)abortGetThumbnail
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    [pdfViewCtrl CancelAllThumbRequests];
+}
 
 
-//- (void)toggleSidebar
-//{
-//    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
-//    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
-//
-//    int pageCount = [pdfDoc GetPageCount];
-//
-//    for(int pageNumber = 1; pageNumber <= pageCount; pageNumber++ ) {
-//
-//        [pdfViewCtrl GetThumbAsync:pageNumber completion:^(UIImage *thumb) {
-//            NSData *data = UIImagePNGRepresentation(thumb);
-//            NSString *base64Str = [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
-//            [self.delegate thumbnailCreated:self page:pageNumber base64String:base64Str];
-//        }];
-//
-//    };
-//
-//}
 
 
 
@@ -2156,6 +2129,9 @@ NS_ASSUME_NONNULL_END
 
                     int toPage = [hlts GetCurrentPageNumber];
                     [pdfViewCtrl addFloatingView:view toPage:toPage withPageRect:rect noZoom:NO];
+                    
+                    [globalSearchResults addObject:view];
+                
                 }
                 [hlts Next];
             }
@@ -2163,7 +2139,7 @@ NS_ASSUME_NONNULL_END
             moreToFind = [result IsFound];
         }
     }
-    
+        
     return [searchResults copy];
 }
 
@@ -2172,7 +2148,7 @@ NS_ASSUME_NONNULL_END
 - (void)clearSearch
 {
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
-    [pdfViewCtrl clearFloatingViews];
+    [pdfViewCtrl removeFloatingViews:globalSearchResults];
 }
 
 
@@ -2199,6 +2175,7 @@ NS_ASSUME_NONNULL_END
     
 //    BOOL sliderHidden = [docViewCtrl isThumbnailSliderHidden];
 //    NSLog(@"SLIDER HIDDEN %d", sliderHidden);
+
     
     if (toggle) {
         [docViewCtrl setThumbnailSliderHidden:NO animated:YES];
@@ -2206,6 +2183,10 @@ NS_ASSUME_NONNULL_END
         [docViewCtrl setThumbnailSliderHidden:YES animated:YES];
     }
 }
+
+
+
+
 
 
 
@@ -2397,21 +2378,6 @@ NS_ASSUME_NONNULL_END
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
     return [pdfViewCtrl GetCurrentPage];
 }
-
-
-@end
-
-
-
-
-
-
-
-
-@interface PTCustomStickyNote : PTFreeTextCreate
-    
-    
-    
 
 
 @end
