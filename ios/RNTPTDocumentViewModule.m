@@ -389,8 +389,6 @@ RCT_REMAP_METHOD(addBookmark,
     }
 }
 
-
-
 // Thumbnails
 RCT_REMAP_METHOD(getThumbnail,
                  getThumbnailForDocumentViewTag:(nonnull NSNumber *)tag
@@ -399,11 +397,16 @@ RCT_REMAP_METHOD(getThumbnail,
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     @try {
-        [[self documentViewManager] getThumbnailForDocumentViewTag:tag getThumbnail:pageNumber];
-        resolve(nil);
+        [[self documentViewManager] getThumbnailForDocumentViewTag:tag getThumbnail:pageNumber completionHandler:^(NSString * _Nullable base64String) {
+                   if (base64String) {
+                       resolve(base64String);
+                   } else {
+                       reject(@"thumbnail_failed", @"Failed to get thumbnail", nil);
+                   }
+               }];
     }
     @catch (NSException *exception) {
-        reject(@"rotate_failed", @"THUMBNAILS FAILED MISERABLY", [self errorFromException:exception]);
+        reject(@"thumbnail_failed", @"THUMBNAILS FAILED MISERABLY", [self errorFromException:exception]);
     }
 }
 
@@ -417,7 +420,7 @@ RCT_REMAP_METHOD(abortGetThumbnail,
         resolve(nil);
     }
     @catch (NSException *exception) {
-        reject(@"rotate_failed", @"THUMBNAILS FAILED MISERABLY", [self errorFromException:exception]);
+        reject(@"abort_get_thumb", @"ABORT THUMBNAILS FAILED MISERABLY", [self errorFromException:exception]);
     }
 }
 

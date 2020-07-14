@@ -156,7 +156,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)showSettings;
 - (void)toggleSlider:(BOOL)toggle;
 
-- (void)getThumbnail:(int)pageNumber;
+- (void)getThumbnail:(int)pageNumber completionHandler:(void (^)(NSString * _Nullable base64String))completionHandler;
+
 - (void)abortGetThumbnail;
 
 - (int)currentPage;

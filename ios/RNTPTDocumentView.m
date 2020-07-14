@@ -2007,23 +2007,18 @@ static NSMutableArray* globalSearchResults;
 //    NSData *data = [[NSData alloc] initWithBase64EncodedString:strEncodeData options:NSDataBase64DecodingIgnoreUnknownCharacters];
 //
 //
-//
-//
 //    UIImage *navImage = [UIImage imageWithData:data];
-//    UIBarButtonItem *sidebarButton = [[UIBarButtonItem alloc] initWithImage:navImage
-//                                                              style:UIBarButtonItemStylePlain
-//                                                              target:self
-//                                                              action:@selector(toggleSidebar)];
+//    UIBarButtonItem *testButton = [[UIBarButtonItem alloc] initWithImage:navImage landscapeImagePhone:navImage style:UIBarButtonItemStylePlain target:self action:@selector(toggleSidebar)];
+//
+//
+                               
     
 
     UIBarButtonItem *testButton = [[UIBarButtonItem alloc] initWithTitle:@"SIDEBAR" style:UIBarButtonItemStylePlain target:self action:@selector(toggleSidebar)];
     self.documentViewController.thumbnailSliderController.leadingToolbarItem = testButton;
 }
 
-
-
-
-- (void)getThumbnail:(int)pageNumber
+- (void)getThumbnail:(int)pageNumber completionHandler:(void (^)(NSString * _Nullable base64Str))completionHandler
 {
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
@@ -2034,7 +2029,8 @@ static NSMutableArray* globalSearchResults;
     [pdfViewCtrl GetThumbAsync:pageNumber completion:^(UIImage *thumb) {
         NSData *data = UIImagePNGRepresentation(thumb);
         NSString *base64Str = [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
-        [self.delegate thumbnailCreated:self page:pageNumber base64String:base64Str];
+        completionHandler(base64Str);
+//        [self.delegate thumbnailCreated:self page:pageNumber base64String:base64Str];
     }];
 }
 
@@ -2316,7 +2312,7 @@ static NSMutableArray* globalSearchResults;
         };
 
         
-        // NSLog(@"Outline Element: %@", outlineElement);
+//         NSLog(@"Outline Element: %@", outlineElement);
         
         
         // Some CAT PDFs have broken outlines, leading to mutlitple nested outlines
@@ -2345,12 +2341,8 @@ static NSMutableArray* globalSearchResults;
     PTBookmark *root = [pdfDoc GetFirstBookmark];
     
     NSMutableArray *outline = [[NSMutableArray alloc] init];
-    
-    NSArray *test = [[NSArray alloc] initWithArray:[self PrintOutlineTree:root outlineArr:outline]];
 
-//    NSLog(@"Final array %@", [test copy]);
-
-    return [outline copy];
+    return [[NSArray alloc] initWithArray:[self PrintOutlineTree:root outlineArr:outline]];
 }
 
 
