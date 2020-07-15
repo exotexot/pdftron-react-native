@@ -398,12 +398,12 @@ RCT_REMAP_METHOD(getThumbnail,
 {
     @try {
         [[self documentViewManager] getThumbnailForDocumentViewTag:tag getThumbnail:pageNumber completionHandler:^(NSString * _Nullable base64String) {
-                   if (base64String) {
-                       resolve(base64String);
-                   } else {
-                       reject(@"thumbnail_failed", @"Failed to get thumbnail", nil);
-                   }
-               }];
+               if (base64String) {
+                   resolve(base64String);
+               } else {
+                   reject(@"thumbnail_failed", @"Failed to get thumbnail", nil);
+               }
+           }];
     }
     @catch (NSException *exception) {
         reject(@"thumbnail_failed", @"THUMBNAILS FAILED MISERABLY", [self errorFromException:exception]);
