@@ -173,6 +173,9 @@ static NSMutableArray* globalSearchResults;
         [self.documentViewController openDocumentWithPDFDoc:doc];
         
         [self applyLayoutMode];
+
+        // Adjustment custom Init function for better clearity
+        [self customInit];
     }
     
     
