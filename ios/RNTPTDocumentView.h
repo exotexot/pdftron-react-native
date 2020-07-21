@@ -20,6 +20,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)annotationsSelected:(RNTPTDocumentView *)sender annotations:(NSArray<NSDictionary<NSString *, id> *> *)annotations;
 - (void)annotationChanged:(RNTPTDocumentView *)sender annotation:(NSDictionary *)annotation action:(NSString *)action;
+
+- (void)formFieldValueChanged:(RNTPTDocumentView *)sender fields:(NSDictionary *)fields;
+
 - (void)exportAnnotationCommand:(RNTPTDocumentView *)sender action:(NSString *)action xfdfCommand:(NSString *)xfdfCommand;
 - (void)annotationMenuPressed:(RNTPTDocumentView *)sender annotationMenu:(NSString *)annotationMenu annotations:(NSArray<NSDictionary<NSString *, id> *> *)annotations;
 - (void)longPressMenuPressed:(RNTPTDocumentView *)sender longPressMenu:(NSString *)longPressMenu longPressText:(NSString *)longPressText;
@@ -98,7 +101,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, weak, nullable) id <RNTPTDocumentViewDelegate> delegate;
 
-
+@property (nonatomic, assign, getter=isLongPressMenuEnabled) BOOL longPressMenuEnabled;
 
 #pragma mark - Methods
 

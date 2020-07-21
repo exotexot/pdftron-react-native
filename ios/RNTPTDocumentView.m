@@ -62,6 +62,7 @@ static NSMutableArray* globalSearchResults;
     _selectAnnotationAfterCreation = YES;
 
     _useStylusAsPen = YES;
+    _longPressMenuEnabled = YES;
 }
 
 -(instancetype)initWithFrame:(CGRect)frame
@@ -298,6 +299,11 @@ static NSMutableArray* globalSearchResults;
                selector:@selector(toolManagerDidRemoveAnnotationWithNotification:)
                    name:PTToolManagerAnnotationRemovedNotification
                  object:self.documentViewController.toolManager];
+
+    [center addObserver:self
+    selector:@selector(toolManagerDidModifyFormFieldDataWithNotification:)
+        name:PTToolManagerFormFieldDataModifiedNotification
+      object:self.documentViewController.toolManager];
 }
 
 - (void)deregisterForPDFViewCtrlNotifications
@@ -318,6 +324,10 @@ static NSMutableArray* globalSearchResults;
     
     [center removeObserver:self
                       name:PTToolManagerAnnotationRemovedNotification
+                    object:self.documentViewController.toolManager];
+
+    [center removeObserver:self
+                      name:PTToolManagerFormFieldDataModifiedNotification
                     object:self.documentViewController.toolManager];
 }
 
@@ -1644,6 +1654,10 @@ static NSMutableArray* globalSearchResults;
 
 - (BOOL)rnt_documentViewController:(PTDocumentViewController *)documentViewController filterMenuItemsForLongPressMenu:(UIMenuController *)menuController
 {
+    if (!self.longPressMenuEnabled) {
+        menuController.menuItems = nil;
+        return NO;
+    }
     // Mapping from menu item title to identifier.
     NSDictionary<NSString *, NSString *> *map = @{
         @"Copy": @"copy",
@@ -1916,6 +1930,42 @@ static NSMutableArray* globalSearchResults;
             @"id": annotId,
             @"pageNumber": @(pageNumber),
         } action:@"remove"];
+    }
+}
+
+- (void)toolManagerDidModifyFormFieldDataWithNotification:(NSNotification *)notification
+{
+    if (notification.object != self.documentViewController.toolManager) {
+        return;
+    }
+
+    PTAnnot *annot = notification.userInfo[PTToolManagerAnnotationUserInfoKey];
+    if ([annot GetType] == e_ptWidget) {
+        PTPDFViewCtrl *pdfViewCtrl = self.documentViewController.pdfViewCtrl;
+        NSError* error;
+
+        __block PTWidget *widget;
+        __block PTField *field;
+        __block NSString *fieldName;
+        __block NSString *fieldValue;
+
+        [pdfViewCtrl DocLockReadWithBlock:^(PTPDFDoc * _Nullable doc) {
+            widget = [[PTWidget alloc] initWithAnn:annot];
+            field = [widget GetField];
+            fieldName = [field IsValid] ? [field GetName] : @"";
+            fieldValue = [field IsValid] ? [field GetValueAsString] : @"";
+        } error:&error];
+        if (error) {
+            NSLog(@"An error occurred: %@", error);
+            return;
+        }
+
+        if ([self.delegate respondsToSelector:@selector(formFieldValueChanged:fields:)]) {
+            [self.delegate formFieldValueChanged:self fields:@{
+                @"fieldName": fieldName,
+                @"fieldValue": fieldValue,
+            }];
+        }
     }
 }
 

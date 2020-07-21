@@ -4,6 +4,7 @@ import {
   requireNativeComponent,
   ViewPropTypes,
   Platform,
+  Alert,
   NativeModules,
   findNodeHandle
 } from 'react-native';
@@ -29,6 +30,7 @@ export default class DocumentView extends PureComponent {
     longPressMenuItems: PropTypes.array,
     overrideLongPressMenuBehavior: PropTypes.array,
     onLongPressMenuPress: PropTypes.func,
+    longPressMenuEnabled: PropTypes.bool,
     annotationMenuItems: PropTypes.array,
     overrideAnnotationMenuBehavior: PropTypes.array,
     onAnnotationMenuPress: PropTypes.func,
@@ -40,6 +42,7 @@ export default class DocumentView extends PureComponent {
     pageIndicatorEnabled: PropTypes.bool,
     onAnnotationsSelected: PropTypes.func,
     onAnnotationChanged: PropTypes.func,
+    onFormFieldValueChanged: PropTypes.func,
     readOnly: PropTypes.bool,
     thumbnailViewEditingEnabled: PropTypes.bool,
     fitMode: PropTypes.string,
@@ -98,9 +101,25 @@ export default class DocumentView extends PureComponent {
     			'annotations': event.nativeEvent.annotations,
     		});
     	}
+    } else if (event.nativeEvent.onFormFieldValueChanged) {
+      if (this.props.onFormFieldValueChanged) {
+        this.props.onFormFieldValueChanged({
+          'fields': event.nativeEvent.fields,
+        });
+      }
     } else if (event.nativeEvent.onDocumentError) {
       if (this.props.onDocumentError) {
-        this.props.onDocumentError();
+        this.props.onDocumentError(event.nativeEvent.onDocumentError);
+      } else {
+        const msg = event.nativeEvent.onDocumentError ? event.nativeEvent.onDocumentError : 'Unknown error';
+        Alert.alert(
+          'Alert',
+          msg,
+          [
+            { text: 'OK' }
+          ],
+          { cancelable: true }
+        );
       }
     } else if (event.nativeEvent.onExportAnnotationCommand) {
       if (this.props.onExportAnnotationCommand) {
