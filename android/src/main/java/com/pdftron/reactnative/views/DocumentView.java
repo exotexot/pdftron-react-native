@@ -1641,7 +1641,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     // CAT Europe
 
     public int currentPage() throws PDFNetException {
-        return getPdfDoc().getCurrentPage();
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        return pdfViewCtrl.getCurrentPage()
     }
 
 
