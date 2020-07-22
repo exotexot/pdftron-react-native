@@ -10,7 +10,14 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableMap;
+import com.pdftron.reactnative.utils.ReactUtils;
 import com.pdftron.reactnative.viewmanagers.DocumentViewViewManager;
+
+import org.json.JSONObject;
+
+import java.util.HashMap;
+
 
 public class DocumentViewModule extends ReactContextBaseJavaModule implements ActivityEventListener {
 
@@ -238,5 +245,24 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
             }
         });
     }
+
+    
+
+    @ReactMethod
+    public void getDimensions(final int tag, final Promise promise) {
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ReadableMap dimensions = mDocumentViewInstance.getDimensions(tag);
+                    promise.resolve(dimensions);
+                } catch (Exception ex) {
+                    promise.reject(ex);
+                }
+            }
+        });
+    }
+
+
 
 }

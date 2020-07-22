@@ -16,6 +16,8 @@ import com.pdftron.common.PDFNetException;
 import com.pdftron.pdf.utils.PdfViewCtrlSettingsManager;
 import com.pdftron.reactnative.views.DocumentView;
 
+import java.util.HashMap;
+
 public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
 
     private static final String REACT_CLASS = "RCTDocumentView";
@@ -364,4 +366,17 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
             throw new PDFNetException("", 0L, getName(), "currentPage", "Unable to find DocumentView.");
         }
     }
+
+
+    public ReadableMap getDimensions(int tag) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            return documentView.getDimensions();
+        } else {
+            throw new PDFNetException("", 0L, getName(), "getDimensions", "Unable to find DocumentView.");
+        }
+    }
+
+
+
 }

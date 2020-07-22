@@ -61,7 +61,6 @@ export default class DocumentView extends PureComponent {
     pageChangeOnTap: PropTypes.bool,
     followSystemDarkMode: PropTypes.bool,
     useStylusAsPen: PropTypes.bool,
-    onThumbnailCreated: PropTypes.func,
     onToggleSidebar: PropTypes.func,
     ...ViewPropTypes,
   };
@@ -157,27 +156,12 @@ export default class DocumentView extends PureComponent {
         });
       }
     }
-
-
-    else if (event.nativeEvent.onThumbnailCreated) {
-      if (this.props.onThumbnailCreated) {
-        this.props.onThumbnailCreated({
-          'page': event.nativeEvent.page,
-          'base64String': event.nativeEvent.base64String,
-        });
-      }
-    }
-
-
+    
     else if (event.nativeEvent.onToggleSidebar) {
       if (this.props.onToggleSidebar) {
         this.props.onToggleSidebar();
       }
     }
-
-
-
-
 
   }
 

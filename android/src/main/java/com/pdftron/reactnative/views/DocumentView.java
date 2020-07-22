@@ -67,6 +67,7 @@ import com.pdftron.sdf.Obj;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -1643,5 +1644,25 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         return pdfViewCtrl.getCurrentPage();
     }
 
+
+
+
+    public ReadableMap getDimensions() throws PDFNetException {
+
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        PDFDoc pdfDoc = pdfViewCtrl.getDoc();
+        Page firstPage = pdfDoc.getPage(1);
+
+        double width = firstPage.getPageWidth(3);      // 3 = e_trim
+        double height = firstPage.getPageHeight(3);    // 3 = e_trim
+
+        WritableMap dimensions = Arguments.createMap();
+        dimensions.putDouble("width", width);
+        dimensions.putDouble("height", height);
+
+        ReadableMap readableMap = dimensions;
+
+        return readableMap;
+    }
 
 }
