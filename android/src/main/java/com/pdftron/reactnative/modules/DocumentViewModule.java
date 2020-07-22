@@ -218,4 +218,25 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
     public void onNewIntent(Intent intent) {
 
     }
+
+
+
+
+    // CAT EUROPE
+
+    @ReactMethod
+    public void currentPage(final int tag, final Promise promise) {
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    int count = mDocumentViewInstance.currentPage(tag);
+                    promise.resolve(count);
+                } catch (Exception ex) {
+                    promise.reject(ex);
+                }
+            }
+        });
+    }
+
 }

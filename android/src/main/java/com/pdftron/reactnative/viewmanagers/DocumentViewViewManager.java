@@ -351,4 +351,17 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
             documentView.onActivityResult(requestCode, resultCode, data);
         }
     }
+
+
+    
+    // CAT Europe
+
+    public int currentPage(int tag) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            return documentView.currentPage();
+        } else {
+            throw new PDFNetException("", 0L, getName(), "currentPage", "Unable to find DocumentView.");
+        }
+    }
 }

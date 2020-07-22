@@ -1632,4 +1632,21 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                 "topChange",
                 event);
     }
+
+
+
+
+
+
+    // CAT Europe
+
+    public int currentPage() throws PDFNetException {
+        return getPdfDoc().getCurrentPage();
+    }
+
+
+
+
+
+
 }
