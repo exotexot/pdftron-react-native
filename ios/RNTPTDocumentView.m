@@ -2156,22 +2156,9 @@ static NSMutableArray* globalSearchResults;
 }
 
 
-
-- (void)showSettings
-{
-    PTDocumentViewController *docViewCtrl = self.documentViewController;
-    [docViewCtrl settingsViewController];
-}
-
-
-
 - (void)toggleSlider:(BOOL)toggle;
 {
     PTDocumentViewController *docViewCtrl = self.documentViewController;
-    
-//    BOOL sliderHidden = [docViewCtrl isThumbnailSliderHidden];
-//    NSLog(@"SLIDER HIDDEN %d", sliderHidden);
-
     
     if (toggle) {
         [docViewCtrl setThumbnailSliderHidden:NO animated:YES];

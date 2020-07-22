@@ -156,7 +156,7 @@ export default class DocumentView extends PureComponent {
         });
       }
     }
-    
+
     else if (event.nativeEvent.onToggleSidebar) {
       if (this.props.onToggleSidebar) {
         this.props.onToggleSidebar();
@@ -282,13 +282,13 @@ export default class DocumentView extends PureComponent {
 
 
   // Clear Search
-  clearSearch = () => {
-    const tag = findNodeHandle(this._viewerRef);
-    if (tag != null) {
-      return DocumentViewManager.clearSearch(tag);
-    }
-    return Promise.resolve();
-  }
+  // clearSearch = () => {
+  //   const tag = findNodeHandle(this._viewerRef);
+  //   if (tag != null) {
+  //     return DocumentViewManager.clearSearch(tag);
+  //   }
+  //   return Promise.resolve();
+  // }
 
 
   // FindText
@@ -297,16 +297,6 @@ export default class DocumentView extends PureComponent {
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
       return DocumentViewManager.findText(tag);
-    }
-    return Promise.resolve();
-  }
-
-  // FindText
-  showSettings = () => {
-    // console.log("Search event triggered")
-    const tag = findNodeHandle(this._viewerRef);
-    if (tag != null) {
-      return DocumentViewManager.showSettings(tag);
     }
     return Promise.resolve();
   }

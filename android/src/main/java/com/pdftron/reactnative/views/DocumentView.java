@@ -44,8 +44,10 @@ import com.pdftron.pdf.config.PDFViewCtrlConfig;
 import com.pdftron.pdf.config.ToolConfig;
 import com.pdftron.pdf.config.ToolManagerBuilder;
 import com.pdftron.pdf.config.ViewerConfig;
+import com.pdftron.pdf.controls.FindTextOverlay;
 import com.pdftron.pdf.controls.PdfViewCtrlTabFragment;
 import com.pdftron.pdf.controls.PdfViewCtrlTabHostFragment;
+import com.pdftron.pdf.controls.ThumbnailSlider;
 import com.pdftron.pdf.dialog.ViewModePickerDialogFragment;
 import com.pdftron.pdf.model.AnnotStyle;
 import com.pdftron.pdf.tools.AdvancedShapeCreate;
@@ -67,13 +69,22 @@ import com.pdftron.sdf.Obj;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+
+// Additional imports
+
+import com.pdftron.pdf.TextSearchResult;
+import com.pdftron.pdf.TextSearch;
+import com.pdftron.pdf.Highlights;
+
+
+
 
 public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
@@ -645,6 +656,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             mode = ToolManager.ToolMode.FORM_COMBO_BOX_CREATE;
         } else if ("FormCreateListBoxField".equals(item)) {
             mode = ToolManager.ToolMode.FORM_LIST_BOX_CREATE;
+        } else if ("Eraser".equals(item)) {
+            mode = ToolManager.ToolMode.INK_ERASER;
         }
         return mode;
     }
@@ -1256,6 +1269,9 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             }
         }
 
+        // Custom init
+        customInit();
+
         onReceiveNativeEvent(ON_DOCUMENT_LOADED, tag);
     }
 
@@ -1616,6 +1632,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         return null;
     }
 
+
     public void onReceiveNativeEvent(String key, String message) {
         WritableMap event = Arguments.createMap();
         event.putString(key, message);
@@ -1638,6 +1655,27 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
 
     // CAT Europe
+
+    public void customInit() {
+
+//        ThumbnailSlider slider;
+//        slider.setMenuItemContentDescription(ThumbnailSlider.POSITION_LEFT, "Hallo");
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public int currentPage() throws PDFNetException {
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
@@ -1664,5 +1702,163 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
         return readableMap;
     }
+
+
+
+
+    public void jumpTo(int page_num) throws PDFNetException {
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        pdfViewCtrl.setCurrentPage(page_num);
+    }
+
+
+
+    public void rotate(boolean ccw) throws PDFNetException {
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        PDFDoc pdfDoc = pdfViewCtrl.getDoc();
+        int currentPageNumber = currentPage();
+
+        Page page = pdfDoc.getPage(currentPageNumber);
+
+        int originalRotation = page.getRotation();
+        int newRotation;
+
+        if (!ccw) {
+            switch (originalRotation)
+            {
+                case Page.e_0:   newRotation = Page.e_90;  break;
+                case Page.e_90:  newRotation = Page.e_180; break;
+                case Page.e_180: newRotation = Page.e_270; break;
+                case Page.e_270: newRotation = Page.e_0;   break;
+                default:         newRotation = Page.e_0;   break;
+            }
+        } else {
+            switch (originalRotation)
+            {
+                case Page.e_0:   newRotation = Page.e_270; break;
+                case Page.e_270: newRotation = Page.e_180; break;
+                case Page.e_180: newRotation = Page.e_90;  break;
+                case Page.e_90:  newRotation = Page.e_0;   break;
+                default:         newRotation = Page.e_0;   break;
+            }
+        }
+
+        page.setRotation(newRotation);
+        pdfViewCtrl.updatePageLayout();
+    }
+
+
+
+
+    public void toggleSlider(boolean toggle) throws PDFNetException {
+        getPdfViewCtrlTabFragment().setThumbSliderVisible(toggle, true);
+    }
+
+
+
+    public void findText() throws PDFNetException {
+
+        // problem: SerachField is IN TOP BAR
+        // how to show FindTextOverlay
+//        FindTextOverlay overlay = new FindTextOverlay();
+
+    }
+
+
+
+
+
+    public ReadableArray search(String searchString, boolean isCase, boolean isWhole) throws PDFNetException {
+        
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        PDFDoc pdfDoc = pdfViewCtrl.getDoc();
+
+        TextSearch search = new TextSearch();
+
+        // Whack mode setting
+        int mode = 0;
+        if        (isCase && !isWhole) {
+            mode = TextSearch.e_highlight|TextSearch.e_ambient_string|TextSearch.e_case_sensitive;
+        } else if (!isCase && isWhole) {
+            mode = TextSearch.e_highlight|TextSearch.e_ambient_string|TextSearch.e_whole_word;
+        } else if (isCase && isWhole) {
+            mode = TextSearch.e_highlight|TextSearch.e_ambient_string|TextSearch.e_whole_word|TextSearch.e_case_sensitive;
+        } else {
+            mode = TextSearch.e_highlight|TextSearch.e_ambient_string;
+        }
+
+
+
+
+        WritableArray searchResults = Arguments.createArray();
+        search.begin(pdfDoc, searchString, mode, -1, -1);
+        boolean moreToFind = true;
+
+        pdfDoc.lock();
+        while (moreToFind) {
+
+            TextSearchResult result = search.run();
+
+            if (result.getCode() == TextSearchResult.e_found) {
+
+                WritableMap oneSearchResult = Arguments.createMap();
+                oneSearchResult.putString("match", result.getResultStr());
+                oneSearchResult.putInt("page", result.getPageNum());
+                oneSearchResult.putString("ambient", result.getAmbientStr());
+
+                ReadableMap readableMap = oneSearchResult;
+
+                searchResults.pushMap(readableMap);
+ 
+
+                // Text Highlights
+
+                Highlights hlts = result.getHighlights();
+                hlts.begin(pdfDoc);
+
+                while (hlts.hasNext()) {
+                    double[] q = hlts.getCurrentQuads();
+                    int quad_count = q.length / 8;
+                    for (int i = 0; i < quad_count; ++i) {
+                        //assume each quad is an axis-aligned rectangle
+                        int offset = 8 * i;
+                        double x1 = Math.min(Math.min(Math.min(q[offset + 0], q[offset + 2]), q[offset + 4]), q[offset + 6]);
+                        double x2 = Math.max(Math.max(Math.max(q[offset + 0], q[offset + 2]), q[offset + 4]), q[offset + 6]);
+                        double y1 = Math.min(Math.min(Math.min(q[offset + 1], q[offset + 3]), q[offset + 5]), q[offset + 7]);
+                        double y2 = Math.max(Math.max(Math.max(q[offset + 1], q[offset + 3]), q[offset + 5]), q[offset + 7]);
+
+                        // There is already a Rect class defined
+                        com.pdftron.pdf.Rect rect = new com.pdftron.pdf.Rect();
+                        rect.set(x1, y1, x2, y2);
+                    }
+                    hlts.next();
+                }
+
+            } else {
+                // this may be wrong
+                moreToFind = false;
+            }
+
+        }
+        pdfDoc.unlock();
+
+
+
+        ReadableArray readableArray = searchResults;
+
+        return readableArray;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
 }

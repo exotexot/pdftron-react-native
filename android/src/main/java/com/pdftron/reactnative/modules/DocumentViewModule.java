@@ -15,7 +15,7 @@ import com.pdftron.reactnative.utils.ReactUtils;
 import com.pdftron.reactnative.viewmanagers.DocumentViewViewManager;
 
 import org.json.JSONObject;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 
 
@@ -259,6 +259,80 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
                 } catch (Exception ex) {
                     promise.reject(ex);
                 }
+            }
+        });
+    }
+
+
+    @ReactMethod
+    public void jumpTo(final int tag, int page_num, final Promise promise) {
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    mDocumentViewInstance.jumpTo(tag, page_num);
+                    promise.resolve(null);
+                } catch (Exception ex) {
+                    promise.reject(ex);
+                }
+
+            }
+        });
+    }
+
+
+    @ReactMethod
+    public void rotate(final int tag, boolean ccw, final Promise promise) {
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    mDocumentViewInstance.rotate(tag, ccw);
+                    promise.resolve(null);
+                } catch (Exception ex) {
+                    promise.reject(ex);
+                }
+
+            }
+        });
+    }
+
+
+    @ReactMethod
+    public void toggleSlider(final int tag, boolean toggle, final Promise promise) {
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    mDocumentViewInstance.toggleSlider(tag, toggle);
+                    promise.resolve(null);
+                } catch (Exception ex) {
+                    promise.reject(ex);
+                }
+
+            }
+        });
+    }
+
+
+
+
+    @ReactMethod
+    public void search(final int tag, String searchString, boolean isCase, boolean isWhole, final Promise promise) {
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    ReadableArray results = mDocumentViewInstance.search(tag, searchString, isCase, isWhole);
+                    promise.resolve(results);
+                } catch (Exception ex) {
+                    promise.reject(ex);
+                }
+
             }
         });
     }

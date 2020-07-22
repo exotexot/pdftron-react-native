@@ -253,21 +253,6 @@ RCT_REMAP_METHOD(findText,
 }
 
 
-RCT_REMAP_METHOD(showSettings,
-                 showSettingsForDocumentViewTag:(nonnull NSNumber *)tag
-                 resolver:(RCTPromiseResolveBlock)resolve
-                 rejecter:(RCTPromiseRejectBlock)reject)
-{
-    @try {
-        [[self documentViewManager] showSettingsForDocumentViewTag:tag];
-        resolve(nil);
-    }
-    @catch (NSException *exception) {
-        reject(@"searchSettings_failed", @"SEARCH SETTINGS FAILED MISERABLY", [self errorFromException:exception]);
-    }
-}
-
-
 
 // Rotate Manager
 RCT_REMAP_METHOD(toggleSlider,

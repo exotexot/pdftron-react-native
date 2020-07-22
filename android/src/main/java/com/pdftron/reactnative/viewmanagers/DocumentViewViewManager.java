@@ -16,6 +16,7 @@ import com.pdftron.common.PDFNetException;
 import com.pdftron.pdf.utils.PdfViewCtrlSettingsManager;
 import com.pdftron.reactnative.views.DocumentView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
@@ -376,6 +377,47 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
             throw new PDFNetException("", 0L, getName(), "getDimensions", "Unable to find DocumentView.");
         }
     }
+
+
+    public void jumpTo(int tag, int page_num) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            documentView.jumpTo(page_num);
+        } else {
+            throw new PDFNetException("", 0L, getName(), "jumpTo", "Unable to find DocumentView.");
+        }
+    }
+
+
+    public void rotate(int tag, boolean ccw) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            documentView.rotate(ccw);
+        } else {
+            throw new PDFNetException("", 0L, getName(), "rotate", "Unable to find DocumentView.");
+        }
+    }
+
+    public void toggleSlider(int tag, boolean toggle) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            documentView.toggleSlider(toggle);
+        } else {
+            throw new PDFNetException("", 0L, getName(), "toggleSlider", "Unable to find DocumentView.");
+        }
+    }
+
+
+
+    public ReadableArray search(int tag, String searchString, boolean isCase, boolean isWhole) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            return documentView.search(searchString, isCase, isWhole);
+        } else {
+            throw new PDFNetException("", 0L, getName(), "toggleSlider", "Unable to find DocumentView.");
+        }
+    }
+
 
 
 
