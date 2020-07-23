@@ -414,7 +414,27 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
         if (documentView != null) {
             return documentView.search(searchString, isCase, isWhole);
         } else {
-            throw new PDFNetException("", 0L, getName(), "toggleSlider", "Unable to find DocumentView.");
+            throw new PDFNetException("", 0L, getName(), "search", "Unable to find DocumentView.");
+        }
+    }
+
+
+    public ReadableArray getOutline(int tag) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            return documentView.getOutline();
+        } else {
+            throw new PDFNetException("", 0L, getName(), "getOutline", "Unable to find DocumentView.");
+        }
+    }
+
+
+    public String getThumbnail(int tag, int page) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            return documentView.getThumbnail(page);
+        } else {
+            throw new PDFNetException("", 0L, getName(), "getOutline", "Unable to find DocumentView.");
         }
     }
 

@@ -71,6 +71,7 @@ import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,7 +83,11 @@ import java.util.Map;
 import com.pdftron.pdf.TextSearchResult;
 import com.pdftron.pdf.TextSearch;
 import com.pdftron.pdf.Highlights;
+import com.pdftron.pdf.Bookmark;
+import com.pdftron.pdf.Destination;
 
+import java.nio.ByteBuffer;
+import java.util.stream.IntStream;
 
 
 
@@ -577,6 +582,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             annotType = Annot.e_Widget;
         } else if ("FormCreateListBoxField".equals(item)) {
             annotType = Annot.e_Widget;
+        } else if ("Eraser".equals(item)) {
+            annotType = Annot.e_Unknown;
         }
         return annotType;
     }
@@ -1669,24 +1676,27 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                 public void onMenuItemClicked(int i) {
                     if (i == ThumbnailSlider.POSITION_LEFT) {
                         System.out.println("Start clicked amk");
+                    } else {
+                        showViewModeDialog(mFragmentManagerSave);
                     }
                 }
             });
         }
 
 
-
-
-
     }
 
 
+    public void showViewModeDialog(FragmentManager fragmentManager) {
 
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
 
-
-
-
-
+        ViewModePickerDialogFragment dialog = ViewModePickerDialogFragment.newInstance(pdfViewCtrl.getPagePresentationMode(), false, false, 0);
+        // Set a custom style for this dialog
+//        dialog.setStyle(DialogFragment.STYLE_NORMAL, com.pdftron.pdf.tools.R.style.CustomAppTheme);
+        // Show the dialog
+        dialog.show(fragmentManager, "view_mode_picker");
+    }
 
 
 
@@ -1786,7 +1796,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
 
     public ReadableArray search(String searchString, boolean isCase, boolean isWhole) throws PDFNetException {
-        
+
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
         PDFDoc pdfDoc = pdfViewCtrl.getDoc();
 
@@ -1826,7 +1836,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                 ReadableMap readableMap = oneSearchResult;
 
                 searchResults.pushMap(readableMap);
- 
+
 
                 // Text Highlights
 
@@ -1870,7 +1880,76 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
 
 
+    public ReadableArray getOutline() throws PDFNetException {
 
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        PDFDoc pdfDoc = pdfViewCtrl.getDoc();
+        Bookmark root = pdfDoc.getFirstBookmark();
+
+        WritableArray outline = Arguments.createArray();
+
+        ReadableArray readableArray = PrintOutlineTree(root, outline);
+
+        return readableArray;
+    }
+
+
+
+    static ReadableArray PrintOutlineTree(Bookmark item, WritableArray outline) throws PDFNetException {
+
+        for (; item.isValid(); item = item.getNext()) {
+
+            Action action = item.getAction();
+            Destination dest = action.getDest();
+            Page page = dest.getPage();
+
+            WritableMap outlineElement = Arguments.createMap();
+            outlineElement.putString("name", item.getTitle());
+            outlineElement.putInt("indent", item.getIndent());
+            outlineElement.putInt("page", page.getIndex());
+
+            ReadableMap readableMap = outlineElement;
+
+            // Some CAT PDFs have broken outlines, leading to mutlitple nested outlines
+            // Luckily the redundant broken outlines all come with page = 0
+            if (page.getIndex() != 0) {
+                outline.pushMap(readableMap);
+            }
+
+            if (item.hasChildren())
+            {
+                PrintOutlineTree(item.getFirstChild(), outline);
+            }
+        }
+
+        return outline;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public static String convertToBase64(int[] ints) {
+        byte[] bytes = new byte[ints.length];
+        for (int i = 0; i < ints.length; i++) {
+            bytes[i] = (byte)ints[i];
+        }
+        return Base64.encodeToString(bytes, Base64.DEFAULT);
+    }
 
 
 
