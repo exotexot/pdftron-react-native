@@ -1658,8 +1658,25 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
     public void customInit() {
 
-//        ThumbnailSlider slider;
-//        slider.setMenuItemContentDescription(ThumbnailSlider.POSITION_LEFT, "Hallo");
+
+        // Replace Buttons in Thumbnail Slider
+        View v = mPdfViewCtrlTabHostFragment.getView();
+        if (v != null) {
+            ThumbnailSlider slider = v.findViewById(R.id.thumbseekbar);
+            slider.setMenuItem(R.drawable.ic_star_white_24dp, ThumbnailSlider.POSITION_LEFT);
+            slider.setOnMenuItemClickedListener(new ThumbnailSlider.OnMenuItemClickedListener() {
+                @Override
+                public void onMenuItemClicked(int i) {
+                    if (i == ThumbnailSlider.POSITION_LEFT) {
+                        System.out.println("Start clicked amk");
+                    }
+                }
+            });
+        }
+
+
+
+
 
     }
 

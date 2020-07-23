@@ -388,10 +388,6 @@ export default class DocumentView extends PureComponent {
   }
 
 
-
-  
-
-
   // Abort get thumbnail
   abortGetThumbnail = () => {
     // console.log("Thumbnails event triggered")
