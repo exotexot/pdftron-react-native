@@ -152,7 +152,7 @@ NS_ASSUME_NONNULL_BEGIN
 // addBookmark
 - (void)addBookmark;
 
-- (void)findText;
+- (void)findTextIOS;
 - (void)showSettings;
 - (void)toggleSlider:(BOOL)toggle;
 
@@ -163,6 +163,18 @@ NS_ASSUME_NONNULL_BEGIN
 - (int)currentPage;
 
 
+
 @end
+
+
+
+@interface PTDocumentViewSettingsControllerCUSTOM : PTDocumentViewSettingsController
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath;
+
+@end
+
+
 
 NS_ASSUME_NONNULL_END

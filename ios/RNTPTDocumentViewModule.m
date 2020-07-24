@@ -238,7 +238,7 @@ RCT_REMAP_METHOD(clearSearch,
 
 
 
-RCT_REMAP_METHOD(findText,
+RCT_REMAP_METHOD(findTextIOS,
                  findTextForDocumentViewTag:(nonnull NSNumber *)tag
                  resolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)

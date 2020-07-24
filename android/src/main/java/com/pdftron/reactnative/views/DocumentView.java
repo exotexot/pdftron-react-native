@@ -86,6 +86,8 @@ import com.pdftron.pdf.Highlights;
 import com.pdftron.pdf.Bookmark;
 import com.pdftron.pdf.Destination;
 
+import android.graphics.Bitmap;
+
 import java.nio.ByteBuffer;
 import java.util.stream.IntStream;
 
@@ -1675,7 +1677,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                 @Override
                 public void onMenuItemClicked(int i) {
                     if (i == ThumbnailSlider.POSITION_LEFT) {
-                        System.out.println("Start clicked amk");
+                        System.out.println("Start clicked ");
                     } else {
                         showViewModeDialog(mFragmentManagerSave);
                     }
@@ -1683,18 +1685,12 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             });
         }
 
-
     }
 
 
     public void showViewModeDialog(FragmentManager fragmentManager) {
-
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
-
         ViewModePickerDialogFragment dialog = ViewModePickerDialogFragment.newInstance(pdfViewCtrl.getPagePresentationMode(), false, false, 0);
-        // Set a custom style for this dialog
-//        dialog.setStyle(DialogFragment.STYLE_NORMAL, com.pdftron.pdf.tools.R.style.CustomAppTheme);
-        // Show the dialog
         dialog.show(fragmentManager, "view_mode_picker");
     }
 
@@ -1783,11 +1779,24 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
 
 
-    public void findText() throws PDFNetException {
+    public void findText(String searchString) throws PDFNetException {
 
-        // problem: SerachField is IN TOP BAR
-        // how to show FindTextOverlay
-//        FindTextOverlay overlay = new FindTextOverlay();
+        if (getPdfViewCtrlTabFragment()!=null) {
+            getPdfViewCtrlTabFragment().setSearchNavButtonsVisible(true);
+            getPdfViewCtrlTabFragment().queryTextSubmit(searchString);
+        }
+
+    }
+
+
+
+    public void cancelFindText() throws PDFNetException {
+
+        if (getPdfViewCtrlTabFragment()!=null) {
+            getPdfViewCtrlTabFragment().setSearchNavButtonsVisible(false);
+            getPdfViewCtrlTabFragment().cancelFindText();
+            getPdfViewCtrlTabFragment().exitSearchMode();
+        }
 
     }
 
@@ -1815,8 +1824,6 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         }
 
 
-
-
         WritableArray searchResults = Arguments.createArray();
         search.begin(pdfDoc, searchString, mode, -1, -1);
         boolean moreToFind = true;
@@ -1837,30 +1844,6 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
                 searchResults.pushMap(readableMap);
 
-
-                // Text Highlights
-
-                Highlights hlts = result.getHighlights();
-                hlts.begin(pdfDoc);
-
-                while (hlts.hasNext()) {
-                    double[] q = hlts.getCurrentQuads();
-                    int quad_count = q.length / 8;
-                    for (int i = 0; i < quad_count; ++i) {
-                        //assume each quad is an axis-aligned rectangle
-                        int offset = 8 * i;
-                        double x1 = Math.min(Math.min(Math.min(q[offset + 0], q[offset + 2]), q[offset + 4]), q[offset + 6]);
-                        double x2 = Math.max(Math.max(Math.max(q[offset + 0], q[offset + 2]), q[offset + 4]), q[offset + 6]);
-                        double y1 = Math.min(Math.min(Math.min(q[offset + 1], q[offset + 3]), q[offset + 5]), q[offset + 7]);
-                        double y2 = Math.max(Math.max(Math.max(q[offset + 1], q[offset + 3]), q[offset + 5]), q[offset + 7]);
-
-                        // There is already a Rect class defined
-                        com.pdftron.pdf.Rect rect = new com.pdftron.pdf.Rect();
-                        rect.set(x1, y1, x2, y2);
-                    }
-                    hlts.next();
-                }
-
             } else {
                 // this may be wrong
                 moreToFind = false;
@@ -1870,6 +1853,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         pdfDoc.unlock();
 
 
+        pdfViewCtrl.updatePageLayout();
 
         ReadableArray readableArray = searchResults;
 
@@ -1935,9 +1919,36 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
 
 
+    public void getThumbnail(int page) throws PDFNetException {
+
+
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        PDFDoc pdfDoc = pdfViewCtrl.getDoc();
+
+
+        pdfViewCtrl.getThumbAsync(page);
+
+
+        pdfViewCtrl.addThumbAsyncListener(new PDFViewCtrl.ThumbAsyncListener() {
+            @Override
+            public void onThumbReceived(int page, int[] buf, int width, int height) {
+                try {
+
+                    String base64str = convertToBase64(buf);
+                    System.out.println("BASE64" + base64str);
+
+                } catch (OutOfMemoryError oom) {
+                    // error
+                }
+            }
+
+
+        });
 
 
 
+
+    }
 
 
 

@@ -282,21 +282,43 @@ export default class DocumentView extends PureComponent {
 
 
   // Clear Search
-  // clearSearch = () => {
-  //   const tag = findNodeHandle(this._viewerRef);
-  //   if (tag != null) {
-  //     return DocumentViewManager.clearSearch(tag);
-  //   }
-  //   return Promise.resolve();
-  // }
+  clearSearch = () => {
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.clearSearch(tag);
+    }
+    return Promise.resolve();
+  }
 
 
   // FindText
-  findText = () => {
+  findTextIOS = () => {
     // console.log("Search event triggered")
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
-      return DocumentViewManager.findText(tag);
+      return DocumentViewManager.findTextIOS(tag);
+    }
+    return Promise.resolve();
+  }
+
+
+  // FindText
+  findText = (searchString) => {
+    // console.log("Search event triggered")
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.findText(tag, searchString);
+    }
+    return Promise.resolve();
+  }
+
+
+  // FindText
+  cancelFindText = () => {
+    // console.log("Search event triggered")
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.cancelFindText(tag);
     }
     return Promise.resolve();
   }

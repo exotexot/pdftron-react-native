@@ -429,12 +429,32 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
     }
 
 
-    public String getThumbnail(int tag, int page) throws PDFNetException {
+    public void getThumbnail(int tag, int page) throws PDFNetException {
         DocumentView documentView = mDocumentViews.get(tag);
         if (documentView != null) {
-            return documentView.getThumbnail(page);
+            documentView.getThumbnail(page);
         } else {
             throw new PDFNetException("", 0L, getName(), "getOutline", "Unable to find DocumentView.");
+        }
+    }
+
+
+    public void findText(int tag, String serachString) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            documentView.findText(serachString);
+        } else {
+            throw new PDFNetException("", 0L, getName(), "findText", "Unable to find DocumentView.");
+        }
+    }
+
+
+    public void cancelFindText(int tag) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            documentView.cancelFindText();
+        } else {
+            throw new PDFNetException("", 0L, getName(), "CancelfindText", "Unable to find DocumentView.");
         }
     }
 

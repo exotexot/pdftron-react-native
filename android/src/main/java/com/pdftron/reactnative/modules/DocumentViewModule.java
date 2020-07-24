@@ -362,8 +362,41 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
             @Override
             public void run() {
                 try {
-                    String thumb = mDocumentViewInstance.getThumbnail(tag, page);
-                    promise.resolve(thumb);
+                    mDocumentViewInstance.getThumbnail(tag, page);
+                    promise.resolve("HALLO");
+                } catch (Exception ex) {
+                    promise.reject(ex);
+                }
+
+            }
+        });
+    }
+
+
+    @ReactMethod
+    public void findText(final int tag, String searchString, final Promise promise) {
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mDocumentViewInstance.findText(tag, searchString);
+                    promise.resolve(null);
+                } catch (Exception ex) {
+                    promise.reject(ex);
+                }
+
+            }
+        });
+    }
+
+    @ReactMethod
+    public void cancelFindText(final int tag, final Promise promise) {
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mDocumentViewInstance.cancelFindText(tag);
+                    promise.resolve(null);
                 } catch (Exception ex) {
                     promise.reject(ex);
                 }

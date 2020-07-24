@@ -659,7 +659,7 @@ RCT_CUSTOM_VIEW_PROPERTY(longPressMenuEnabled, BOOL, RNTPTDocumentView)
 {
     RNTPTDocumentView *documentView = self.documentViews[tag];
     if (documentView) {
-        return [documentView findText];
+        return [documentView findTextIOS];
     } else {
         @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
     }
@@ -676,23 +676,6 @@ RCT_CUSTOM_VIEW_PROPERTY(longPressMenuEnabled, BOOL, RNTPTDocumentView)
     }
 }
 
-//- (void)saveDocumentForDocumentViewTag:(NSNumber *)tag completionHandler:(void (^)(NSString * _Nullable filePath))completionHandler
-//{
-//    RNTPTDocumentView *documentView = self.documentViews[tag];
-//    if (documentView) {
-//        [documentView saveDocumentWithCompletionHandler:^(NSString * _Nullable filePath){
-//            if (completionHandler) {
-//                completionHandler(filePath);
-//            }
-//        }];
-//    } else {
-//        @throw [NSException exceptionWithName:NSInvalidArgumentException
-//                                       reason:@"Unable to find DocumentView for tag"
-//                                     userInfo:nil];
-//    }
-//}
-
-
 
 - (void)getThumbnailForDocumentViewTag:(NSNumber *)tag getThumbnail:(int)pageNumber completionHandler:(void (^)(NSString * _Nullable base64string))completionHandler
 {
@@ -703,7 +686,6 @@ RCT_CUSTOM_VIEW_PROPERTY(longPressMenuEnabled, BOOL, RNTPTDocumentView)
                 return completionHandler(base64string);
             }
         }];
-//        return [documentView getThumbnail:pageNumber];
     } else {
         @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
     }
