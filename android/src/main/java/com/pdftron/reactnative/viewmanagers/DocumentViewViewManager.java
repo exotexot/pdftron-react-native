@@ -439,6 +439,17 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
     }
 
 
+    public void abortGetThumbnail(int tag) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            documentView.cancelFindText();
+        } else {
+            throw new PDFNetException("", 0L, getName(), "abortGetThumb", "Unable to find DocumentView.");
+        }
+    }
+
+
+
     public void findText(int tag, String serachString) throws PDFNetException {
         DocumentView documentView = mDocumentViews.get(tag);
         if (documentView != null) {

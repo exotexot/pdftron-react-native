@@ -87,6 +87,7 @@ import com.pdftron.pdf.Bookmark;
 import com.pdftron.pdf.Destination;
 
 import android.graphics.Bitmap;
+import java.io.ByteArrayOutputStream;
 
 import java.nio.ByteBuffer;
 import java.util.stream.IntStream;
@@ -1911,30 +1912,35 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
 
 
+    public void abortGetThumbnail() throws PDFNetException {
 
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        pdfViewCtrl.cancelAllThumbRequests();
 
-
-
-
+    }
 
 
 
     public void getThumbnail(int page) throws PDFNetException {
 
-
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
         PDFDoc pdfDoc = pdfViewCtrl.getDoc();
 
-
         pdfViewCtrl.getThumbAsync(page);
-
 
         pdfViewCtrl.addThumbAsyncListener(new PDFViewCtrl.ThumbAsyncListener() {
             @Override
             public void onThumbReceived(int page, int[] buf, int width, int height) {
                 try {
 
-                    String base64str = convertToBase64(buf);
+                    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                    bitmap.setPixels(buf, 0, width, 0, 0, width, height);
+
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                    byte[] byteArray = byteArrayOutputStream .toByteArray();
+
+                    String base64str = Base64.encodeToString(byteArray, Base64.DEFAULT);
                     System.out.println("BASE64" + base64str);
 
                 } catch (OutOfMemoryError oom) {
@@ -1942,30 +1948,9 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                 }
             }
 
-
         });
 
-
-
-
     }
-
-
-
-
-
-    public static String convertToBase64(int[] ints) {
-        byte[] bytes = new byte[ints.length];
-        for (int i = 0; i < ints.length; i++) {
-            bytes[i] = (byte)ints[i];
-        }
-        return Base64.encodeToString(bytes, Base64.DEFAULT);
-    }
-
-
-
-
-
 
 
 }
