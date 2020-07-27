@@ -399,7 +399,6 @@ export default class DocumentView extends PureComponent {
   }
 
 
-  // Thumbnails Test 
   getThumbnail = (page) => {
     // console.log("Thumbnails event triggered")
     const tag = findNodeHandle(this._viewerRef);

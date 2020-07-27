@@ -2,6 +2,8 @@ package com.pdftron.reactnative.modules;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.util.Base64;
 
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Promise;
@@ -11,10 +13,13 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
+import com.pdftron.pdf.PDFViewCtrl;
 import com.pdftron.reactnative.utils.ReactUtils;
 import com.pdftron.reactnative.viewmanagers.DocumentViewViewManager;
 
 import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -362,8 +367,7 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
             @Override
             public void run() {
                 try {
-                    mDocumentViewInstance.getThumbnail(tag, page);
-                    promise.resolve("HALLO");
+                    mDocumentViewInstance.getThumbnail(tag, page, promise);
                 } catch (Exception ex) {
                     promise.reject(ex);
                 }
@@ -413,6 +417,23 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
             public void run() {
                 try {
                     mDocumentViewInstance.cancelFindText(tag);
+                    promise.resolve(null);
+                } catch (Exception ex) {
+                    promise.reject(ex);
+                }
+
+            }
+        });
+    }
+
+
+    @ReactMethod
+    public void appendSchoolLogo(final int tag, String base64str, boolean isDuplex, final Promise promise) {
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mDocumentViewInstance.appendSchoolLogo(tag, base64str, isDuplex);
                     promise.resolve(null);
                 } catch (Exception ex) {
                     promise.reject(ex);

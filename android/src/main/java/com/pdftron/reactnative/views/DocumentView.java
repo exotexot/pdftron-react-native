@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -17,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -85,11 +89,17 @@ import com.pdftron.pdf.TextSearch;
 import com.pdftron.pdf.Highlights;
 import com.pdftron.pdf.Bookmark;
 import com.pdftron.pdf.Destination;
+import com.pdftron.pdf.tools.CustomRelativeLayout;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+
+import com.pdftron.pdf.ThumbAsyncHandler;
 
 import android.graphics.Bitmap;
 import java.io.ByteArrayOutputStream;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 
 
@@ -1668,7 +1678,6 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
     public void customInit() {
 
-
         // Replace Buttons in Thumbnail Slider
         View v = mPdfViewCtrlTabHostFragment.getView();
         if (v != null) {
@@ -1687,6 +1696,10 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         }
 
     }
+
+
+
+
 
 
     public void showViewModeDialog(FragmentManager fragmentManager) {
@@ -1921,16 +1934,13 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
 
 
-    public void getThumbnail(int page) throws PDFNetException {
+    public void getThumbnail(int page, Promise promise) throws PDFNetException {
 
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
-        PDFDoc pdfDoc = pdfViewCtrl.getDoc();
 
-        pdfViewCtrl.getThumbAsync(page);
-
-        pdfViewCtrl.addThumbAsyncListener(new PDFViewCtrl.ThumbAsyncListener() {
+        PDFViewCtrl.ThumbAsyncListener listener = new PDFViewCtrl.ThumbAsyncListener() {
             @Override
-            public void onThumbReceived(int page, int[] buf, int width, int height) {
+            public void onThumbReceived(int i, int[] buf, int width, int height) {
                 try {
 
                     Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -1941,16 +1951,60 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                     byte[] byteArray = byteArrayOutputStream .toByteArray();
 
                     String base64str = Base64.encodeToString(byteArray, Base64.DEFAULT);
-                    System.out.println("BASE64" + base64str);
+                    promise.resolve(base64str);
 
                 } catch (OutOfMemoryError oom) {
                     // error
                 }
-            }
 
-        });
+            }
+        };
+
+        pdfViewCtrl.addThumbAsyncListener(listener);
+
+        pdfViewCtrl.getThumbAsync(page);
 
     }
+
+
+
+
+    public void appendSchoolLogo (String base64str, boolean isDuplex) throws PDFNetException {
+
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        Context context = pdfViewCtrl.getContext();
+        int pages = pdfViewCtrl.getPageCount();
+
+        if (pages < 2) return;
+
+        byte[] decodedString = Base64.decode(base64str, Base64.DEFAULT);
+        Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        Drawable d = new BitmapDrawable(getResources(), bitmap);
+
+        int maxImageWidth = 120;
+        int maxImageHeight = 37;
+
+        int offsetTop = 25;
+        int offsetHorizontal = 60;
+
+        for (int page = 1; page <= pages; page++) {
+            com.pdftron.pdf.Rect rect = new com.pdftron.pdf.Rect();
+            rect.set(0,0,maxImageWidth,maxImageHeight);
+
+            CustomRelativeLayout overlay = new CustomRelativeLayout(context);
+
+            overlay.setRect(pdfViewCtrl, rect, page);
+            overlay.setBackground( d );
+            overlay.setZoomWithParent(true);
+            pdfViewCtrl.addView(overlay);
+        }
+    }
+
+
+
+
+
+
 
 
 }

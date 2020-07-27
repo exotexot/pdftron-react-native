@@ -7,6 +7,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -429,12 +430,12 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
     }
 
 
-    public void getThumbnail(int tag, int page) throws PDFNetException {
+    public void getThumbnail(int tag, int page, Promise promise) throws PDFNetException {
         DocumentView documentView = mDocumentViews.get(tag);
         if (documentView != null) {
-            documentView.getThumbnail(page);
+            documentView.getThumbnail(page, promise);
         } else {
-            throw new PDFNetException("", 0L, getName(), "getOutline", "Unable to find DocumentView.");
+            throw new PDFNetException("", 0L, getName(), "getThumbnail", "Unable to find DocumentView.");
         }
     }
 
@@ -442,7 +443,7 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
     public void abortGetThumbnail(int tag) throws PDFNetException {
         DocumentView documentView = mDocumentViews.get(tag);
         if (documentView != null) {
-            documentView.cancelFindText();
+            documentView.abortGetThumbnail();
         } else {
             throw new PDFNetException("", 0L, getName(), "abortGetThumb", "Unable to find DocumentView.");
         }
@@ -464,6 +465,16 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
         DocumentView documentView = mDocumentViews.get(tag);
         if (documentView != null) {
             documentView.cancelFindText();
+        } else {
+            throw new PDFNetException("", 0L, getName(), "CancelfindText", "Unable to find DocumentView.");
+        }
+    }
+
+
+    public void appendSchoolLogo(int tag, String base64str, boolean isDuplex) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            documentView.appendSchoolLogo(base64str, isDuplex);
         } else {
             throw new PDFNetException("", 0L, getName(), "CancelfindText", "Unable to find DocumentView.");
         }
