@@ -478,5 +478,4 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
     }
 
 
-
 }

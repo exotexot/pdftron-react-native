@@ -162,6 +162,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (int)currentPage;
 
+- (void)changeBackground:(int)r green:(int)g blue:(int)b;
+
 
 
 @end

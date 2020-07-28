@@ -118,6 +118,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     private static final String ON_ANNOTATIONS_SELECTED = "onAnnotationsSelected";
     private static final String ON_BEHAVIOR_ACTIVATED = "onBehaviorActivated";
     private static final String ON_FORM_FIELD_VALUE_CHANGED = "onFormFieldValueChanged";
+    private static final String ON_TOGGLE_SIDEBAR = "onToggleSidebar";
+
 
     private static final String PREV_PAGE_KEY = "previousPageNumber";
     private static final String PAGE_CURRENT_KEY = "pageNumber";
@@ -1287,7 +1289,11 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         }
 
         // Custom init
-        customInit();
+        try {
+            customInit();
+        } catch (PDFNetException e) {
+            e.printStackTrace();
+        }
 
         onReceiveNativeEvent(ON_DOCUMENT_LOADED, tag);
     }
@@ -1673,7 +1679,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
     // CAT Europe
 
-    public void customInit() {
+    public void customInit() throws PDFNetException {
 
         // Replace Buttons in Thumbnail Slider
         View v = mPdfViewCtrlTabHostFragment.getView();
@@ -1684,7 +1690,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                 @Override
                 public void onMenuItemClicked(int i) {
                     if (i == ThumbnailSlider.POSITION_LEFT) {
-                        System.out.println("Start clicked ");
+                        onReceiveNativeEvent(ON_TOGGLE_SIDEBAR, ON_TOGGLE_SIDEBAR);
                     } else {
                         showViewModeDialog(mFragmentManagerSave);
                     }
@@ -1693,7 +1699,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         }
 
 
-
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        pdfViewCtrl.setPageSpacing(10,10,100,100);
 
     }
 
@@ -1704,9 +1711,6 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         pdfViewCtrl.setClientBackgroundColor(r, g, b, false);
 
     }
-
-
-
 
 
 

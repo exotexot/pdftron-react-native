@@ -716,6 +716,18 @@ RCT_CUSTOM_VIEW_PROPERTY(longPressMenuEnabled, BOOL, RNTPTDocumentView)
 
 
 
+- (void)changeBackgroundForDocumentViewTag:(NSNumber *)tag changeBackground:(int)r green:(int)g blue:(int)b
+{
+    RNTPTDocumentView *documentView = self.documentViews[tag];
+    if (documentView) {
+        return [documentView changeBackground:r green:g blue:b];
+    } else {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
+    }
+}
+
+
+
 
 #pragma mark - DocumentView attached/detached
 

@@ -501,5 +501,4 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
     }
 
 
-
 }

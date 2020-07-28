@@ -64,6 +64,11 @@
 
 - (int)currentPageForDocumentViewTag:(NSNumber *)tag;
 
+- (void)changeBackgroundForDocumentViewTag:(NSNumber *)tag changeBackground:(int)r green:(int)g blue:(int)b;
+
+
+
+
 
 
 @end

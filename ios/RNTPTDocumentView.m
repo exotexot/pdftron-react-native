@@ -1350,14 +1350,10 @@ static NSMutableArray* globalSearchResults;
 
 - (void)toggleSidebar
 {
-    NSLog(@"TOGGELS SIDEBAR ACTIONS TEST");
     if([self.delegate respondsToSelector:@selector(toggleSidebar:)]) {
         [self.delegate toggleSidebar:self];
     }
 }
-
-
-
 
 
 
@@ -2019,7 +2015,15 @@ static NSMutableArray* globalSearchResults;
                                
 //    UIBarButtonItem *testButton = [[UIBarButtonItem alloc] initWithTitle:@"SIDEBAR" style:UIBarButtonItemStylePlain target:self action:@selector(toggleSidebar)];
     self.documentViewController.thumbnailSliderController.leadingToolbarItem = sidebarButton;
+    
+    
+    
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    [pdfViewCtrl SetPageSpacing:10 vert_col_space:10 horiz_pad:100 vert_pad:100];
 }
+
+
+
 
 - (void)getThumbnail:(int)pageNumber completionHandler:(void (^)(NSString * _Nullable base64Str))completionHandler
 {
@@ -2033,9 +2037,9 @@ static NSMutableArray* globalSearchResults;
         NSData *data = UIImagePNGRepresentation(thumb);
         NSString *base64Str = [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
         completionHandler(base64Str);
-//        [self.delegate thumbnailCreated:self page:pageNumber base64String:base64Str];
     }];
 }
+
 
 
 
@@ -2048,11 +2052,6 @@ static NSMutableArray* globalSearchResults;
 
 
 
-
-
-
-
-
 // Custom Search
 - (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString case:(BOOL)isCase whole:(BOOL)isWhole
 {
@@ -2060,7 +2059,7 @@ static NSMutableArray* globalSearchResults;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
     
     PTTextSearch *search = [[PTTextSearch alloc] init];
-    
+
     
     // Whack mode setting
     unsigned int mode = 0;
@@ -2074,8 +2073,8 @@ static NSMutableArray* globalSearchResults;
         mode = e_pthighlight|e_ptambient_string;
     }
     
+
     
-                    
     NSString *pattern = searchString;
     [search Begin:pdfDoc pattern:pattern mode:mode start_page:-1 end_page:-1];
     
@@ -2161,6 +2160,7 @@ static NSMutableArray* globalSearchResults;
 //    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
 //    [pdfViewCtrl FindText:searchString MatchCase:NO MatchWholeWord:NO SearchUp:direction RegExp:NO];
 //}
+
 
 
 
@@ -2366,6 +2366,17 @@ static NSMutableArray* globalSearchResults;
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
     return [pdfViewCtrl GetCurrentPage];
 }
+
+
+
+
+- (void)changeBackground:(int)r green:(int)g blue:(int)b
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    [pdfViewCtrl SetBackgroundColor:(char)r g:(char)g b:(char)b a:255];
+}
+
+
 
 
 @end
