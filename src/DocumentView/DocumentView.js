@@ -324,6 +324,16 @@ export default class DocumentView extends PureComponent {
   }
 
 
+  findTextResult = (nextprev) => {
+    // console.log("Search event triggered")
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.findTextResult(tag, nextprev);
+    }
+    return Promise.resolve();
+  }
+
+
   // getDimensions
   getDimensions = () => {
     const tag = findNodeHandle(this._viewerRef);
@@ -426,6 +436,17 @@ export default class DocumentView extends PureComponent {
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
       return DocumentViewManager.currentPage(tag);
+    }
+    return Promise.resolve();
+  }
+
+
+  // Current Page Test 
+  changeBackground = (r, g, b) => {
+    // console.log("Current event triggered")
+    const tag = findNodeHandle(this._viewerRef);
+    if (tag != null) {
+      return DocumentViewManager.changeBackground(tag, r, g, b);
     }
     return Promise.resolve();
   }

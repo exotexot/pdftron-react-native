@@ -2153,10 +2153,14 @@ static NSMutableArray* globalSearchResults;
 {
     PTDocumentViewController *docViewCtrl = self.documentViewController;
     [docViewCtrl showSearchViewController];
-    
-//    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
-//    [pdfViewCtrl FindText:searchString MatchCase:NO MatchWholeWord:NO SearchUp:NO RegExp:NO];
 }
+
+
+//- (void)findTextIOS:(NSString *)searchString direction:(BOOL)direction
+//{
+//    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+//    [pdfViewCtrl FindText:searchString MatchCase:NO MatchWholeWord:NO SearchUp:direction RegExp:NO];
+//}
 
 
 

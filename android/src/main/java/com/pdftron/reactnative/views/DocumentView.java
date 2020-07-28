@@ -4,9 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -90,7 +88,6 @@ import com.pdftron.pdf.Highlights;
 import com.pdftron.pdf.Bookmark;
 import com.pdftron.pdf.Destination;
 import com.pdftron.pdf.tools.CustomRelativeLayout;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 
 import com.pdftron.pdf.ThumbAsyncHandler;
@@ -1695,6 +1692,17 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             });
         }
 
+
+
+
+    }
+
+
+    public void changeBackground(int r, int g, int b) throws PDFNetException {
+
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        pdfViewCtrl.setClientBackgroundColor(r, g, b, false);
+
     }
 
 
@@ -1813,6 +1821,20 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         }
 
     }
+
+
+    public void findTextResult(boolean nextprev) throws PDFNetException {
+
+        if (nextprev) {
+            getPdfViewCtrlTabFragment().gotoNextSearch();
+        } else {
+            getPdfViewCtrlTabFragment().gotoPreviousSearch();
+        }
+
+    }
+
+
+
 
 
 
@@ -1977,28 +1999,23 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
         if (pages < 2) return;
 
-        byte[] decodedString = Base64.decode(base64str, Base64.DEFAULT);
-        Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        Drawable d = new BitmapDrawable(getResources(), bitmap);
-
-        int maxImageWidth = 120;
-        int maxImageHeight = 37;
-
-        int offsetTop = 25;
-        int offsetHorizontal = 60;
-
         for (int page = 1; page <= pages; page++) {
-            com.pdftron.pdf.Rect rect = new com.pdftron.pdf.Rect();
-            rect.set(0,0,maxImageWidth,maxImageHeight);
 
+            System.out.println("THIS IS PAGE" + page);
+            com.pdftron.pdf.Rect rect = new com.pdftron.pdf.Rect();
+            rect.set(0,0,100,100);
+
+            ColorDrawable col = new ColorDrawable(0xFFFF6666);
             CustomRelativeLayout overlay = new CustomRelativeLayout(context);
 
             overlay.setRect(pdfViewCtrl, rect, page);
-            overlay.setBackground( d );
+            overlay.setBackground( col );
             overlay.setZoomWithParent(true);
             pdfViewCtrl.addView(overlay);
         }
+
     }
+
 
 
 

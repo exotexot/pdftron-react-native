@@ -14,6 +14,7 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.pdftron.common.PDFNetException;
+import com.pdftron.pdf.PDFViewCtrl;
 import com.pdftron.pdf.utils.PdfViewCtrlSettingsManager;
 import com.pdftron.reactnative.views.DocumentView;
 
@@ -470,6 +471,15 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
         }
     }
 
+    public void findTextResult(int tag, boolean nextprev) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            documentView.findTextResult(nextprev);
+        } else {
+            throw new PDFNetException("", 0L, getName(), "FindTextResult", "Unable to find DocumentView.");
+        }
+    }
+
 
     public void appendSchoolLogo(int tag, String base64str, boolean isDuplex) throws PDFNetException {
         DocumentView documentView = mDocumentViews.get(tag);
@@ -480,6 +490,15 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
         }
     }
 
+
+    public void changeBackground(int tag, int r, int g, int b) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            documentView.changeBackground(r, g, b);
+        } else {
+            throw new PDFNetException("", 0L, getName(), "changeBackground", "Unable to find DocumentView.");
+        }
+    }
 
 
 

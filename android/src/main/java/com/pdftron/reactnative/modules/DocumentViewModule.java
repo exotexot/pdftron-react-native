@@ -428,12 +428,46 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
 
 
     @ReactMethod
+    public void findTextResult(final int tag, boolean nextprev, final Promise promise) {
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mDocumentViewInstance.findTextResult(tag, nextprev);
+                    promise.resolve(null);
+                } catch (Exception ex) {
+                    promise.reject(ex);
+                }
+
+            }
+        });
+    }
+
+
+    @ReactMethod
     public void appendSchoolLogo(final int tag, String base64str, boolean isDuplex, final Promise promise) {
         getReactApplicationContext().runOnUiQueueThread(new Runnable() {
             @Override
             public void run() {
                 try {
                     mDocumentViewInstance.appendSchoolLogo(tag, base64str, isDuplex);
+                    promise.resolve(null);
+                } catch (Exception ex) {
+                    promise.reject(ex);
+                }
+
+            }
+        });
+    }
+
+
+    @ReactMethod
+    public void changeBackground(final int tag, int r, int g, int b, final Promise promise) {
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mDocumentViewInstance.changeBackground(tag, r, g, b);
                     promise.resolve(null);
                 } catch (Exception ex) {
                     promise.reject(ex);
