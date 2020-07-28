@@ -491,7 +491,7 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
         if (documentView != null) {
             documentView.appendSchoolLogo(base64str, isDuplex);
         } else {
-            throw new PDFNetException("", 0L, getName(), "CancelfindText", "Unable to find DocumentView.");
+            throw new PDFNetException("", 0L, getName(), "AppendSchoolLogo", "Unable to find DocumentView.");
         }
     }
 

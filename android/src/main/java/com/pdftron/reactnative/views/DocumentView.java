@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -37,6 +39,7 @@ import com.pdftron.pdf.Action;
 import com.pdftron.pdf.ActionParameter;
 import com.pdftron.pdf.Annot;
 import com.pdftron.pdf.Field;
+import com.pdftron.pdf.Image;
 import com.pdftron.pdf.PDFDoc;
 import com.pdftron.pdf.PDFViewCtrl;
 import com.pdftron.pdf.Page;
@@ -83,20 +86,14 @@ import java.util.Map;
 
 import com.pdftron.pdf.TextSearchResult;
 import com.pdftron.pdf.TextSearch;
-import com.pdftron.pdf.Highlights;
 import com.pdftron.pdf.Bookmark;
 import com.pdftron.pdf.Destination;
 import com.pdftron.pdf.tools.CustomRelativeLayout;
-import android.graphics.Color;
-
-import com.pdftron.pdf.ThumbAsyncHandler;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import java.io.ByteArrayOutputStream;
-
-import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.IntStream;
+import android.widget.ImageView;
 
 
 
@@ -1782,9 +1779,12 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         }
 
 
+//        pdfViewCtrl.DEFAULT_BG_COLOR = 100;
+
+
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
         pdfViewCtrl.setPageSpacing(10,10,100,100);
-
+        pdfViewCtrl.updatePageLayout();
     }
 
 
@@ -2086,19 +2086,53 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
         if (pages < 2) return;
 
-        for (int page = 1; page <= pages; page++) {
+        PDFDoc pdfDoc = pdfViewCtrl.getDoc();
+        Page firstPage = pdfDoc.getPage(1);
+        double width = firstPage.getPageWidth(3);      // 3 = e_trim
+        double height = firstPage.getPageHeight(3);    // 3 = e_trim
 
-            System.out.println("THIS IS PAGE" + page);
-            com.pdftron.pdf.Rect rect = new com.pdftron.pdf.Rect();
-            rect.set(0,0,100,100);
+        int maxImageWidth = 120;
+        int maxImageHeight = 37;
 
-            ColorDrawable col = new ColorDrawable(0xFFFF6666);
+        int offsetTop = 25;
+        int offsetHorizontal = 60;
+
+        ColorDrawable col = new ColorDrawable(0xFFFF6666);
+
+        byte[] decodedString = Base64.decode(base64str, Base64.DEFAULT);
+        Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+
+        BitmapDrawable bitmapDrawable = new BitmapDrawable(getResources(), bitmap);
+
+        System.out.println("BASE LOGO ANDROID" + decodedString + base64str);
+
+        for (int page = 2; page <= pages; page++) {
+
+            com.pdftron.pdf.Rect topLeft = new com.pdftron.pdf.Rect();
+            topLeft.set(offsetHorizontal,height-maxImageHeight-offsetTop,maxImageWidth+offsetHorizontal,height-offsetTop);
+
+            com.pdftron.pdf.Rect topRight = new com.pdftron.pdf.Rect();
+            topRight.set(width - maxImageWidth - offsetHorizontal,height-maxImageHeight-offsetTop,width-offsetHorizontal,height-offsetTop);
+
             CustomRelativeLayout overlay = new CustomRelativeLayout(context);
-
-            overlay.setRect(pdfViewCtrl, rect, page);
-            overlay.setBackground( col );
             overlay.setZoomWithParent(true);
-            pdfViewCtrl.addView(overlay);
+
+//            overlay.setBackground( col );
+
+
+            ImageView iv = new ImageView(context);
+            iv.setImageBitmap(bitmap);
+
+
+            overlay.setBackground(bitmapDrawable);
+
+            if(isDuplex) {
+                overlay.setRect(pdfViewCtrl, (page % 2 == 0) ? topLeft : topRight, page);
+            } else {
+                overlay.setRect(pdfViewCtrl, topLeft, page);
+            }
+            pdfViewCtrl.addView(iv);
+
         }
 
     }
