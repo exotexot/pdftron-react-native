@@ -73,7 +73,6 @@ import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -180,7 +179,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
     private boolean mAutoSaveEnabled = true;
 
-    private boolean mUseStylusAsPen = false;
+    private boolean mUseStylusAsPen = true;
+    private boolean mSignWithStamps;
 
     // collab
     private CollabManager mCollabManager;
@@ -197,6 +197,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
     // custom behaviour
     private ReadableArray mActionOverrideItems;
+
+    private ArrayList<ViewModePickerDialogFragment.ViewModePickerItems> mViewModePickerItems = new ArrayList<>();
 
     public DocumentView(Context context) {
         super(context);
@@ -454,6 +456,10 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         mActionOverrideItems = items;
     }
 
+    public void setSignSignatureFieldsWithStamps(boolean signWithStamps) {
+        mSignWithStamps = signWithStamps;
+    }
+
     private void disableElements(ReadableArray args) {
         for (int i = 0; i < args.size(); i++) {
             String item = args.getString(i);
@@ -504,12 +510,11 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                 mBuilder = mBuilder.showUserBookmarksList(false);
             } else if ("reflowButton".equals(item)) {
                 mBuilder = mBuilder.showReflowOption(false);
+                mViewModePickerItems.add(ViewModePickerDialogFragment.ViewModePickerItems.ITEM_ID_REFLOW);
             } else if ("editMenuButton".equals(item)) {
                 mBuilder = mBuilder.showEditMenuOption(false);
             } else if ("cropPageButton".equals(item)) {
-                mBuilder = mBuilder.hideViewModeItems(new ViewModePickerDialogFragment.ViewModePickerItems[]{
-                        ViewModePickerDialogFragment.ViewModePickerItems.ITEM_ID_USERCROP
-                });
+                mViewModePickerItems.add(ViewModePickerDialogFragment.ViewModePickerItems.ITEM_ID_USERCROP);
             }
         }
         disableTools(args);
@@ -594,8 +599,6 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             annotType = Annot.e_Widget;
         } else if ("FormCreateListBoxField".equals(item)) {
             annotType = Annot.e_Widget;
-        } else if ("Eraser".equals(item)) {
-            annotType = Annot.e_Unknown;
         }
         return annotType;
     }
@@ -675,7 +678,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             mode = ToolManager.ToolMode.FORM_COMBO_BOX_CREATE;
         } else if ("FormCreateListBoxField".equals(item)) {
             mode = ToolManager.ToolMode.FORM_LIST_BOX_CREATE;
-        } else if ("Eraser".equals(item)) {
+        } else if ("AnnotationEraserTool".equals(item)) {
             mode = ToolManager.ToolMode.INK_ERASER;
         }
         return mode;
@@ -746,6 +749,9 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             if (modes.length > 0) {
                 mToolManagerBuilder = mToolManagerBuilder.disableToolModes(modes);
             }
+        }
+        if (mViewModePickerItems.size() > 0) {
+            mBuilder = mBuilder.hideViewModeItems(mViewModePickerItems.toArray(new ViewModePickerDialogFragment.ViewModePickerItems[0]));
         }
         return mBuilder
                 .pdfViewCtrlConfig(mPDFViewCtrlConfig)
@@ -1148,6 +1154,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         @Override
         public void onAnnotationsAdded(Map<Annot, Integer> map) {
             handleAnnotationChanged(KEY_action_add, map);
+
+            handleExportAnnotationCommand(KEY_action_add, map);
         }
 
         @Override
@@ -1158,6 +1166,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         @Override
         public void onAnnotationsModified(Map<Annot, Integer> map, Bundle bundle) {
             handleAnnotationChanged(KEY_action_modify, map);
+
+            handleExportAnnotationCommand(KEY_action_modify, map);
 
             // handle form fields change
             WritableMap params = Arguments.createMap();
@@ -1190,6 +1200,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         @Override
         public void onAnnotationsPreRemove(Map<Annot, Integer> map) {
             handleAnnotationChanged(KEY_action_delete, map);
+
+            handleExportAnnotationCommand(KEY_action_delete, map);
         }
 
         @Override
@@ -1236,6 +1248,46 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         onReceiveNativeEvent(params);
     }
 
+    private void handleExportAnnotationCommand(String action, Map<Annot, Integer> map) {
+        if (mCollabManager == null) {
+            // fallback for export annotations when collab not present
+            ArrayList<Annot> annots = new ArrayList<>(map.keySet());
+            String xfdfCommand = null;
+            try {
+                if (KEY_action_add.equals(action)) {
+                    xfdfCommand = generateXfdfCommand(annots, null, null);
+                } else if (KEY_action_modify.equals(action)) {
+                    xfdfCommand = generateXfdfCommand(null, annots, null);
+                } else {
+                    xfdfCommand = generateXfdfCommand(null, null, annots);
+                }
+            } catch (PDFNetException e) {
+                e.printStackTrace();
+            }
+
+            if (xfdfCommand != null) {
+                WritableMap params = Arguments.createMap();
+                params.putString(ON_EXPORT_ANNOTATION_COMMAND, ON_EXPORT_ANNOTATION_COMMAND);
+                params.putString(KEY_action, action);
+                params.putString(KEY_xfdfCommand, xfdfCommand);
+                onReceiveNativeEvent(params);
+            }
+        }
+    }
+
+    // helper
+    @Nullable
+    private String generateXfdfCommand(@Nullable ArrayList<Annot> added,
+            @Nullable ArrayList<Annot> modified,
+            @Nullable ArrayList<Annot> removed) throws PDFNetException {
+        PDFDoc pdfDoc = getPdfDoc();
+        if (pdfDoc != null) {
+            FDFDoc fdfDoc = pdfDoc.fdfExtract(added, modified, removed);
+            return fdfDoc.saveAsXFDF();
+        }
+        return null;
+    }
+
     @Override
     public void onTabDocumentLoaded(String tag) {
         super.onTabDocumentLoaded(tag);
@@ -1259,6 +1311,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         getToolManager().addAnnotationsSelectionListener(mAnnotationsSelectionListener);
 
         getToolManager().setStylusAsPen(mUseStylusAsPen);
+        getToolManager().setSignSignatureFieldsWithStamps(mSignWithStamps);
 
         getPdfViewCtrlTabFragment().addQuickMenuListener(mQuickMenuListener);
 
@@ -1333,7 +1386,41 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         if (mCollabManager != null) {
             mCollabManager.importAnnotationCommand(xfdfCommand, initialLoad);
         } else {
-            throw new PDFNetException("", 0L, TAG, "importAnnotationCommand", "set collabEnabled to true is required.");
+            PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+            PDFDoc pdfDoc = getPdfDoc();
+            if (null == pdfViewCtrl || null == pdfDoc || null == xfdfCommand) {
+                return;
+            }
+            boolean shouldUnlockRead = false;
+            try {
+                pdfViewCtrl.docLockRead();
+                shouldUnlockRead = true;
+
+                if (pdfDoc.hasDownloader()) {
+                    // still downloading file, let's wait for next call
+                    return;
+                }
+            } finally {
+                if (shouldUnlockRead) {
+                    pdfViewCtrl.docUnlockRead();
+                }
+            }
+
+            boolean shouldUnlock = false;
+            try {
+                pdfViewCtrl.docLock(true);
+                shouldUnlock = true;
+
+                FDFDoc fdfDoc = pdfDoc.fdfExtract(PDFDoc.e_both);
+                fdfDoc.mergeAnnots(xfdfCommand);
+
+                pdfDoc.fdfUpdate(fdfDoc);
+                pdfViewCtrl.update(true);
+            } finally {
+                if (shouldUnlock) {
+                    pdfViewCtrl.docUnlock();
+                }
+            }
         }
     }
 
@@ -1616,15 +1703,11 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         return false;
     }
 
-    public boolean canExitViewer() {
-        PdfViewCtrlTabFragment currentFragment = getPdfViewCtrlTabFragment();
-        if (currentFragment.isAnnotationMode()) {
-            return false;
+    public boolean handleBackButton() {
+        if (mPdfViewCtrlTabHostFragment != null) {
+            return mPdfViewCtrlTabHostFragment.handleBackPressed();
         }
-        if (currentFragment.isSearchMode()) {
-            return false;
-        }
-        return true;
+        return false;
     }
 
     public PdfViewCtrlTabFragment getPdfViewCtrlTabFragment() {

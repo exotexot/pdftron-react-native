@@ -351,6 +351,7 @@ A component for displaying documents of different types such as PDF, docx, pptx,
 - [onAnnotationMenuPress](#onannotationmenupress)
 - [pageChangeOnTap](#pagechangeontap)
 - [useStylusAsPen](#usestylusaspen)
+- [signSignatureFieldsWithStamps](#signsignaturefieldswithstamps)
 - [longPressMenuEnabled](#longPressMenuEnabled)
 
 ##### document
@@ -495,12 +496,16 @@ Action | Param
 ##### pageChangeOnTap
 bool, optional, default to true
 ##### useStylusAsPen
-bool, optional, default to false on Android, true on iOS
-
+bool, optional, default to true
 If true, stylus will act as a pen in pan mode, otherwise it will act as finger
+
+##### signSignatureFieldsWithStamps
+bool, optional, default to false
+If true, signature field will be signed with image stamp.
+This is useful if you are saving XFDF to remote source.
+
 ##### followSystemDarkMode
 bool, optional, Android only, default to true
-
 If true, UI will appear in dark color when System is dark mode. Otherwise it will use viewer setting instead.
 ##### collabEnabled
 bool, optional, if set to true then `currentUser` must be set as well for collaboration mode to work
@@ -509,7 +514,7 @@ string, required if `collabEnabled` is set to true
 ##### currentUserName
 string, optional
 ##### onExportAnnotationCommand
-function, optional, annotation command will only be given if `collabEnabled` is set to true
+function, optional, annotation command will be given on each edit
 ##### onAnnotationsSelected
 function, optional
 
@@ -577,7 +582,7 @@ fields | array | array of field data in the format `{fieldName: string, fieldVal
 - [setFlagForFields](#setFlagForFields)
 - [setValueForFields](#setValueForFields)
 - [importAnnotationCommand](#importannotationcommand)
-- [canExitViewer](#canexitviewer)
+- [handleBackButton](#handlebackbutton)
 
 ##### setToolMode
 To set the current tool mode (`Config.Tools` constants).
@@ -724,7 +729,6 @@ this._viewer.setValueForFields({
 ```
 
 ##### importAnnotationCommand
-This is used only if `collabEnabled` is set to true.
 Import remote annotation command to local document.
 
 Parameters:
@@ -736,10 +740,16 @@ initialLoad | bool | whether this is for initial load
 
 Returns a Promise.
 
-##### canExitViewer
+##### handleBackButton
 Android only.
-This is useful for custom back button handling on Android.
-This method will indicate whether you can do your custom handling or the viewer is still not done yet.
+
+```js
+this._viewer.handleBackButton().then((handled) => {
+  if (!handled) {
+    BackHandler.exitApp();
+  }
+});
+```
 
 ## Contributing
 See [Contributing](./CONTRIBUTING.md)

@@ -636,6 +636,9 @@ static NSMutableArray* globalSearchResults;
     else if ( [toolMode isEqualToString:@"AnnotationCreateAreaMeasurement"]) {
         toolClass = [PTAreaCreate class];
     }
+    else if ( [toolMode isEqualToString:@"AnnotationEraserTool"]) {
+        toolClass = [PTEraser class];
+    }
     
     // Adjustment - Apple Pencil and Eraser Tools
     else if ( [toolMode isEqualToString:@"ApplePencil"])
@@ -1030,7 +1033,37 @@ static NSMutableArray* globalSearchResults;
         [self.collaborationManager importAnnotationsWithXFDFCommand:xfdfCommand
                                                           isInitial:initialLoad];
     } else {
-        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"set collabEnabled to true is required" userInfo:nil];
+        PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+        PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+        BOOL shouldUnlockRead = NO;
+        @try {
+            [pdfViewCtrl DocLockRead];
+            shouldUnlockRead = YES;
+            if (pdfDoc.HasDownloader) {
+                return;
+            }
+        }
+        @finally {
+            if (shouldUnlockRead) {
+                [pdfViewCtrl DocUnlockRead];
+            }
+        }
+
+        BOOL shouldUnlock = NO;
+        @try {
+            [pdfViewCtrl DocLock:YES];
+            shouldUnlock = YES;
+
+            PTFDFDoc *fdfDoc = [pdfDoc FDFExtract:e_ptboth];
+            [fdfDoc MergeAnnots:xfdfCommand permitted_user:@""];
+            [pdfDoc FDFUpdate:fdfDoc];
+            [pdfViewCtrl Update:YES];
+        }
+        @finally {
+            if (shouldUnlock) {
+                [pdfViewCtrl DocUnlock];
+            }
+        }
     }
 }
 
@@ -1195,6 +1228,8 @@ static NSMutableArray* globalSearchResults;
     // Shows saved signatures.
     self.toolManager.showDefaultSignature = self.showSavedSignatures;
     
+    self.toolManager.signatureAnnotationOptions.signSignatureFieldsWithStamps = self.signSignatureFieldsWithStamps;
+    
     // Use Apple Pencil as a pen
     Class pencilTool = [PTFreeHandCreate class];
     if (@available(iOS 13.0, *)) {
@@ -1347,7 +1382,6 @@ static NSMutableArray* globalSearchResults;
 }
 
 
-
 - (void)toggleSidebar
 {
     if([self.delegate respondsToSelector:@selector(toggleSidebar:)]) {
@@ -1355,6 +1389,15 @@ static NSMutableArray* globalSearchResults;
     }
 }
 
+
+#pragma mark - signSignatureFieldsWithStamps
+
+-(void)setSignSignatureFieldsWithStamps:(BOOL)signSignatureFieldsWithStamps
+{
+    _signSignatureFieldsWithStamps = signSignatureFieldsWithStamps;
+    
+    [self applyViewerSettings];
+}
 
 
 
@@ -1893,6 +1936,11 @@ static NSMutableArray* globalSearchResults;
             @"pageNumber": @(pageNumber),
         } action:@"add"];
     }
+    if (!self.collaborationManager) {
+        PTVectorAnnot *annots = [[PTVectorAnnot alloc] init];
+        [annots add:annot];
+        [self rnt_sendExportAnnotationCommandWithAction:@"add" xfdfCommand:[self generateXfdfCommand:annots modified:[[PTVectorAnnot alloc] init] deleted:[[PTVectorAnnot alloc] init]]];
+    }
 }
 
 - (void)toolManagerDidModifyAnnotationWithNotification:(NSNotification *)notification
@@ -1912,6 +1960,11 @@ static NSMutableArray* globalSearchResults;
             @"pageNumber": @(pageNumber),
         } action:@"modify"];
     }
+    if (!self.collaborationManager) {
+        PTVectorAnnot *annots = [[PTVectorAnnot alloc] init];
+        [annots add:annot];
+        [self rnt_sendExportAnnotationCommandWithAction:@"modify" xfdfCommand:[self generateXfdfCommand:[[PTVectorAnnot alloc] init] modified:annots deleted:[[PTVectorAnnot alloc] init]]];
+    }
 }
 
 - (void)toolManagerDidRemoveAnnotationWithNotification:(NSNotification *)notification
@@ -1930,6 +1983,11 @@ static NSMutableArray* globalSearchResults;
             @"id": annotId,
             @"pageNumber": @(pageNumber),
         } action:@"remove"];
+    }
+    if (!self.collaborationManager) {
+        PTVectorAnnot *annots = [[PTVectorAnnot alloc] init];
+        [annots add:annot];
+        [self rnt_sendExportAnnotationCommandWithAction:@"delete" xfdfCommand:[self generateXfdfCommand:[[PTVectorAnnot alloc] init] modified:[[PTVectorAnnot alloc] init] deleted:annots]];
     }
 }
 
@@ -1966,7 +2024,31 @@ static NSMutableArray* globalSearchResults;
                 @"fieldValue": fieldValue,
             }];
         }
+        if (!self.collaborationManager) {
+            PTVectorAnnot *annots = [[PTVectorAnnot alloc] init];
+            [annots add:annot];
+            [self rnt_sendExportAnnotationCommandWithAction:@"modify" xfdfCommand:[self generateXfdfCommand:[[PTVectorAnnot alloc] init] modified:annots deleted:[[PTVectorAnnot alloc] init]]];
+        }
     }
+}
+
+-(NSString*)generateXfdfCommand:(PTVectorAnnot*)added modified:(PTVectorAnnot*)modified deleted:(PTVectorAnnot*)deleted {
+    NSString *fdfCommand = @"";
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    BOOL shouldUnlockRead = NO;
+    @try {
+        [pdfViewCtrl DocLockRead];
+        shouldUnlockRead = YES;
+        PTPDFDoc *pdfDoc = [self.pdfViewCtrl GetDoc];
+        PTFDFDoc *fdfDoc = [pdfDoc FDFExtractCommand:added annot_modified:modified annot_deleted:deleted];
+        fdfCommand = [fdfDoc SaveAsXFDFToString];
+    }
+    @finally {
+        if (shouldUnlockRead) {
+            [pdfViewCtrl DocUnlockRead];
+        }
+    }
+    return fdfCommand;
 }
 
 

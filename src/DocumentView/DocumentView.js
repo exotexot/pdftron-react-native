@@ -61,6 +61,7 @@ export default class DocumentView extends PureComponent {
     pageChangeOnTap: PropTypes.bool,
     followSystemDarkMode: PropTypes.bool,
     useStylusAsPen: PropTypes.bool,
+    signSignatureFieldsWithStamps: PropTypes.bool,
     onToggleSidebar: PropTypes.func,
     ...ViewPropTypes,
   };
@@ -141,13 +142,6 @@ export default class DocumentView extends PureComponent {
           'longPressText': event.nativeEvent.longPressText,
         });
       }
-    } else if (event.nativeEvent.onLongPressMenuPress) {
-      if (this.props.onLongPressMenuPress) {
-        this.props.onLongPressMenuPress({
-          'longPressMenu': event.nativeEvent.longPressMenu,
-          'longPressText': event.nativeEvent.longPressText,
-        });
-      }
     } else if (event.nativeEvent.onBehaviorActivated) {
       if (this.props.onBehaviorActivated) {
         this.props.onBehaviorActivated({
@@ -191,6 +185,9 @@ export default class DocumentView extends PureComponent {
   importAnnotationCommand = (xfdfCommand, initialLoad) => {
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
+      if (initialLoad === undefined) {
+        initialLoad = false;
+      }
       return DocumentViewManager.importAnnotationCommand(
         tag,
         xfdfCommand,
@@ -256,10 +253,10 @@ export default class DocumentView extends PureComponent {
     return Promise.resolve();
   }
 
-  canExitViewer = () => {
+  handleBackButton = () => {
     const tag = findNodeHandle(this._viewerRef);
     if (tag != null) {
-      return DocumentViewManager.canExitViewer(tag);
+      return DocumentViewManager.handleBackButton(tag);
     }
     return Promise.resolve();
   }
