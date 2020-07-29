@@ -1757,12 +1757,25 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
 
 
+
     // CAT Europe
 
     public void customInit() throws PDFNetException {
 
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        pdfViewCtrl.setPageSpacing(10,10,100,100);
+
+        int RGB = android.graphics.Color.rgb(36, 36, 36);
+
+
+        pdfViewCtrl.DEFAULT_BG_COLOR = RGB;
+        pdfViewCtrl.DEFAULT_DARK_BG_COLOR = RGB;
+        pdfViewCtrl.updatePageLayout();
+
         // Replace Buttons in Thumbnail Slider
         View v = mPdfViewCtrlTabHostFragment.getView();
+        FragmentManager m = mPdfViewCtrlTabHostFragment.getFragmentManager();
+
         if (v != null) {
             ThumbnailSlider slider = v.findViewById(R.id.thumbseekbar);
             slider.setMenuItem(R.drawable.ic_star_white_24dp, ThumbnailSlider.POSITION_LEFT);
@@ -1772,19 +1785,14 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                     if (i == ThumbnailSlider.POSITION_LEFT) {
                         onReceiveNativeEvent(ON_TOGGLE_SIDEBAR, ON_TOGGLE_SIDEBAR);
                     } else {
-                        showViewModeDialog(mFragmentManagerSave);
+                        ViewModePickerDialogFragment dialog = ViewModePickerDialogFragment.newInstance(pdfViewCtrl.getPagePresentationMode(), false, false, 0);
+                        dialog.setViewModePickerDialogFragmentListener(mPdfViewCtrlTabHostFragment);
+                        dialog.show(m, "view_mode_picker");
                     }
                 }
             });
         }
 
-
-//        pdfViewCtrl.DEFAULT_BG_COLOR = 100;
-
-
-        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
-        pdfViewCtrl.setPageSpacing(10,10,100,100);
-        pdfViewCtrl.updatePageLayout();
     }
 
 
@@ -1796,12 +1804,6 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     }
 
 
-
-    public void showViewModeDialog(FragmentManager fragmentManager) {
-        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
-        ViewModePickerDialogFragment dialog = ViewModePickerDialogFragment.newInstance(pdfViewCtrl.getPagePresentationMode(), false, false, 0);
-        dialog.show(fragmentManager, "view_mode_picker");
-    }
 
 
 
