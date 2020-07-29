@@ -3,6 +3,7 @@ package com.pdftron.reactnative.views;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -1893,6 +1894,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     public void findText(String searchString) throws PDFNetException {
 
         if (getPdfViewCtrlTabFragment()!=null) {
+            toggleSlider(false);
             getPdfViewCtrlTabFragment().setSearchNavButtonsVisible(true);
             getPdfViewCtrlTabFragment().queryTextSubmit(searchString);
         }
@@ -2099,14 +2101,9 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         int offsetTop = 25;
         int offsetHorizontal = 60;
 
-        ColorDrawable col = new ColorDrawable(0xFFFF6666);
-
         byte[] decodedString = Base64.decode(base64str, Base64.DEFAULT);
         Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
 
-        BitmapDrawable bitmapDrawable = new BitmapDrawable(getResources(), bitmap);
-
-        System.out.println("BASE LOGO ANDROID" + decodedString + base64str);
 
         for (int page = 2; page <= pages; page++) {
 
@@ -2116,34 +2113,25 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             com.pdftron.pdf.Rect topRight = new com.pdftron.pdf.Rect();
             topRight.set(width - maxImageWidth - offsetHorizontal,height-maxImageHeight-offsetTop,width-offsetHorizontal,height-offsetTop);
 
-            CustomRelativeLayout overlay = new CustomRelativeLayout(context);
-            overlay.setZoomWithParent(true);
-
-//            overlay.setBackground( col );
-
-
+            // Image View
             ImageView iv = new ImageView(context);
             iv.setImageBitmap(bitmap);
+            iv.setScaleType(ImageView.ScaleType.FIT_END);
 
-
-            overlay.setBackground(bitmapDrawable);
+            // Layout
+            CustomRelativeLayout overlay = new CustomRelativeLayout(context);
+            overlay.setZoomWithParent(true);
+            overlay.addView(iv);
 
             if(isDuplex) {
                 overlay.setRect(pdfViewCtrl, (page % 2 == 0) ? topLeft : topRight, page);
             } else {
                 overlay.setRect(pdfViewCtrl, topLeft, page);
             }
-            pdfViewCtrl.addView(iv);
-
+            pdfViewCtrl.addView(overlay);
         }
 
     }
-
-
-
-
-
-
 
 
 
