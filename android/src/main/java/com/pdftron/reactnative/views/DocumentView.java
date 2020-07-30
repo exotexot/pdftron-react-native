@@ -90,6 +90,7 @@ import com.pdftron.pdf.TextSearch;
 import com.pdftron.pdf.Bookmark;
 import com.pdftron.pdf.Destination;
 import com.pdftron.pdf.tools.CustomRelativeLayout;
+import android.util.SparseArray;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
