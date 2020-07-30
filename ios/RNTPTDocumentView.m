@@ -2269,7 +2269,7 @@ static NSMutableArray* globalSearchResults;
     
     if (pages < 2) return;
 
-    NSURL *url = [NSURL URLWithString:base64String];
+    NSURL *url = [NSURL URLWithString:[@"data:image/png;base64," stringByAppendingString:base64String]];
     NSData *imageData = [NSData dataWithContentsOfURL:url];
     
     

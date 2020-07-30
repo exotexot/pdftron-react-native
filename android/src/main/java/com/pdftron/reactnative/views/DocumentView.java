@@ -1766,11 +1766,11 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
         pdfViewCtrl.setPageSpacing(10,10,100,100);
 
-        int RGB = android.graphics.Color.rgb(36, 36, 36);
+        int darkBG = android.graphics.Color.rgb(36, 36, 36);
+        int lightBG = android.graphics.Color.rgb(238, 238, 238);
 
-
-        pdfViewCtrl.DEFAULT_BG_COLOR = RGB;
-        pdfViewCtrl.DEFAULT_DARK_BG_COLOR = RGB;
+        pdfViewCtrl.DEFAULT_BG_COLOR = lightBG;
+        pdfViewCtrl.DEFAULT_DARK_BG_COLOR = darkBG;
         pdfViewCtrl.updatePageLayout();
 
         // Replace Buttons in Thumbnail Slider
@@ -1805,18 +1805,10 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     }
 
 
-
-
-
-
-
-
-
     public int currentPage() throws PDFNetException {
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
         return pdfViewCtrl.getCurrentPage();
     }
-
 
 
 
