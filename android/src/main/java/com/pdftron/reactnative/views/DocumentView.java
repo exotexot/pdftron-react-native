@@ -1913,8 +1913,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
         if (getPdfViewCtrlTabFragment()!=null) {
             toggleSlider(false);
-            getPdfViewCtrlTabFragment().setSearchNavButtonsVisible(true);
             getPdfViewCtrlTabFragment().queryTextSubmit(searchString);
+            getPdfViewCtrlTabFragment().setSearchNavButtonsVisible(true);
         }
 
     }
