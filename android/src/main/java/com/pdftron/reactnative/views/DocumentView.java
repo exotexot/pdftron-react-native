@@ -663,6 +663,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             mode = ToolManager.ToolMode.TEXT_SELECT;
         } else if ("Pan".equals(item)) {
             mode = ToolManager.ToolMode.PAN;
+            setContinuousAnnotationEditing(false);
         } else if ("AnnotationEdit".equals(item)) {
             mode = ToolManager.ToolMode.ANNOT_EDIT_RECT_GROUP;
         } else if ("FormCreateTextField".equals(item)) {
@@ -679,6 +680,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             mode = ToolManager.ToolMode.FORM_LIST_BOX_CREATE;
         } else if ("AnnotationEraserTool".equals(item)) {
             mode = ToolManager.ToolMode.INK_ERASER;
+            setContinuousAnnotationEditing(true);
         }
         return mode;
     }
@@ -730,10 +732,6 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             menuStr = "openAttachment";
         } else if (id == R.id.qm_tts) {
             menuStr = "read";
-        } else if (id == R.id.qm_share) {
-            menuStr = "share";
-        } else if (id == R.id.qm_search) {
-            menuStr = "search";
         }
         return menuStr;
     }
