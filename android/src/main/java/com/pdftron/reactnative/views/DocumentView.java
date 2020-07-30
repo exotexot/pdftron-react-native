@@ -854,6 +854,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         if (getPdfViewCtrl() != null) {
             getPdfViewCtrl().removePageChangeListener(mPageChangeListener);
             getPdfViewCtrl().removeOnCanvasSizeChangeListener(mOnCanvasSizeChangeListener);
+            getPdfViewCtrl().removeThumbAsyncListener(mThumbAsyncListener);
         }
         if (getToolManager() != null) {
             getToolManager().removeAnnotationModificationListener(mAnnotationModificationListener);
@@ -1125,6 +1126,31 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         }
     };
 
+    private PDFViewCtrl.ThumbAsyncListener mThumbAsyncListener = new PDFViewCtrl.ThumbAsyncListener() {
+        @Override
+        public void onThumbReceived(int i, int[] buf, int width, int height) {
+            try {
+
+                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                bitmap.setPixels(buf, 0, width, 0, 0, width, height);
+
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                byte[] byteArray = byteArrayOutputStream.toByteArray();
+
+                String base64str = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+                // resolve promise
+                Promise promise = mThumbnailsMap.get(i);
+                if (promise!=null) {
+                    promise.resolve(base64str);
+                }
+            } catch (OutOfMemoryError oom) {
+                // error
+            }
+        }
+    };
+
     private PDFViewCtrl.PageChangeListener mPageChangeListener = new PDFViewCtrl.PageChangeListener() {
         @Override
         public void onPageChange(int old_page, int cur_page, PDFViewCtrl.PageChangeState pageChangeState) {
@@ -1304,6 +1330,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
         getPdfViewCtrl().addPageChangeListener(mPageChangeListener);
         getPdfViewCtrl().addOnCanvasSizeChangeListener(mOnCanvasSizeChangeListener);
+        getPdfViewCtrl().addThumbAsyncListener(mThumbAsyncListener);
 
         getToolManager().addAnnotationModificationListener(mAnnotationModificationListener);
         getToolManager().addAnnotationsSelectionListener(mAnnotationsSelectionListener);
@@ -2039,36 +2066,13 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
 
 
+    private SparseArray<Promise> mThumbnailsMap = new SparseArray<>();
+
     public void getThumbnail(int page, Promise promise) throws PDFNetException {
 
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
-
-        PDFViewCtrl.ThumbAsyncListener listener = new PDFViewCtrl.ThumbAsyncListener() {
-            @Override
-            public void onThumbReceived(int i, int[] buf, int width, int height) {
-                try {
-
-                    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                    bitmap.setPixels(buf, 0, width, 0, 0, width, height);
-
-                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-                    byte[] byteArray = byteArrayOutputStream .toByteArray();
-
-                    String base64str = Base64.encodeToString(byteArray, Base64.DEFAULT);
-                    promise.resolve(base64str);
-
-                } catch (OutOfMemoryError oom) {
-                    // error
-                }
-
-            }
-        };
-
-        pdfViewCtrl.addThumbAsyncListener(listener);
-
         pdfViewCtrl.getThumbAsync(page);
-
+        mThumbnailsMap.put(page, promise);
     }
 
 
