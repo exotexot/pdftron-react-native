@@ -542,8 +542,6 @@ static NSMutableArray* globalSearchResults;
     
     Class toolClass = Nil;
     
-    bool customFreeTextStyle = false;
-    
     
     if( [toolMode isEqualToString:@"AnnotationEdit"] )
     {
@@ -583,9 +581,7 @@ static NSMutableArray* globalSearchResults;
     }
     else if ( [toolMode isEqualToString:@"AnnotationCreateFreeText"])
     {
-        customFreeTextStyle = false;
         toolClass = [PTFreeTextCreate class];
-
     }
     else if ( [toolMode isEqualToString:@"AnnotationCreateCallout"])
     {
@@ -639,24 +635,13 @@ static NSMutableArray* globalSearchResults;
     else if ( [toolMode isEqualToString:@"AnnotationEraserTool"]) {
         toolClass = [PTEraser class];
     }
-    
-    // Adjustment - Apple Pencil and Eraser Tools
+    // Adjustment - Apple Pencil
     else if ( [toolMode isEqualToString:@"ApplePencil"])
     {
         if (@available(iOS 13.1, *)) {
             toolClass = [PTPencilDrawingCreate class];
         }
     }
-    else if ( [toolMode isEqualToString:@"Eraser"])
-    {
-        toolClass = [PTEraser class];
-    }
-    else if ( [toolMode isEqualToString:@"CustomSticky"])
-    {
-        customFreeTextStyle = true;
-        toolClass = [PTFreeTextCreate class];
-    }
-    
     
     
     if (toolClass) {
@@ -667,19 +652,6 @@ static NSMutableArray* globalSearchResults;
         if ([tool isKindOfClass:[PTFreeHandCreate class]]
             && ![tool isKindOfClass:[PTFreeHandHighlightCreate class]]) {
             ((PTFreeHandCreate *)tool).multistrokeMode = self.continuousAnnotationEditing;
-        }
-        
-        if ([tool isKindOfClass:[PTFreeTextCreate class]] && customFreeTextStyle) {
-            UIColor *stickyYellow = [UIColor colorWithRed: 0.99 green: 0.80 blue: 0.00 alpha: 1.00];
-            [PTColorDefaults setDefaultColor:stickyYellow forAnnotType:e_ptFreeText attribute:ATTRIBUTE_FILL_COLOR colorPostProcessMode:e_ptpostprocess_none];
-            [PTColorDefaults setDefaultColor:stickyYellow forAnnotType:e_ptFreeText attribute:ATTRIBUTE_STROKE_COLOR colorPostProcessMode:e_ptpostprocess_none];
-            [PTColorDefaults setDefaultBorderThickness:10 forAnnotType:e_ptFreeText];
-        
-        } else if ([tool isKindOfClass:[PTFreeTextCreate class]] && !customFreeTextStyle) {
-            UIColor *stickyYellow = [UIColor colorWithRed: 0.99 green: 0.80 blue: 0.00 alpha: 1.00];
-            [PTColorDefaults setDefaultColor:[UIColor clearColor] forAnnotType:e_ptFreeText attribute:ATTRIBUTE_FILL_COLOR colorPostProcessMode:e_ptpostprocess_none];
-            [PTColorDefaults setDefaultColor:[UIColor clearColor] forAnnotType:e_ptFreeText attribute:ATTRIBUTE_STROKE_COLOR colorPostProcessMode:e_ptpostprocess_none];
-            [PTColorDefaults setDefaultBorderThickness:0 forAnnotType:e_ptFreeText];
         }
         
         // Adjustment - Apple Pencil
@@ -2101,7 +2073,7 @@ static NSMutableArray* globalSearchResults;
     
     
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
-    [pdfViewCtrl SetPageSpacing:10 vert_col_space:10 horiz_pad:100 vert_pad:100];
+    [pdfViewCtrl SetPageSpacing:10 vert_col_space:10 horiz_pad:0 vert_pad:100];
 }
 
 

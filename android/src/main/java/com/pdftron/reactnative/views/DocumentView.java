@@ -1790,7 +1790,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     public void customInit() throws PDFNetException {
 
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
-        pdfViewCtrl.setPageSpacing(10,10,100,100);
+        pdfViewCtrl.setPageSpacing(10,10,0,100);
 
         int darkBG = android.graphics.Color.rgb(36, 36, 36);
         int lightBG = android.graphics.Color.rgb(238, 238, 238);
