@@ -66,7 +66,7 @@
 
 - (void)changeBackgroundForDocumentViewTag:(NSNumber *)tag changeBackground:(int)r green:(int)g blue:(int)b;
 
-
+- (void)setContinuousForDocumentViewTag:(NSNumber *)tag setContinuous:(BOOL)toggle;
 
 
 

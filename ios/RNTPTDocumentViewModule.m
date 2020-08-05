@@ -447,6 +447,22 @@ RCT_REMAP_METHOD(changeBackground,
 
 
 
+RCT_REMAP_METHOD(setContinuous,
+                 setContinuousForDocumentViewTag:(nonnull NSNumber *)tag
+                 toggle:(int)toggle
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] setContinuousForDocumentViewTag:tag setContinuous:toggle];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"changeBackground_failed", @"CHANGE BACKRGOUND FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+
 
 
 @end

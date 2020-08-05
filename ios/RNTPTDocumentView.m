@@ -2044,6 +2044,8 @@ static NSMutableArray* globalSearchResults;
     self.documentViewController.settingsViewController.popoverPresentationController.permittedArrowDirections = (UIPopoverArrowDirectionUp|UIPopoverArrowDirectionDown);
     self.documentViewController.thumbnailSliderController.trailingToolbarItem = self.documentViewController.settingsButtonItem;
     
+    self.documentViewController.settingsButtonItem.tintColor = [UIColor colorWithRed: 0.98 green: 0.46 blue: 0.08 alpha: 1.00];
+    
     
     // Translucent Thumbnail Slider
     self.documentViewController.navigationController.navigationBar.translucent = YES;
@@ -2059,6 +2061,8 @@ static NSMutableArray* globalSearchResults;
                                                                   style:UIBarButtonItemStylePlain
                                                                  target:self
                                                                  action:@selector(toggleSidebar)];
+    
+    sidebarButton.tintColor = [UIColor colorWithRed: 0.98 green: 0.46 blue: 0.08 alpha: 1.00];
     
     UIImage *eyeIcon = [UIImage imageNamed:@"eyeIcon"];
     UIBarButtonItem *eyeButton = [[UIBarButtonItem alloc] initWithImage:eyeIcon
@@ -2428,6 +2432,13 @@ static NSMutableArray* globalSearchResults;
 {
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
     [pdfViewCtrl SetBackgroundColor:(char)r g:(char)g b:(char)b a:255];
+}
+
+
+
+- (void)setContinuous:(BOOL)toggle
+{
+    [self setContinuousAnnotationEditing:toggle];
 }
 
 

@@ -3,6 +3,7 @@ package com.pdftron.reactnative.views;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
@@ -19,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.DialogFragment;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
@@ -88,6 +90,7 @@ import java.util.Map;
 import com.pdftron.pdf.TextSearchResult;
 import com.pdftron.pdf.TextSearch;
 import com.pdftron.pdf.Bookmark;
+import com.pdftron.pdf.tools.Eraser;
 import com.pdftron.pdf.Destination;
 import com.pdftron.pdf.tools.CustomRelativeLayout;
 import android.util.SparseArray;
@@ -1337,6 +1340,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         getToolManager().setStylusAsPen(mUseStylusAsPen);
         getToolManager().setSignSignatureFieldsWithStamps(mSignWithStamps);
 
+        getToolManager().setEraserType(Eraser.EraserType.ANNOTATION_ERASER);
+
         getPdfViewCtrlTabFragment().addQuickMenuListener(mQuickMenuListener);
 
         ActionUtils.getInstance().setActionInterceptCallback(mActionInterceptCallback);
@@ -1783,8 +1788,6 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
 
 
-
-
     // CAT Europe
 
     public void customInit() throws PDFNetException {
@@ -1795,9 +1798,12 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         int darkBG = android.graphics.Color.rgb(36, 36, 36);
         int lightBG = android.graphics.Color.rgb(238, 238, 238);
 
-        pdfViewCtrl.DEFAULT_BG_COLOR = lightBG;
-        pdfViewCtrl.DEFAULT_DARK_BG_COLOR = darkBG;
+        PDFViewCtrl.DEFAULT_BG_COLOR = lightBG;
+        PDFViewCtrl.DEFAULT_DARK_BG_COLOR = darkBG;
+
+        //mPdfViewCtrlTabHostFragment.getCurrentPdfViewCtrlFragment().updateColorMode();
         pdfViewCtrl.updatePageLayout();
+
 
         // Replace Buttons in Thumbnail Slider
         View v = mPdfViewCtrlTabHostFragment.getView();
@@ -1805,15 +1811,52 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
         if (v != null) {
             ThumbnailSlider slider = v.findViewById(R.id.thumbseekbar);
-            slider.setMenuItem(R.drawable.ic_star_white_24dp, ThumbnailSlider.POSITION_LEFT);
+            slider.setMenuItem(R.drawable.ic_sidebar, ThumbnailSlider.POSITION_LEFT);
+            slider.setMenuItem(R.drawable.ic_settings, ThumbnailSlider.POSITION_RIGHT);
             slider.setOnMenuItemClickedListener(new ThumbnailSlider.OnMenuItemClickedListener() {
                 @Override
                 public void onMenuItemClicked(int i) {
                     if (i == ThumbnailSlider.POSITION_LEFT) {
                         onReceiveNativeEvent(ON_TOGGLE_SIDEBAR, ON_TOGGLE_SIDEBAR);
                     } else {
-                        ViewModePickerDialogFragment dialog = ViewModePickerDialogFragment.newInstance(pdfViewCtrl.getPagePresentationMode(), false, false, 0);
-                        dialog.setViewModePickerDialogFragmentListener(mPdfViewCtrlTabHostFragment);
+                        ArrayList<Integer> hiddenViewModeItems = new ArrayList<>();
+                        hiddenViewModeItems.add(ViewModePickerDialogFragment.ViewModePickerItems.ITEM_ID_REFLOW.getValue());
+                        ViewModePickerDialogFragment dialog = ViewModePickerDialogFragment.newInstance(
+                                pdfViewCtrl.getPagePresentationMode(), false, false, 0, hiddenViewModeItems);
+                        dialog.setViewModePickerDialogFragmentListener(new ViewModePickerDialogFragment.ViewModePickerDialogFragmentListener() {
+                            @Override
+                            public void onViewModeSelected(String s) {
+                                mPdfViewCtrlTabHostFragment.onViewModeSelected(s);
+                            }
+
+                            @Override
+                            public boolean onViewModeColorSelected(int i) {
+                                return mPdfViewCtrlTabHostFragment.onViewModeColorSelected(i);
+                            }
+
+                            @Override
+                            public boolean onCustomColorModeSelected(int i, int i1) {
+                                return mPdfViewCtrlTabHostFragment.onCustomColorModeSelected(i, i1);
+                            }
+
+                            @Override
+                            public void onViewModePickerDialogFragmentDismiss() {
+                                mPdfViewCtrlTabHostFragment.onViewModePickerDialogFragmentDismiss();
+
+                                hideSystemUI();
+                            }
+
+                            @Override
+                            public int onReflowZoomInOut(boolean b) {
+                                return mPdfViewCtrlTabHostFragment.onReflowZoomInOut(b);
+                            }
+
+                            @Override
+                            public boolean checkTabConversionAndAlert(int i, boolean b) {
+                                return mPdfViewCtrlTabHostFragment.checkTabConversionAndAlert(i, b);
+                            }
+                        });
+                        dialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.CustomAppTheme);
                         dialog.show(m, "view_mode_picker");
                     }
                 }
@@ -1821,6 +1864,29 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         }
 
     }
+
+    protected void hideSystemUI() {
+        final PdfViewCtrlTabFragment currentFragment = getPdfViewCtrlTabFragment();
+        View view = mPdfViewCtrlTabHostFragment.getView();
+        if (currentFragment == null || view == null) {
+            return;
+        }
+
+        // Set the IMMERSIVE flag.
+        // Set the content to appear under the system bars so that the content
+        // doesn't resize when the system bars hide and show.
+        int oldFlags = view.getSystemUiVisibility();
+        int newFlags = oldFlags;
+
+        // Add the fullscreen system UI flags.
+        newFlags |= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION; // hide nav bar
+
+        if (newFlags != oldFlags) {
+            view.setSystemUiVisibility(newFlags);
+            view.requestLayout(); // Force a layout invalidation.
+        }
+    }
+
 
 
     public void changeBackground(int r, int g, int b) throws PDFNetException {
@@ -2127,6 +2193,13 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         }
 
     }
+
+
+
+    public void setContinuous(boolean toggle) throws PDFNetException {
+        setContinuousAnnotationEditing(toggle);
+    }
+
 
 
 

@@ -164,6 +164,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)changeBackground:(int)r green:(int)g blue:(int)b;
 
+- (void)setContinuous:(BOOL)toggle;
+
 
 
 @end

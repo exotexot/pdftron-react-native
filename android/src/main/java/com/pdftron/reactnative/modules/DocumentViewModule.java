@@ -478,4 +478,21 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
     }
 
 
+    @ReactMethod
+    public void setContinuous(final int tag, boolean toggle, final Promise promise) {
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mDocumentViewInstance.setContinuous(tag, toggle);
+                    promise.resolve(null);
+                } catch (Exception ex) {
+                    promise.reject(ex);
+                }
+
+            }
+        });
+    }
+
+
 }

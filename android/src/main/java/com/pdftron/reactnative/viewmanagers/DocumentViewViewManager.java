@@ -506,4 +506,14 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
     }
 
 
+    public void setContinuous(int tag, boolean toggle) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            documentView.setContinuous(toggle);
+        } else {
+            throw new PDFNetException("", 0L, getName(), "changeBackground", "Unable to find DocumentView.");
+        }
+    }
+
+
 }
