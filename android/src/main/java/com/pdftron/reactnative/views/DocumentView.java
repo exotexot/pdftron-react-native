@@ -1137,7 +1137,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                 bitmap.setPixels(buf, 0, width, 0, 0, width, height);
 
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 10, byteArrayOutputStream);
                 byte[] byteArray = byteArrayOutputStream.toByteArray();
 
                 String base64str = Base64.encodeToString(byteArray, Base64.DEFAULT);
@@ -1843,7 +1843,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                             public void onViewModePickerDialogFragmentDismiss() {
                                 mPdfViewCtrlTabHostFragment.onViewModePickerDialogFragmentDismiss();
 
-                                hideSystemUI();
+                                //hideSystemUI();
                             }
 
                             @Override
@@ -1976,6 +1976,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
 
     public void findText(String searchString) throws PDFNetException {
+
+        //hideSystemUI();
 
         if (getPdfViewCtrlTabFragment()!=null) {
             toggleSlider(false);
