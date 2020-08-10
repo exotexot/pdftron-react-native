@@ -2236,53 +2236,109 @@ static NSMutableArray* globalSearchResults;
 
 
 
+//- (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex
+//{
+//    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+//    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
+//
+//    int pages = [pdfDoc GetPageCount];
+//
+//    if (pages < 2) return;
+//
+//    NSURL *url = [NSURL URLWithString:[@"data:image/png;base64," stringByAppendingString:base64String]];
+//    NSData *imageData = [NSData dataWithContentsOfURL:url];
+//
+//
+//    int maxImageWidth = 120;
+//    int maxImageHeight = 37;
+//
+//    int offsetTop = 25;
+//    int offsetHorizontal = 60;
+//
+//
+//    for (int page = 2; page <= pages; page++)
+//    {
+//        UIImage *image = [UIImage imageWithData:imageData];
+//        UIImageView * imageView = [[UIImageView alloc] initWithImage:image];
+//        imageView.frame = CGRectMake(0, 0, maxImageWidth, maxImageHeight);
+//        imageView.contentMode = UIViewContentModeScaleAspectFit;
+//
+//        UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, maxImageWidth, maxImageHeight)];
+////        view.backgroundColor = [UIColor greenColor];
+//        [view addSubview:imageView];
+//
+//
+//        PTPage *pageObject = [pdfDoc GetPage:page];
+//
+//        double width = [pageObject GetPageWidth:e_pttrim];
+//        double height = [pageObject GetPageHeight:e_pttrim];
+//
+//        if (isDuplex) {
+//            PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0+offsetHorizontal y1:height-maxImageHeight-offsetTop x2:maxImageWidth+offsetHorizontal y2:height-offsetTop];
+//            PTPDFRect *topRight = [[PTPDFRect alloc] initWithX1:(width - maxImageWidth - offsetHorizontal) y1:height-maxImageHeight-offsetTop x2:width-offsetHorizontal y2:height-offsetTop];
+//            [pdfViewCtrl addFloatingView:view toPage:page withPageRect: (page % 2 ? topRight : topLeft) noZoom:NO];
+//        } else {
+//            PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0+offsetHorizontal y1:height-maxImageHeight-offsetTop x2:maxImageWidth+offsetHorizontal y2:height-offsetTop];
+//            [pdfViewCtrl addFloatingView:view toPage:page withPageRect:topLeft noZoom:NO];
+//        }
+//    }
+//}
+
+
+
 - (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex
 {
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
-    
     int pages = [pdfDoc GetPageCount];
     
     if (pages < 2) return;
+    
+    PTPage *firstPage = [pdfDoc GetPage:1];
+    double width = [firstPage GetPageWidth:e_pttrim];
+    double height = [firstPage GetPageHeight:e_pttrim];
 
-    NSURL *url = [NSURL URLWithString:[@"data:image/png;base64," stringByAppendingString:base64String]];
-    NSData *imageData = [NSData dataWithContentsOfURL:url];
-    
-    
     int maxImageWidth = 120;
     int maxImageHeight = 37;
-    
+
     int offsetTop = 25;
     int offsetHorizontal = 60;
     
-
+    NSURL *url = [NSURL URLWithString:[@"data:image/png;base64," stringByAppendingString:base64String]];
+    NSData *imageData = [NSData dataWithContentsOfURL:url];
+    
     for (int page = 2; page <= pages; page++)
     {
-        UIImage *image = [UIImage imageWithData:imageData];
-        UIImageView * imageView = [[UIImageView alloc] initWithImage:image];
-        imageView.frame = CGRectMake(0, 0, maxImageWidth, maxImageHeight);
-        imageView.contentMode = UIViewContentModeScaleAspectFit;
+        PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0+offsetHorizontal y1:height-maxImageHeight-offsetTop x2:maxImageWidth+offsetHorizontal y2:height-offsetTop];
+        PTPDFRect *topRight = [[PTPDFRect alloc] initWithX1:(width - maxImageWidth - offsetHorizontal) y1:height-maxImageHeight-offsetTop x2:width-offsetHorizontal y2:height-offsetTop];
         
-        UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, maxImageWidth, maxImageHeight)];
-//        view.backgroundColor = [UIColor greenColor];
-        [view addSubview:imageView];
-        
-        
-        PTPage *pageObject = [pdfDoc GetPage:page];
-        
-        double width = [pageObject GetPageWidth:e_pttrim];
-        double height = [pageObject GetPageHeight:e_pttrim];
-        
+        PTPDFRect *finalRect = topLeft;
         if (isDuplex) {
-            PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0+offsetHorizontal y1:height-maxImageHeight-offsetTop x2:maxImageWidth+offsetHorizontal y2:height-offsetTop];
-            PTPDFRect *topRight = [[PTPDFRect alloc] initWithX1:(width - maxImageWidth - offsetHorizontal) y1:height-maxImageHeight-offsetTop x2:width-offsetHorizontal y2:height-offsetTop];
-            [pdfViewCtrl addFloatingView:view toPage:page withPageRect: (page % 2 ? topRight : topLeft) noZoom:NO];
-        } else {
-            PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0+offsetHorizontal y1:height-maxImageHeight-offsetTop x2:maxImageWidth+offsetHorizontal y2:height-offsetTop];
-            [pdfViewCtrl addFloatingView:view toPage:page withPageRect:topLeft noZoom:NO];
+            finalRect = (page % 2 == 0) ? topLeft : topRight;
         }
+        [finalRect Normalize];
+                
+        
+        // Stamper
+        PTStamper *s = [[PTStamper alloc] initWithSize_type:e_ptabsolute_size a:[finalRect Width] b:[finalRect Height]];
+        [s SetAlignment:e_pthorizontal_left vertical_alignment:e_ptvertical_bottom];
+        [s SetPosition:[finalRect GetX1] vertical_distance:[finalRect GetY1] use_percentage:NO];
+        
+        [s SetAsBackground:false];
+        
+        PTPageSet *ps = [[PTPageSet alloc] initWithOne_page:page];
+        PTSDFDoc *sdfDoc = [pdfDoc GetSDFDoc];
+        PTImage *img2 = [PTImage CreateWithDataSimple:sdfDoc buf:imageData buf_size:imageData.length encoder_hints:[sdfDoc GetObj:0]];
+        
+        [s StampImage:pdfDoc src_img:img2 dest_pages:ps];
     }
+    
+    [pdfViewCtrl Update:YES];
 }
+
+
+
+
 
 
 

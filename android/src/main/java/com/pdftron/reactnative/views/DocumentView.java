@@ -100,6 +100,11 @@ import android.graphics.BitmapFactory;
 import java.io.ByteArrayOutputStream;
 import android.widget.ImageView;
 
+import com.pdftron.pdf.PageSet;
+import com.pdftron.pdf.Point;
+import com.pdftron.pdf.Stamper;
+
+
 
 
 public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
@@ -2145,7 +2150,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
 
 
-    public void appendSchoolLogo (String base64str, boolean isDuplex) throws PDFNetException {
+    public void appendSchoolLogo (String base64str, boolean isDuplex) throws PDFNetException, InterruptedException {
 
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
         Context context = pdfViewCtrl.getContext();
@@ -2176,23 +2181,47 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             com.pdftron.pdf.Rect topRight = new com.pdftron.pdf.Rect();
             topRight.set(width - maxImageWidth - offsetHorizontal,height-maxImageHeight-offsetTop,width-offsetHorizontal,height-offsetTop);
 
-            // Image View
-            ImageView iv = new ImageView(context);
-            iv.setImageBitmap(bitmap);
-            iv.setScaleType(ImageView.ScaleType.FIT_END);
 
-            // Layout
-            CustomRelativeLayout overlay = new CustomRelativeLayout(context);
-            overlay.setZoomWithParent(true);
-            overlay.addView(iv);
+            Image img = Image.create(pdfDoc, bitmap);
 
-            if(isDuplex) {
-                overlay.setRect(pdfViewCtrl, (page % 2 == 0) ? topLeft : topRight, page);
-            } else {
-                overlay.setRect(pdfViewCtrl, topLeft, page);
+            com.pdftron.pdf.Rect finalRect = topLeft;
+            if (isDuplex) {
+                finalRect = (page % 2 == 0) ? topLeft : topRight;
             }
-            pdfViewCtrl.addView(overlay);
+            finalRect.normalize();
+
+            // Stamper
+            Stamper s = new Stamper(Stamper.e_absolute_size, finalRect.getWidth(), finalRect.getHeight());
+            s.setAlignment(Stamper.e_horizontal_left, Stamper.e_vertical_bottom);
+            s.setPosition(finalRect.getX1(), finalRect.getY1());
+
+            s.setAsBackground(false);
+            s.stampImage(pdfDoc, img, new PageSet(page));
+
+
+            // Image View
+//            ImageView iv = new ImageView(context);
+//            iv.setImageBitmap(bitmap);
+//            iv.setScaleType(ImageView.ScaleType.FIT_END);
+//
+//            // Layout
+//            CustomRelativeLayout overlay = new CustomRelativeLayout(context);
+//            overlay.setZoomWithParent(true);
+//            overlay.addView(iv);
+
+
+//            if(isDuplex) {
+//                overlay.setRect(pdfViewCtrl, (page % 2 == 0) ? topLeft : topRight, page);
+//            } else {
+//                overlay.setRect(pdfViewCtrl, topLeft, page);
+//            }
+//            pdfViewCtrl.addView(overlay);
+
+
         }
+
+
+        pdfViewCtrl.update(true);
 
     }
 

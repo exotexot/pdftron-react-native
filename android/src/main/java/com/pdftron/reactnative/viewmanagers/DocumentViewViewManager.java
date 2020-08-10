@@ -486,7 +486,7 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
     }
 
 
-    public void appendSchoolLogo(int tag, String base64str, boolean isDuplex) throws PDFNetException {
+    public void appendSchoolLogo(int tag, String base64str, boolean isDuplex) throws PDFNetException, InterruptedException {
         DocumentView documentView = mDocumentViews.get(tag);
         if (documentView != null) {
             documentView.appendSchoolLogo(base64str, isDuplex);

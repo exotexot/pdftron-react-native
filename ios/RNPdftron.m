@@ -22,6 +22,31 @@ RCT_EXPORT_METHOD(enableJavaScript:(BOOL)enabled)
     [PTPDFNet EnableJavaScript:enabled];
 }
 
+
+
+RCT_REMAP_METHOD(getPages,
+                 getPagesForFilePath:(NSString *)filePath
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        
+        PTPDFDoc *pdfDoc = [[PTPDFDoc alloc] initWithFilepath:filePath];
+        NSNumber *pageCount = [NSNumber numberWithInt:[pdfDoc GetPageCount]];
+
+        if (pageCount) {
+            resolve(pageCount);
+        } else {
+            reject(@"getPages", @"getPages failed.", nil);
+        }
+    }
+    @catch (NSException *exception) {
+        reject(@"getPages_failed", @"Failed to get pages", [self errorFromException:exception]);
+    }
+}
+
+
+
 RCT_REMAP_METHOD(encryptDocument,
                  encryptDocumentForFilePath:(NSString *)filePath
                  password:(NSString *)password
@@ -51,6 +76,7 @@ RCT_REMAP_METHOD(encryptDocument,
         reject(@"encrypt_failed", @"Failed to encrypt document", [self errorFromException:exception]);
     }
 }
+
 
 - (void)setPassword:(NSString *)password onPDFDoc:(PTPDFDoc *)pdfDoc
 {
