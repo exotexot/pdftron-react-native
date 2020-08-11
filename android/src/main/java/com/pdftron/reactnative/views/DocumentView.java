@@ -2198,26 +2198,6 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             s.setAsBackground(false);
             s.stampImage(pdfDoc, img, new PageSet(page));
 
-
-            // Image View
-//            ImageView iv = new ImageView(context);
-//            iv.setImageBitmap(bitmap);
-//            iv.setScaleType(ImageView.ScaleType.FIT_END);
-//
-//            // Layout
-//            CustomRelativeLayout overlay = new CustomRelativeLayout(context);
-//            overlay.setZoomWithParent(true);
-//            overlay.addView(iv);
-
-
-//            if(isDuplex) {
-//                overlay.setRect(pdfViewCtrl, (page % 2 == 0) ? topLeft : topRight, page);
-//            } else {
-//                overlay.setRect(pdfViewCtrl, topLeft, page);
-//            }
-//            pdfViewCtrl.addView(overlay);
-
-
         }
 
 

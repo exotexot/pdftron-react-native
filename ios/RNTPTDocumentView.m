@@ -2418,19 +2418,18 @@ static NSMutableArray* globalSearchResults;
         PTDestination *dest = [action GetDest];
         PTPage *page = [dest GetPage];
             
-        NSDictionary *outlineElement = @{
-           @"name": [item GetTitle],
-           @"indent": [NSNumber numberWithInt:[item GetIndent]],
-           @"page": [NSNumber numberWithInt:[page GetIndex]],
-        };
-
-        
-//         NSLog(@"Outline Element: %@", outlineElement);
-        
         
         // Some CAT PDFs have broken outlines, leading to mutlitple nested outlines
         // Luckily the redundant broken outlines all come with page = 0
         if ( [page GetIndex] != 0) {
+            
+            NSDictionary *outlineElement = @{
+               @"name": [item GetTitle],
+               @"indent": [NSNumber numberWithInt:[item GetIndent]],
+               @"page": [NSNumber numberWithInt:[page GetIndex]],
+            };
+            
+            NSLog(@"Outline Element: %@", outlineElement);
             [outlineArr addObject:outlineElement];
         }
 
