@@ -2307,31 +2307,37 @@ static NSMutableArray* globalSearchResults;
     NSURL *url = [NSURL URLWithString:[@"data:image/png;base64," stringByAppendingString:base64String]];
     NSData *imageData = [NSData dataWithContentsOfURL:url];
     
-    for (int page = 2; page <= pages; page++)
-    {
-        PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0+offsetHorizontal y1:height-maxImageHeight-offsetTop x2:maxImageWidth+offsetHorizontal y2:height-offsetTop];
-        PTPDFRect *topRight = [[PTPDFRect alloc] initWithX1:(width - maxImageWidth - offsetHorizontal) y1:height-maxImageHeight-offsetTop x2:width-offsetHorizontal y2:height-offsetTop];
+    PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0+offsetHorizontal y1:height-maxImageHeight-offsetTop x2:maxImageWidth+offsetHorizontal y2:height-offsetTop];
+    PTPDFRect *topRight = [[PTPDFRect alloc] initWithX1:(width - maxImageWidth - offsetHorizontal) y1:height-maxImageHeight-offsetTop x2:width-offsetHorizontal y2:height-offsetTop];
+    
+    PTPDFRect *finalRect = topLeft;
+    [finalRect Normalize];
+            
+    // Stamper
+    PTStamper *s = [[PTStamper alloc] initWithSize_type:e_ptabsolute_size a:[finalRect Width] b:[finalRect Height]];
+    [s SetAlignment:e_pthorizontal_left vertical_alignment:e_ptvertical_bottom];
+    [s SetPosition:[finalRect GetX1] vertical_distance:[finalRect GetY1] use_percentage:NO];
+    
+    [s SetAsBackground:false];
+
+    PTSDFDoc *sdfDoc = [pdfDoc GetSDFDoc];
+    PTImage *img2 = [PTImage CreateWithDataSimple:sdfDoc buf:imageData buf_size:imageData.length encoder_hints:[sdfDoc GetObj:0]];
+    
+    
+    if(isDuplex) {
+        PTPageSet *psLeft = [[PTPageSet alloc] initWithRange_start:2 range_end:pages filter:e_pteven];
+        PTPageSet *psRight = [[PTPageSet alloc] initWithRange_start:2 range_end:pages filter:e_ptodd];
         
-        PTPDFRect *finalRect = topLeft;
-        if (isDuplex) {
-            finalRect = (page % 2 == 0) ? topLeft : topRight;
-        }
-        [finalRect Normalize];
-                
-        
-        // Stamper
-        PTStamper *s = [[PTStamper alloc] initWithSize_type:e_ptabsolute_size a:[finalRect Width] b:[finalRect Height]];
-        [s SetAlignment:e_pthorizontal_left vertical_alignment:e_ptvertical_bottom];
-        [s SetPosition:[finalRect GetX1] vertical_distance:[finalRect GetY1] use_percentage:NO];
-        
-        [s SetAsBackground:false];
-        
-        PTPageSet *ps = [[PTPageSet alloc] initWithOne_page:page];
-        PTSDFDoc *sdfDoc = [pdfDoc GetSDFDoc];
-        PTImage *img2 = [PTImage CreateWithDataSimple:sdfDoc buf:imageData buf_size:imageData.length encoder_hints:[sdfDoc GetObj:0]];
-        
+        [s StampImage:pdfDoc src_img:img2 dest_pages:psLeft];
+        [s StampImage:pdfDoc src_img:img2 dest_pages:psRight];
+    } else {
+        PTPageSet *ps = [[PTPageSet alloc] initWithRange_start:2 range_end:pages filter:e_ptall];
         [s StampImage:pdfDoc src_img:img2 dest_pages:ps];
     }
+    
+    
+    
+    
     
     [pdfViewCtrl Update:YES];
 }
@@ -2429,7 +2435,7 @@ static NSMutableArray* globalSearchResults;
                @"page": [NSNumber numberWithInt:[page GetIndex]],
             };
             
-            NSLog(@"Outline Element: %@", outlineElement);
+//            NSLog(@"Outline Element: %@", outlineElement);
             [outlineArr addObject:outlineElement];
         }
 

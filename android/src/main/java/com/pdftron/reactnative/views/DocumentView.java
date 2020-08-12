@@ -2172,34 +2172,30 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         byte[] decodedString = Base64.decode(base64str, Base64.DEFAULT);
         Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
 
+        com.pdftron.pdf.Rect topLeft = new com.pdftron.pdf.Rect();
+        topLeft.set(offsetHorizontal,height-maxImageHeight-offsetTop,maxImageWidth+offsetHorizontal,height-offsetTop);
 
-        for (int page = 2; page <= pages; page++) {
+        com.pdftron.pdf.Rect topRight = new com.pdftron.pdf.Rect();
+        topRight.set(width - maxImageWidth - offsetHorizontal,height-maxImageHeight-offsetTop,width-offsetHorizontal,height-offsetTop);
 
-            com.pdftron.pdf.Rect topLeft = new com.pdftron.pdf.Rect();
-            topLeft.set(offsetHorizontal,height-maxImageHeight-offsetTop,maxImageWidth+offsetHorizontal,height-offsetTop);
+        Image img = Image.create(pdfDoc, bitmap);
 
-            com.pdftron.pdf.Rect topRight = new com.pdftron.pdf.Rect();
-            topRight.set(width - maxImageWidth - offsetHorizontal,height-maxImageHeight-offsetTop,width-offsetHorizontal,height-offsetTop);
+        com.pdftron.pdf.Rect finalRect = topLeft;
+        finalRect.normalize();
 
+        // Stamper
+        Stamper s = new Stamper(Stamper.e_absolute_size, finalRect.getWidth(), finalRect.getHeight());
+        s.setAlignment(Stamper.e_horizontal_left, Stamper.e_vertical_bottom);
+        s.setPosition(finalRect.getX1(), finalRect.getY1());
 
-            Image img = Image.create(pdfDoc, bitmap);
+        s.setAsBackground(false);
 
-            com.pdftron.pdf.Rect finalRect = topLeft;
-            if (isDuplex) {
-                finalRect = (page % 2 == 0) ? topLeft : topRight;
-            }
-            finalRect.normalize();
-
-            // Stamper
-            Stamper s = new Stamper(Stamper.e_absolute_size, finalRect.getWidth(), finalRect.getHeight());
-            s.setAlignment(Stamper.e_horizontal_left, Stamper.e_vertical_bottom);
-            s.setPosition(finalRect.getX1(), finalRect.getY1());
-
-            s.setAsBackground(false);
-            s.stampImage(pdfDoc, img, new PageSet(page));
-
+        if (isDuplex) {
+            s.stampImage(pdfDoc, img, new PageSet(2, pages, PageSet.e_odd));
+            s.stampImage(pdfDoc, img, new PageSet(2, pages, PageSet.e_odd));
+        } else {
+            s.stampImage(pdfDoc, img, new PageSet(2, pages));
         }
-
 
         pdfViewCtrl.update(true);
 
