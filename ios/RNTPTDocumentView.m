@@ -2427,7 +2427,7 @@ static NSMutableArray* globalSearchResults;
         
         // Some CAT PDFs have broken outlines, leading to mutlitple nested outlines
         // Luckily the redundant broken outlines all come with page = 0
-        if ( [page GetIndex] != 0) {
+        if ( [page IsValid] && ([page GetIndex] != 0) && [item IsValid] ) {
             
             NSDictionary *outlineElement = @{
                @"name": [item GetTitle],
@@ -2437,13 +2437,14 @@ static NSMutableArray* globalSearchResults;
             
 //            NSLog(@"Outline Element: %@", outlineElement);
             [outlineArr addObject:outlineElement];
+            
+            
+            // If this Bookmark has children do it again
+           if ([item HasChildren]) {
+               [self PrintOutlineTree:[item GetFirstChild] outlineArr:outlineArr];
+           }
         }
-
-        
-        // If this Bookmark has children do it again
-        if ([item HasChildren]) {
-            [self PrintOutlineTree:[item GetFirstChild] outlineArr:outlineArr];
-        }
+       
     }
     
     return [outlineArr copy];

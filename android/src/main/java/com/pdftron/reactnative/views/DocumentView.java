@@ -2105,25 +2105,24 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             Destination dest = action.getDest();
             Page page = dest.getPage();
 
-            WritableMap outlineElement = Arguments.createMap();
-            outlineElement.putString("name", item.getTitle());
-            outlineElement.putInt("indent", item.getIndent());
-            outlineElement.putInt("page", page.getIndex());
-
-            ReadableMap readableMap = outlineElement;
-
             // Some CAT PDFs have broken outlines, leading to mutlitple nested outlines
             // Luckily the redundant broken outlines all come with page = 0
-            if (page.getIndex() != 0) {
-                outline.pushMap(readableMap);
-            }
+            if ( page.isValid() && page.getIndex() != 0 && item.isValid() ) {
 
-            if (item.hasChildren())
-            {
-                PrintOutlineTree(item.getFirstChild(), outline);
+                WritableMap outlineElement = Arguments.createMap();
+                outlineElement.putString("name", item.getTitle());
+                outlineElement.putInt("indent", item.getIndent());
+                outlineElement.putInt("page", page.getIndex());
+
+                ReadableMap readableMap = outlineElement;
+                outline.pushMap(readableMap);
+
+                if (item.hasChildren())
+                {
+                    PrintOutlineTree(item.getFirstChild(), outline);
+                }
             }
         }
-
         return outline;
     }
 
