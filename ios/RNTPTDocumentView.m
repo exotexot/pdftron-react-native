@@ -1613,6 +1613,8 @@ static NSMutableArray* globalSearchResults;
         return NO;
     }
         
+    NSString *editString = ([annot GetType] == e_ptFreeText) ? @"editText" : @"editInk";
+
     // Mapping from menu item title to identifier.
     NSDictionary<NSString *, NSString *> *map = @{
         @"Style": @"style",
@@ -1621,8 +1623,7 @@ static NSMutableArray* globalSearchResults;
         @"Delete": @"delete",
         @"Type": @"markupType",
         @"Search": @"search",
-        @"Edit": @"editInk",
-        @"Edit Text": @"editText",
+        @"Edit": editString,
         @"Flatten": @"flatten",
         @"Open": @"openAttachment",
     };
