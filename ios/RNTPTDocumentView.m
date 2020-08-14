@@ -178,9 +178,6 @@ static NSMutableArray* globalSearchResults;
         [self customInit];
     }
     
-    
-    // Adjustment custom Init function for better clearity
-    [self customInit];
 }
 
 -(void)setDocument:(NSString *)document
@@ -1523,9 +1520,14 @@ static NSMutableArray* globalSearchResults;
     
     [self applyLayoutMode];
     
+    
+    
     if ([self.delegate respondsToSelector:@selector(documentLoaded:)]) {
         [self.delegate documentLoaded:self];
     }
+    
+    // Adjustment custom Init function for better clearity
+    [self customInit];
 }
 
 - (void)rnt_documentViewControllerDidZoom:(PTDocumentViewController *)documentViewController
@@ -2033,9 +2035,12 @@ static NSMutableArray* globalSearchResults;
 
 - (void)customInit
 {
+    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    [pdfViewCtrl SetPageSpacing:10 vert_col_space:10 horiz_pad:0 vert_pad:100];
+    [pdfViewCtrl SetupThumbnails:YES generate_at_runtime:YES use_disk_cache:YES thumb_max_side_length:300 max_abs_cache_size:300*300*500 max_perc_cache_size:0.7];
+    
+    
     // Gesture Control
-    UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapFrom:)];
-    [self.documentViewController.pdfViewCtrl handleTap:tapGestureRecognizer];
     self.documentViewController.hidesControlsOnTap = NO;
 
 
@@ -2045,11 +2050,6 @@ static NSMutableArray* globalSearchResults;
     self.documentViewController.thumbnailSliderController.trailingToolbarItem = self.documentViewController.settingsButtonItem;
     
     self.documentViewController.settingsButtonItem.tintColor = [UIColor colorWithRed: 0.98 green: 0.46 blue: 0.08 alpha: 1.00];
-    
-    
-    // Translucent Thumbnail Slider
-    self.documentViewController.navigationController.navigationBar.translucent = YES;
-    self.documentViewController.thumbnailSliderController.toolbar.translucent = YES;
     
     globalSearchResults = [NSMutableArray array];
     
@@ -2076,8 +2076,7 @@ static NSMutableArray* globalSearchResults;
     
     
     
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
-    [pdfViewCtrl SetPageSpacing:10 vert_col_space:10 horiz_pad:0 vert_pad:100];
+    
 }
 
 
@@ -2096,6 +2095,7 @@ static NSMutableArray* globalSearchResults;
         NSString *base64Str = [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
         completionHandler(base64Str);
     }];
+    
 }
 
 

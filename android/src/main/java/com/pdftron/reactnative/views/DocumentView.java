@@ -1799,6 +1799,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
         pdfViewCtrl.setPageSpacing(10,10,0,100);
+        pdfViewCtrl.setupThumbnails(false, true, true, 200, 200 * 200 * 500, 0.7);
 
         int darkBG = android.graphics.Color.rgb(36, 36, 36);
         int lightBG = android.graphics.Color.rgb(238, 238, 238);
