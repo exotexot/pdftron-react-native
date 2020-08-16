@@ -2105,6 +2105,7 @@ static NSMutableArray* globalSearchResults;
 - (void)abortGetThumbnail
 {
     PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    [pdfViewCtrl ClearThumbCache];
     [pdfViewCtrl CancelAllThumbRequests];
 }
 
@@ -2422,32 +2423,30 @@ static NSMutableArray* globalSearchResults;
     for (; [item IsValid]; item=[item GetNext]) {
 
         PTAction *action = [item GetAction];
+        if (![action IsValid]) return nil;
+            
         PTDestination *dest = [action GetDest];
+        if (![dest IsValid]) return nil;
+                
         PTPage *page = [dest GetPage];
-            
+        if (![page IsValid]) return nil;
+        if([page GetIndex] == 0) return nil;
+                    
+        NSDictionary *outlineElement = @{
+           @"name": [item GetTitle],
+           @"indent": [NSNumber numberWithInt:[item GetIndent]],
+           @"page": [NSNumber numberWithInt:[page GetIndex]],
+        };
         
-        // Some CAT PDFs have broken outlines, leading to mutlitple nested outlines
-        // Luckily the redundant broken outlines all come with page = 0
-        if ( [page IsValid] && ([page GetIndex] != 0) && [item IsValid] ) {
-            
-            NSDictionary *outlineElement = @{
-               @"name": [item GetTitle],
-               @"indent": [NSNumber numberWithInt:[item GetIndent]],
-               @"page": [NSNumber numberWithInt:[page GetIndex]],
-            };
-            
-//            NSLog(@"Outline Element: %@", outlineElement);
-            [outlineArr addObject:outlineElement];
-            
-            
-            // If this Bookmark has children do it again
-           if ([item HasChildren]) {
-               [self PrintOutlineTree:[item GetFirstChild] outlineArr:outlineArr];
-           }
-        }
-       
+        NSLog(@"Outline Element: %@", outlineElement);
+        [outlineArr addObject:outlineElement];
+        
+        // If this Bookmark has children do it again
+       if ([item HasChildren]) {
+           [self PrintOutlineTree:[item GetFirstChild] outlineArr:outlineArr];
+       }
+
     }
-    
     return [outlineArr copy];
 }
 

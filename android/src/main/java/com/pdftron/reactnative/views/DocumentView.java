@@ -2103,25 +2103,28 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         for (; item.isValid(); item = item.getNext()) {
 
             Action action = item.getAction();
+            if (!action.isValid()) return null;
+
             Destination dest = action.getDest();
+            if(!dest.isValid()) return null;
+
             Page page = dest.getPage();
+            if (!page.isValid()) return null;
+            if(page.getIndex() == 0) return null;
 
             // Some CAT PDFs have broken outlines, leading to mutlitple nested outlines
             // Luckily the redundant broken outlines all come with page = 0
-            if ( page.isValid() && page.getIndex() != 0 && item.isValid() ) {
+            WritableMap outlineElement = Arguments.createMap();
+            outlineElement.putString("name", item.getTitle());
+            outlineElement.putInt("indent", item.getIndent());
+            outlineElement.putInt("page", page.getIndex());
 
-                WritableMap outlineElement = Arguments.createMap();
-                outlineElement.putString("name", item.getTitle());
-                outlineElement.putInt("indent", item.getIndent());
-                outlineElement.putInt("page", page.getIndex());
+            ReadableMap readableMap = outlineElement;
+            outline.pushMap(readableMap);
 
-                ReadableMap readableMap = outlineElement;
-                outline.pushMap(readableMap);
-
-                if (item.hasChildren())
-                {
-                    PrintOutlineTree(item.getFirstChild(), outline);
-                }
+            if (item.hasChildren())
+            {
+                PrintOutlineTree(item.getFirstChild(), outline);
             }
         }
         return outline;
@@ -2132,6 +2135,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     public void abortGetThumbnail() throws PDFNetException {
 
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        pdfViewCtrl.clearThumbCache();
         pdfViewCtrl.cancelAllThumbRequests();
 
     }
