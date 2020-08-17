@@ -2184,21 +2184,27 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
         Image img = Image.create(pdfDoc, bitmap);
 
-        com.pdftron.pdf.Rect finalRect = topLeft;
-        finalRect.normalize();
+        topLeft.normalize();
+        topRight.normalize();
 
-        // Stamper
-        Stamper s = new Stamper(Stamper.e_absolute_size, finalRect.getWidth(), finalRect.getHeight());
-        s.setAlignment(Stamper.e_horizontal_left, Stamper.e_vertical_bottom);
-        s.setPosition(finalRect.getX1(), finalRect.getY1());
+        // Stamper 1
+        Stamper s1 = new Stamper(Stamper.e_absolute_size, topLeft.getWidth(), topLeft.getHeight());
+        s1.setAlignment(Stamper.e_horizontal_left, Stamper.e_vertical_bottom);
+        s1.setPosition(topLeft.getX1(), topLeft.getY1());
+        s1.setAsBackground(false);
 
-        s.setAsBackground(false);
+        // Stamper 2
+        Stamper s2 = new Stamper(Stamper.e_absolute_size, topRight.getWidth(), topRight.getHeight());
+        s2.setAlignment(Stamper.e_horizontal_left, Stamper.e_vertical_bottom);
+        s2.setPosition(topRight.getX1(), topRight.getY1());
+        s2.setAsBackground(false);
+
 
         if (isDuplex) {
-            s.stampImage(pdfDoc, img, new PageSet(2, pages, PageSet.e_odd));
-            s.stampImage(pdfDoc, img, new PageSet(2, pages, PageSet.e_odd));
+            s1.stampImage(pdfDoc, img, new PageSet(2, pages, PageSet.e_even));
+            s2.stampImage(pdfDoc, img, new PageSet(2, pages, PageSet.e_odd));
         } else {
-            s.stampImage(pdfDoc, img, new PageSet(2, pages));
+            s1.stampImage(pdfDoc, img, new PageSet(2, pages));
         }
 
         pdfViewCtrl.update(true);

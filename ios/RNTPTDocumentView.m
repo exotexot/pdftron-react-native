@@ -2312,34 +2312,34 @@ static NSMutableArray* globalSearchResults;
     PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0+offsetHorizontal y1:height-maxImageHeight-offsetTop x2:maxImageWidth+offsetHorizontal y2:height-offsetTop];
     PTPDFRect *topRight = [[PTPDFRect alloc] initWithX1:(width - maxImageWidth - offsetHorizontal) y1:height-maxImageHeight-offsetTop x2:width-offsetHorizontal y2:height-offsetTop];
     
-    PTPDFRect *finalRect = topLeft;
-    [finalRect Normalize];
+    [topLeft Normalize];
+    [topRight Normalize];
             
-    // Stamper
-    PTStamper *s = [[PTStamper alloc] initWithSize_type:e_ptabsolute_size a:[finalRect Width] b:[finalRect Height]];
-    [s SetAlignment:e_pthorizontal_left vertical_alignment:e_ptvertical_bottom];
-    [s SetPosition:[finalRect GetX1] vertical_distance:[finalRect GetY1] use_percentage:NO];
+    // Stamper1
+    PTStamper *s1 = [[PTStamper alloc] initWithSize_type:e_ptabsolute_size a:[topLeft Width] b:[topLeft Height]];
+    [s1 SetAlignment:e_pthorizontal_left vertical_alignment:e_ptvertical_bottom];
+    [s1 SetPosition:[topLeft GetX1] vertical_distance:[topLeft GetY1] use_percentage:NO];
+    [s1 SetAsBackground:false];
     
-    [s SetAsBackground:false];
-
+    // Stamper2
+    PTStamper *s2 = [[PTStamper alloc] initWithSize_type:e_ptabsolute_size a:[topRight Width] b:[topRight Height]];
+    [s2 SetAlignment:e_pthorizontal_left vertical_alignment:e_ptvertical_bottom];
+    [s2 SetPosition:[topRight GetX1] vertical_distance:[topRight GetY1] use_percentage:NO];
+    [s2 SetAsBackground:false];
+    
     PTSDFDoc *sdfDoc = [pdfDoc GetSDFDoc];
     PTImage *img2 = [PTImage CreateWithDataSimple:sdfDoc buf:imageData buf_size:imageData.length encoder_hints:[sdfDoc GetObj:0]];
-    
     
     if(isDuplex) {
         PTPageSet *psLeft = [[PTPageSet alloc] initWithRange_start:2 range_end:pages filter:e_pteven];
         PTPageSet *psRight = [[PTPageSet alloc] initWithRange_start:2 range_end:pages filter:e_ptodd];
         
-        [s StampImage:pdfDoc src_img:img2 dest_pages:psLeft];
-        [s StampImage:pdfDoc src_img:img2 dest_pages:psRight];
+        [s1 StampImage:pdfDoc src_img:img2 dest_pages:psLeft];
+        [s2 StampImage:pdfDoc src_img:img2 dest_pages:psRight];
     } else {
         PTPageSet *ps = [[PTPageSet alloc] initWithRange_start:2 range_end:pages filter:e_ptall];
-        [s StampImage:pdfDoc src_img:img2 dest_pages:ps];
+        [s1 StampImage:pdfDoc src_img:img2 dest_pages:ps];
     }
-    
-    
-    
-    
     
     [pdfViewCtrl Update:YES];
 }
