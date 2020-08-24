@@ -740,6 +740,10 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             menuStr = "openAttachment";
         } else if (id == R.id.qm_tts) {
             menuStr = "read";
+        } else if (id == R.id.qm_share) {
+            menuStr = "share";
+        } else if (id == R.id.qm_search) {
+            menuStr = "search";
         }
         return menuStr;
     }

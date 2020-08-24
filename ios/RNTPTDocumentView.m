@@ -2072,12 +2072,12 @@ static NSMutableArray* globalSearchResults;
                                                                  action:@selector(toggleSidebar)];
    
                                
-//    UIBarButtonItem *testButton = [[UIBarButtonItem alloc] initWithTitle:@"SIDEBAR" style:UIBarButtonItemStylePlain target:self action:@selector(toggleSidebar)];
+    // UIBarButtonItem *testButton = [[UIBarButtonItem alloc] initWithTitle:@"SIDEBAR" style:UIBarButtonItemStylePlain target:self action:@selector(toggleSidebar)];
     self.documentViewController.thumbnailSliderController.leadingToolbarItem = sidebarButton;
     
     
-    
-    
+    // Force one refresh after document loaded
+    [pdfViewCtrl Update:YES];
 }
 
 
