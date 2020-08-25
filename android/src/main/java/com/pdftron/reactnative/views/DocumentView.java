@@ -3,6 +3,7 @@ package com.pdftron.reactnative.views;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Matrix;
 import android.graphics.Rect;
@@ -13,6 +14,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -1819,13 +1821,25 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         pdfViewCtrl.setPageSpacing(10,10,0,100);
         pdfViewCtrl.setupThumbnails(false, true, true, 200, 200 * 200 * 500, 0.7);
 
-        int darkBG = android.graphics.Color.rgb(36, 36, 36);
-        int lightBG = android.graphics.Color.rgb(238, 238, 238);
+        Context context = pdfViewCtrl.getContext();
+        PdfViewCtrlSettingsManager.setFollowSystemDarkMode(context, false);
 
-        PDFViewCtrl.DEFAULT_BG_COLOR = lightBG;
-        PDFViewCtrl.DEFAULT_DARK_BG_COLOR = darkBG;
+        int darkBG = android.graphics.Color.rgb(36, 36, 36); // 36,36,36
+        int lightBG = android.graphics.Color.rgb(238, 238, 238); // 238,238,238
 
-        //mPdfViewCtrlTabHostFragment.getCurrentPdfViewCtrlFragment().updateColorMode();
+        int nightModeFlags = getContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        switch (nightModeFlags) {
+            case Configuration.UI_MODE_NIGHT_YES:
+                PDFViewCtrl.DEFAULT_BG_COLOR = darkBG;
+                break;
+
+            default:
+                PDFViewCtrl.DEFAULT_BG_COLOR = lightBG;
+                break;
+        }
+
+
+        Log.d("NIGHTNIGHT", String.format("value1 = %d", nightModeFlags));
         pdfViewCtrl.updatePageLayout();
 
 
@@ -1867,7 +1881,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                             public void onViewModePickerDialogFragmentDismiss() {
                                 mPdfViewCtrlTabHostFragment.onViewModePickerDialogFragmentDismiss();
 
-                                //hideSystemUI();
+                                hideSystemUI();
                             }
 
                             @Override
@@ -2001,7 +2015,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
     public void findText(String searchString) throws PDFNetException {
 
-        //hideSystemUI();
+        hideSystemUI();
 
         if (getPdfViewCtrlTabFragment()!=null) {
             toggleSlider(false);
@@ -2015,11 +2029,14 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
     public void cancelFindText() throws PDFNetException {
 
+
         if (getPdfViewCtrlTabFragment()!=null) {
             getPdfViewCtrlTabFragment().setSearchNavButtonsVisible(false);
             getPdfViewCtrlTabFragment().cancelFindText();
             getPdfViewCtrlTabFragment().exitSearchMode();
         }
+
+        hideSystemUI();
 
     }
 
