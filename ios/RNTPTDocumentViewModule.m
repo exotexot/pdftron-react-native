@@ -180,6 +180,52 @@ RCT_REMAP_METHOD(setValueForFields,
     }
 }
 
+RCT_REMAP_METHOD(setFlagForAnnotations,
+                 setFlagForAnnotationsForDocumentViewTag:(nonnull NSNumber *)tag
+                 annotationFlagList:(NSArray *)annotationFlagList
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] setFlagForAnnotationsForDocumentViewTag:tag annotationFlagList:annotationFlagList];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"set_flag_for_annotations", @"Failed to set flag on annotations", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(selectAnnotation,
+                 selectAnnotationForDocumentViewTag:(nonnull NSNumber *)tag
+                 annotationId:(NSString *)annotationId
+                 pageNumber:(NSInteger)pageNumber
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] selectAnnotationForDocumentViewTag:tag annotationId:annotationId pageNumber:pageNumber];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"select_annotation", @"Failed to select annotation", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(getPageCropBox,
+                 getPageCropBoxForDocumentViewTag: (nonnull NSNumber *)tag
+                 pageNumber:(NSInteger)pageNumber
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejector:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        NSDictionary<NSString *, NSNumber *> *cropBox = [[self documentViewManager] getPageCropBoxForDocumentViewTag:tag pageNumber:pageNumber];
+        resolve(cropBox);
+    }
+    @catch (NSException *exception) {
+        reject(@"get_page_crop_box", @"Failed to get page cropbox", [self errorFromException:exception]);
+    }
+}
+
 #pragma mark - Collaboration
 
 RCT_REMAP_METHOD(importAnnotationCommand,
