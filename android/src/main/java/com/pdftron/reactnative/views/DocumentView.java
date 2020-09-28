@@ -1024,6 +1024,12 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
         @Override
         public boolean onShowQuickMenu(QuickMenu quickMenu, Annot annot) {
+
+            // disabled menu completely
+            if (annot == null && getToolManager().getTool().getToolMode() == ToolManager.ToolMode.PAN) {
+                return true;
+            }
+
             // first check if we need to show at all
             if (mHideAnnotMenuTools != null && annot != null && getPdfViewCtrl() != null) {
                 for (Object item : mHideAnnotMenuTools) {
