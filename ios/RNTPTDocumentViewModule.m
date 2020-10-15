@@ -333,4 +333,243 @@ RCT_REMAP_METHOD(importAnnotationCommand,
     }
 }
 
+
+
+
+
+#pragma mark - Custom CAT
+
+RCT_REMAP_METHOD(search,
+                 searchForDocumentViewTag:(nonnull NSNumber *)tag
+                 searchString:(NSString *)searchString
+                 case:(BOOL)isCase
+                 whole:(BOOL)isWhole
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        NSArray *results = [[self documentViewManager] searchForDocumentViewTag:tag search:searchString case:isCase whole:isWhole];
+        resolve(results);
+    }
+    @catch (NSException *exception) {
+        reject(@"search_failed", @"SEARCH FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(clearSearch,
+                 clearSearchForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] clearSearchForDocumentViewTag:tag];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"clearSearch_Failed", @"CLEAR SEARCH FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+
+
+RCT_REMAP_METHOD(findTextIOS,
+                 findTextForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] findTextForDocumentViewTag:tag];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"findText_failed", @"FIND TEXT FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(toggleSlider,
+                 toggleSliderForDocumentViewTag:(nonnull NSNumber *)tag
+                 toggle:(BOOL)toggle
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] toggleSliderForDocumentViewTag:tag toggleSlider:toggle];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"rotate_failed", @"TOGGLE SLIDER PAGE FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(getDimensions,
+                 getDimensionsForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        NSDictionary *dimensions = [[self documentViewManager] getDimensionsForDocumentViewTag:tag];
+        resolve(dimensions);
+    }
+    @catch (NSException *exception) {
+        reject(@"dimensions_failed", @"DIMENSIONS FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(jumpTo,
+                 jumpToForDocumentViewTag:(nonnull NSNumber *)tag
+                 page_num:(int)page_num
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] jumpToForDocumentViewTag:tag jumpTo:page_num];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"setPageNum_failed", @"SET CURRENT PAGE FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(appendSchoolLogo,
+                 appendSchoolLogoForDocumentViewTag:(nonnull NSNumber *)tag
+                 base64String:(NSString *)base64String
+                 duplex:(BOOL)isDuplex
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] appendSchoolLogoForDocumentViewTag:tag appendSchoolLogo:base64String duplex:isDuplex];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"addSchoolLogo_failed", @"ADD SCHOOL LOGO FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(rotate,
+                 rotateForDocumentViewTag:(nonnull NSNumber *)tag
+                 ccw:(BOOL)ccw
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] rotateForDocumentViewTag:tag rotate:ccw];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"rotate_failed", @"ROTATE PAGE FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(getOutline,
+                 getOutlineForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        NSArray *outline = [[self documentViewManager] getOutlineForDocumentViewTag:tag];
+        resolve(outline);
+    }
+    @catch (NSException *exception) {
+        reject(@"outline_failed", @"GET OUTLINE FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(addBookmark,
+                 addBookmarkForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] addBookmarkForDocumentViewTag:tag];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"bookmark_failed", @"ADD BOOKMARK FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(getThumbnail,
+                 getThumbnailForDocumentViewTag:(nonnull NSNumber *)tag
+                 pageNumber:(int)pageNumber
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] getThumbnailForDocumentViewTag:tag getThumbnail:pageNumber completionHandler:^(NSString * _Nullable base64String) {
+               if (base64String) {
+                   resolve(base64String);
+               } else {
+                   reject(@"thumbnail_failed", @"Failed to get thumbnail", nil);
+               }
+           }];
+    }
+    @catch (NSException *exception) {
+        reject(@"thumbnail_failed", @"THUMBNAILS FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(abortGetThumbnail,
+                 abortGetThumbnailForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] abortGetThumbnailForDocumentViewTag:tag];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"abort_get_thumb", @"ABORT THUMBNAILS FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(currentPage,
+                 currentPageForDocumentViewTag:(nonnull NSNumber *)tag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        
+        NSNumber *page = [NSNumber numberWithInt:[[self documentViewManager] currentPageForDocumentViewTag:tag]];
+        resolve(page);
+    }
+    @catch (NSException *exception) {
+        reject(@"rotate_failed", @"CURRENT PAGE FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(changeBackground,
+                 changeBackgroundForDocumentViewTag:(nonnull NSNumber *)tag
+                 red:(int)r
+                 green:(int)g
+                 blue:(int)b
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] changeBackgroundForDocumentViewTag:tag changeBackground:r green:g blue:b];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"changeBackground_failed", @"CHANGE BACKRGOUND FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(setContinuous,
+                 setContinuousForDocumentViewTag:(nonnull NSNumber *)tag
+                 toggle:(int)toggle
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] setContinuousForDocumentViewTag:tag setContinuous:toggle];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"changeBackground_failed", @"CHANGE BACKRGOUND FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
+
+
 @end
