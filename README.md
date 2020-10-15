@@ -61,6 +61,7 @@
             versionCode 1
             versionName "1.0"
     +       multiDexEnabled true
+    +       manifestPlaceholders = [pdftronLicenseKey:PDFTRON_LICENSE_KEY]
         }
 
         dependencies {
@@ -83,7 +84,14 @@
 	    // ...
 	}
 	```
-3. Add the following to your `android/app/src/main/AndroidManifest.xml` file:
+3. In your `android/gradle.properties` file. Add the following line to it:
+    ``` diff
+    # Add the PDFTRON_LICENSE_KEY variable here. 
+    # For trial purposes leave it blank.
+    # For production add a valid commercial license key.
+    PDFTRON_LICENSE_KEY=
+    ```
+4. Add the following to your `android/app/src/main/AndroidManifest.xml` file:
 
     ```diff
     <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -99,6 +107,11 @@
         ...
     +   android:largeHeap="true"
     +   android:usesCleartextTraffic="true">
+
+        <!-- Add license key in meta-data tag here. This should be inside the application tag. -->
+    +   <meta-data
+    +       android:name="pdftron_license_key"
+    +       android:value="${pdftronLicenseKey}"/>
 
         <activity
           android:name=".MainActivity"
@@ -117,7 +130,7 @@
     </manifest>
     ```
 
-4. In your `android\app\src\main\java\com\myapp\MainApplication.java` file, change `Application` to `MultiDexApplication`:
+5. In your `android\app\src\main\java\com\myapp\MainApplication.java` file, change `Application` to `MultiDexApplication`:
     ```diff
     - import android.app.Application;
     + import androidx.multidex.MultiDexApplication;
@@ -126,8 +139,8 @@
     + public class MainApplication extends MultiDexApplication implements ReactApplication {
     ```
 
-5. Replace `App.js` with what is shown [here](#usage)
-6. Finally in the root project directory, run `react-native run-android`.
+6. Replace `App.js` with what is shown [here](#usage)
+7. Finally in the root project directory, run `react-native run-android`.
 
 ### iOS
 
@@ -423,7 +436,9 @@ bool, optional
 ##### isBase64String
 bool, optional
 
-If true, `document` prop will be treated as a base64 string.
+If true, `document` prop will be treated as a base64 string. 
+
+When viewing a document initialized with a base64 string (ie a memory buffer), a temporary file is created on Android, and no temporary path is created on iOS.
 ##### padStatusBar
 bool, optional, android only
 
@@ -602,7 +617,10 @@ fields | array | array of field data in the format `{fieldName: string, fieldVal
 - [handleBackButton](#handlebackbutton)
 - [selectAnnotation](#selectAnnotation)
 - [setFlagForAnnotations](#setFlagForAnnotations)
+- [setPropertyForAnnotation](#setPropertyForAnnotation)
 - [getPageCropBox](#getPageCropBox)
+- [setCurrentPage](#setCurrentPage)
+- [getDocumentPath](#getDocumentPath)
 
 ##### setToolMode
 To set the current tool mode (`Config.Tools` constants).
@@ -816,6 +834,44 @@ this._viewer.setFlagForAnnotations([
     }
 ]);
 ```
+##### setPropertyForAnnotation
+To set properties for specified annotation in the current document, if it is valid. 
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+annotationId | string | the unique id of the annotation
+pageNumber | integer | the page number where annotation is located. It is 1-indexed
+propertyMap | object | an object containing properties to be set. Available properties are listed below
+
+Properties:
+
+Name | Type | Markup exclusive | Example
+--- | --- | --- | ---
+rect | object | no | {x1: 1, y1: 2, x2: 3, y2: 4}
+contents | string | no | "contents"
+subject | string | yes | "subject"
+title | string | yes | "title"
+contentRect | object | yes | {x1: 1, y1: 2, x2: 3, y2: 4}
+
+Return a promise.
+
+```js
+// Set properties for annotation in the current document.
+this._viewer.setPropertyForAnnotation('Pdftron', 1, {
+  rect: {
+    x1: 1.1,    // left
+    y1: 3,      // bottom
+    x2: 100.9,  // right
+    y2: 99.8    // top
+  },
+  contents: 'Hello World',
+  subject: 'Sample',
+  title: 'set-prop-for-annot'
+});
+```
+
 
 ##### getPageCropBox
 Return a JSON object with properties for position (`x1`, `y1`, `x2` and `y2`) and size (`width` and `height`) of the crop box for specified page.
@@ -833,6 +889,36 @@ this._viewer.getPageCropBox(1).then((cropBox) => {
   console.log('bottom-left coordinate:', cropBox.x1, cropBox.y1);
   console.log('top-right coordinate:', cropBox.x2, cropBox.y2);
   console.log('width and height:', cropBox.width, cropBox.height);
+});
+```
+
+##### setCurrentPage
+Set current page of the document.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+pageNumber | integer | the page number for the target crop box. It is 1-indexed
+
+Return a Promise (with a boolean that tells whether the setting process is successful).
+
+```js
+this._viewer.setCurrentPage(4).then((success) => {
+  if (success) {
+    console.log("Current page is set to 4.");
+  }
+});
+```
+
+##### getDocumentPath
+Return the path of the current document.
+
+Return a Promise.
+
+```js
+this._viewer.getDocumentPath().then((path) => {
+  console.log('The path to current document is: ' + path);
 });
 ```
 

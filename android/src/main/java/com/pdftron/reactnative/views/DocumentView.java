@@ -49,6 +49,7 @@ import com.pdftron.pdf.PDFDoc;
 import com.pdftron.pdf.PDFViewCtrl;
 import com.pdftron.pdf.Page;
 import com.pdftron.pdf.ViewChangeCollection;
+import com.pdftron.pdf.annots.Markup;
 import com.pdftron.pdf.annots.Widget;
 import com.pdftron.pdf.config.PDFViewCtrlConfig;
 import com.pdftron.pdf.config.ToolConfig;
@@ -68,6 +69,7 @@ import com.pdftron.pdf.tools.Tool;
 import com.pdftron.pdf.tools.ToolManager;
 import com.pdftron.pdf.utils.ActionUtils;
 import com.pdftron.pdf.utils.AnnotUtils;
+import com.pdftron.pdf.utils.CommonToast;
 import com.pdftron.pdf.utils.PdfDocManager;
 import com.pdftron.pdf.utils.PdfViewCtrlSettingsManager;
 import com.pdftron.pdf.utils.Utils;
@@ -142,6 +144,10 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     private static final String KEY_annotRect = "rect";
     private static final String KEY_annotFlag = "flag";
     private static final String KEY_annotFlagValue = "flagValue";
+    private static final String KEY_annotSubject = "subject";
+    private static final String KEY_annotTitle = "title";
+    private static final String KEY_annotContents = "contents";
+    private static final String KEY_annotContentRect = "contentRect";
 
     private static final String KEY_action = "action";
     private static final String KEY_action_add = "add";
@@ -235,6 +241,19 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     }
 
     public void setup(ThemedReactContext reactContext) {
+        // intercept toast
+        CommonToast.CommonToastHandler.getInstance().setCommonToastListener(new CommonToast.CommonToastListener() {
+            @Override
+            public boolean canShowToast(int res, @Nullable CharSequence charSequence) {
+                if (res == R.string.download_finished_message ||
+                        res == R.string.document_saved_toast_message ||
+                        res == R.string.download_failed_message) {
+                    return false;
+                }
+                return true;
+            }
+        });
+
         int width = ViewGroup.LayoutParams.MATCH_PARENT;
         int height = ViewGroup.LayoutParams.MATCH_PARENT;
         ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(width, height);
@@ -1698,7 +1717,9 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             case String: {
                 String fieldValue = readableMap.getString(fieldName);
                 if (fieldValue != null &&
-                        (Field.e_text == fieldType || Field.e_radio == fieldType)) {
+                        (Field.e_text == fieldType ||
+                                Field.e_radio == fieldType ||
+                                Field.e_choice == fieldType)) {
                     ViewChangeCollection view_change = field.setValue(fieldValue);
                     pdfViewCtrl.refreshAndUpdate(view_change);
                 }
@@ -1737,6 +1758,14 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             if (shouldUnlock) {
                 pdfViewCtrl.docUnlock();
             }
+        }
+    }
+
+    public String getDocumentPath() {
+        if (mIsBase64 && mTempFile != null) {
+            return mTempFile.getAbsolutePath();
+        } else {
+            return getPdfViewCtrlTabFragment().getFilePath();
         }
     }
 
@@ -1779,8 +1808,89 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         return false;
     }
 
+    public void setPropertyForAnnotation(String annotId, int pageNumber, ReadableMap propertyMap) throws PDFNetException {
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        ToolManager toolManager = getToolManager();
+
+        boolean shouldUnlock = false;
+        try {
+            pdfViewCtrl.docLock(true);
+            shouldUnlock = true;
+
+            Annot annot = ViewerUtils.getAnnotById(pdfViewCtrl, annotId, pageNumber);
+            if (annot != null && annot.isValid()) {
+
+                HashMap<Annot, Integer> map = new HashMap<>(1);
+                map.put(annot, pageNumber);
+                toolManager.raiseAnnotationsPreModifyEvent(map);
+
+                if (propertyMap.hasKey(KEY_annotContents)) {
+                    String contents = propertyMap.getString(KEY_annotContents);
+                    if (contents != null) {
+                        annot.setContents(contents);
+                    }
+                }
+
+                if (propertyMap.hasKey(KEY_annotRect)) {
+                    ReadableMap rectMap = propertyMap.getMap(KEY_annotRect);
+
+                    if (rectMap != null && rectMap.hasKey(KEY_x1) && rectMap.hasKey(KEY_y1) &&
+                                rectMap.hasKey(KEY_x2) && rectMap.hasKey(KEY_y2)) {
+                        double rectX1 = rectMap.getDouble(KEY_x1);
+                        double rectY1 = rectMap.getDouble(KEY_y1);
+                        double rectX2 = rectMap.getDouble(KEY_x2);
+                        double rectY2 = rectMap.getDouble(KEY_y2);
+                        com.pdftron.pdf.Rect rect = new com.pdftron.pdf.Rect(rectX1, rectY1, rectX2, rectY2);
+                        annot.setRect(rect);
+                    }
+                }
+
+                if (annot.isMarkup()) {
+                    Markup markupAnnot = new Markup(annot);
+
+                    if (propertyMap.hasKey(KEY_annotSubject)) {
+                        String subject = propertyMap.getString(KEY_annotSubject);
+                        if (subject != null) {
+                            markupAnnot.setSubject(subject);
+                        }
+                    }
+
+                    if (propertyMap.hasKey(KEY_annotTitle)) {
+                        String title = propertyMap.getString(KEY_annotTitle);
+                        if (title != null) {
+                            markupAnnot.setTitle(title);
+                        }
+                    }
+
+                    if (propertyMap.hasKey(KEY_annotContentRect)) {
+                        ReadableMap contentRectMap = propertyMap.getMap(KEY_annotContentRect);
+                        if (contentRectMap != null && contentRectMap.hasKey(KEY_x1) && contentRectMap.hasKey(KEY_y1) &&
+                                contentRectMap.hasKey(KEY_x2) && contentRectMap.hasKey(KEY_y2)) {
+                            double rectX1 = contentRectMap.getDouble(KEY_x1);
+                            double rectY1 = contentRectMap.getDouble(KEY_y1);
+                            double rectX2 = contentRectMap.getDouble(KEY_x2);
+                            double rectY2 = contentRectMap.getDouble(KEY_y2);
+                            com.pdftron.pdf.Rect contentRect = new com.pdftron.pdf.Rect(rectX1, rectY1, rectX2, rectY2);
+                            markupAnnot.setContentRect(contentRect);
+                        }
+                    }
+                }
+
+                pdfViewCtrl.update(annot, pageNumber);
+
+                toolManager.raiseAnnotationsModifiedEvent(map, Tool.getAnnotationModificationBundle(null));
+            }
+        }
+        finally {
+            if (shouldUnlock) {
+                pdfViewCtrl.docUnlock();
+            }
+        }
+    }
+
     public void setFlagForAnnotations(ReadableArray annotationFlagList) throws PDFNetException {
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        ToolManager toolManager = getToolManager();
         int flagCount = annotationFlagList.size();
 
         boolean shouldUnlock = false;
@@ -1832,8 +1942,15 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                             flagNum = Annot.e_toggle_no_view;
                     }
                     if (flagNum != -1) {
+
+                        HashMap<Annot, Integer> map = new HashMap<>(1);
+                        map.put(annot, pageNum);
+                        toolManager.raiseAnnotationsPreModifyEvent(map);
+
                         annot.setFlag(flagNum, flagValue);
                         pdfViewCtrl.update(annot, pageNum);
+
+                        toolManager.raiseAnnotationsModifiedEvent(map, Tool.getAnnotationModificationBundle(null));
                     }
                 }
             }
@@ -1857,6 +1974,11 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         map.putDouble(KEY_height, rect.getHeight());
 
         return map;
+    }
+
+    public boolean setCurrentPage(int pageNumber) {
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        return pdfViewCtrl.setCurrentPage(pageNumber);
     }
 
     public PdfViewCtrlTabFragment getPdfViewCtrlTabFragment() {
