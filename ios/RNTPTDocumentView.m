@@ -151,6 +151,8 @@ NS_ASSUME_NONNULL_END
         
         [self applyLayoutMode:self.documentViewController.pdfViewCtrl];
     }
+    
+    [self customInit];
 }
 
 - (void)setDocument:(NSString *)document
@@ -766,6 +768,15 @@ NS_ASSUME_NONNULL_END
             && ![tool isKindOfClass:[PTFreeHandHighlightCreate class]]) {
             ((PTFreeHandCreate *)tool).multistrokeMode = self.continuousAnnotationEditing;
         }
+        
+        if (@available(iOS 13.1, *))
+        {
+            if ([tool isKindOfClass:[PTPencilDrawingCreate class]])
+            {
+               ((PTPencilDrawingCreate *)tool).shouldShowToolPicker = YES;
+            }
+        }
+
     }
 }
 
@@ -2914,7 +2925,7 @@ NS_ASSUME_NONNULL_END
     return nil;
 }
 
-+ (Class)toolClassForKey:(NSString *)key
+
 {
     if ([key isEqualToString:PTAnnotationEditToolKey]) {
         return [PTAnnotSelectTool class];
