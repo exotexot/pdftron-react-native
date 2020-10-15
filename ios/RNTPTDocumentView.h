@@ -284,6 +284,60 @@ static NSString * const PTFormFieldValueKey = @"fieldValue";
 
 - (void)importAnnotationCommand:(NSString *)xfdfCommand initialLoad:(BOOL)initialLoad;
 
+
+#pragma mark - Custom CAT
+
+// Custom Events
+
+- (void)thumbnailCreated:(RNTPTDocumentView *)sender page:(int)page base64String:(NSString *)base64String;
+
+- (void)toggleSidebar:(RNTPTDocumentView *)sender;
+
+
+
+// Custom Methods
+
+- (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString case:(BOOL)isCase whole:(BOOL)isWhole;
+
+- (void)clearSearch;
+
+- (NSDictionary<NSString *, NSNumber *> *)getDimensions;
+
+- (void)jumpTo:(int)page_num;
+
+- (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex;
+
+- (void)rotate:(BOOL)ccw;
+
+- (NSArray<NSDictionary<NSString *, id> *> *)getOutline;
+
+- (void)addBookmark;
+
+- (void)findTextIOS;
+
+- (void)showSettings;
+
+- (void)toggleSlider:(BOOL)toggle;
+
+- (void)getThumbnail:(int)pageNumber completionHandler:(void (^)(NSString * _Nullable base64String))completionHandler;
+
+- (void)abortGetThumbnail;
+
+- (int)currentPage;
+
+- (void)changeBackground:(int)r green:(int)g blue:(int)b;
+
+- (void)setContinuous:(BOOL)toggle;
+
 @end
+
+
+@interface PTDocumentViewSettingsControllerCUSTOM : PTDocumentViewSettingsController
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath;
+
+@end
+
 
 NS_ASSUME_NONNULL_END
