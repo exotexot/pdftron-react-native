@@ -1,30 +1,13 @@
 package com.pdftron.reactnative.nativeviews;
 
 import android.graphics.PointF;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 
 import com.pdftron.pdf.controls.PdfViewCtrlTabFragment;
 import com.pdftron.pdf.tools.ToolManager;
-import com.pdftron.pdf.utils.AppUtils;
 import com.pdftron.pdf.utils.ViewerUtils;
 
 public class RNPdfViewCtrlTabFragment extends PdfViewCtrlTabFragment {
-
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        try {
-            AppUtils.initializePDFNetApplication(getContext().getApplicationContext(), "");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return super.onCreateView(inflater, container, savedInstanceState);
-    }
 
     @Override
     public void imageStamperSelected(PointF targetPoint) {

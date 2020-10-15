@@ -164,19 +164,16 @@ static NSString * const PTFormFieldValueKey = @"fieldValue";
 - (void)zoomChanged:(RNTPTDocumentView *)sender zoom:(double)zoom;
 
 - (void)annotationsSelected:(RNTPTDocumentView *)sender annotations:(NSArray<NSDictionary<NSString *, id> *> *)annotations;
+
 - (void)annotationChanged:(RNTPTDocumentView *)sender annotation:(NSDictionary *)annotation action:(NSString *)action;
 
 - (void)formFieldValueChanged:(RNTPTDocumentView *)sender fields:(NSDictionary *)fields;
 
 - (void)exportAnnotationCommand:(RNTPTDocumentView *)sender action:(NSString *)action xfdfCommand:(NSString *)xfdfCommand;
+
 - (void)annotationMenuPressed:(RNTPTDocumentView *)sender annotationMenu:(NSString *)annotationMenu annotations:(NSArray<NSDictionary<NSString *, id> *> *)annotations;
+
 - (void)longPressMenuPressed:(RNTPTDocumentView *)sender longPressMenu:(NSString *)longPressMenu longPressText:(NSString *)longPressText;
-
-
-// Custom Events
-- (void)thumbnailCreated:(RNTPTDocumentView *)sender page:(int)page base64String:(NSString *)base64String;
-- (void)toggleSidebar:(RNTPTDocumentView *)sender;
-
 
 @end
 
@@ -287,57 +284,6 @@ static NSString * const PTFormFieldValueKey = @"fieldValue";
 
 - (void)importAnnotationCommand:(NSString *)xfdfCommand initialLoad:(BOOL)initialLoad;
 
-
-
-// Custom Search
-- (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString case:(BOOL)isCase whole:(BOOL)isWhole;
-- (void)clearSearch;
-
-// Get First Page Dimensions
-- (NSDictionary<NSString *, NSNumber *> *)getDimensions;
-
-// Jump to Page
-- (void)jumpTo:(int)page_num;
-
-// Append School Logo
-- (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex;
-
-// Rotation Manager
-- (void)rotate:(BOOL)ccw;
-
-// Outline
-- (NSArray<NSDictionary<NSString *, id> *> *)getOutline;
-
-// addBookmark
-- (void)addBookmark;
-
-- (void)findTextIOS;
-- (void)showSettings;
-- (void)toggleSlider:(BOOL)toggle;
-
-- (void)getThumbnail:(int)pageNumber completionHandler:(void (^)(NSString * _Nullable base64String))completionHandler;
-
-- (void)abortGetThumbnail;
-
-- (int)currentPage;
-
-- (void)changeBackground:(int)r green:(int)g blue:(int)b;
-
-- (void)setContinuous:(BOOL)toggle;
-
-
-
 @end
-
-
-
-@interface PTDocumentViewSettingsControllerCUSTOM : PTDocumentViewSettingsController
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath;
-
-@end
-
-
 
 NS_ASSUME_NONNULL_END
