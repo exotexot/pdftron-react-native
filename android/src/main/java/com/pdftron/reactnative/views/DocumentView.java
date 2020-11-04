@@ -1887,7 +1887,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                             public void onViewModePickerDialogFragmentDismiss() {
                                 mPdfViewCtrlTabHostFragment.onViewModePickerDialogFragmentDismiss();
 
-                                hideSystemUI();
+                                //hideSystemUI();
                             }
 
                             @Override
@@ -2021,7 +2021,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
     public void findText(String searchString) throws PDFNetException {
 
-        hideSystemUI();
+        //hideSystemUI();
 
         if (getPdfViewCtrlTabFragment()!=null) {
             toggleSlider(false);
@@ -2042,7 +2042,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             getPdfViewCtrlTabFragment().exitSearchMode();
         }
 
-        hideSystemUI();
+        //hideSystemUI();
 
     }
 
