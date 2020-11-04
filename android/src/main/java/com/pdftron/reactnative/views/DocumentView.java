@@ -689,7 +689,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         } else if ("FormCreateListBoxField".equals(item)) {
             mode = ToolManager.ToolMode.FORM_LIST_BOX_CREATE;
         } else if ("AnnotationEraserTool".equals(item)) {
-            mode = ToolManager.ToolMode.INK_ERASER;
+            //mode = ToolManager.ToolMode.INK_ERASER;
             setContinuousAnnotationEditing(true);
         }
         return mode;
