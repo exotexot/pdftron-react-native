@@ -689,7 +689,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         } else if ("FormCreateListBoxField".equals(item)) {
             mode = ToolManager.ToolMode.FORM_LIST_BOX_CREATE;
         } else if ("AnnotationEraserTool".equals(item)) {
-            //mode = ToolManager.ToolMode.INK_ERASER;
+            mode = ToolManager.ToolMode.INK_ERASER;
             setContinuousAnnotationEditing(true);
         }
         return mode;
@@ -1371,7 +1371,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         getToolManager().setStylusAsPen(mUseStylusAsPen);
         getToolManager().setSignSignatureFieldsWithStamps(mSignWithStamps);
 
-        getToolManager().setEraserType(Eraser.EraserType.ANNOTATION_ERASER);
+        // Setting Eraser Type
+        getToolManager().setEraserType(Eraser.EraserType.INK_ERASER);
 
         getPdfViewCtrlTabFragment().addQuickMenuListener(mQuickMenuListener);
 
