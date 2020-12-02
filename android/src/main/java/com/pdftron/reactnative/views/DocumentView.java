@@ -233,7 +233,16 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             setSupportFragmentManager(fragmentManager);
             mFragmentManagerSave = fragmentManager;
             mCacheDir = currentActivity.getCacheDir().getAbsolutePath();
-            mPDFViewCtrlConfig = PDFViewCtrlConfig.getDefaultConfig(currentActivity);
+
+            PdfViewCtrlSettingsManager.setFollowSystemDarkMode(getContext(), false);
+            int darkBG = android.graphics.Color.rgb(0, 0, 0);
+            int lightBG = android.graphics.Color.rgb(216, 216, 216);
+
+            int nightModeFlags = getContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+
+            mPDFViewCtrlConfig = PDFViewCtrlConfig.getDefaultConfig(currentActivity)
+                    .setClientBackgroundColor(nightModeFlags == Configuration.UI_MODE_NIGHT_YES ? darkBG : lightBG )
+                    .setClientBackgroundColorDark(darkBG);
         } else {
             throw new IllegalStateException("FragmentActivity required.");
         }
@@ -764,6 +773,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         if (mViewModePickerItems.size() > 0) {
             mBuilder = mBuilder.hideViewModeItems(mViewModePickerItems.toArray(new ViewModePickerDialogFragment.ViewModePickerItems[0]));
         }
+
         return mBuilder
                 .pdfViewCtrlConfig(mPDFViewCtrlConfig)
                 .toolManagerBuilder(mToolManagerBuilder)
@@ -1827,28 +1837,6 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
         pdfViewCtrl.setPageSpacing(10,10,0,100);
         pdfViewCtrl.setupThumbnails(false, true, true, 200, 200 * 200 * 500, 0.7);
-
-        Context context = pdfViewCtrl.getContext();
-        PdfViewCtrlSettingsManager.setFollowSystemDarkMode(context, false);
-
-        int darkBG = android.graphics.Color.rgb(36, 36, 36); // 36,36,36
-        int lightBG = android.graphics.Color.rgb(238, 238, 238); // 238,238,238
-
-        int nightModeFlags = getContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        switch (nightModeFlags) {
-            case Configuration.UI_MODE_NIGHT_YES:
-                PDFViewCtrl.DEFAULT_BG_COLOR = darkBG;
-                break;
-
-            default:
-                PDFViewCtrl.DEFAULT_BG_COLOR = lightBG;
-                break;
-        }
-
-
-        Log.d("NIGHTNIGHT", String.format("value1 = %d", nightModeFlags));
-        pdfViewCtrl.updatePageLayout();
-
 
         // Replace Buttons in Thumbnail Slider
         View v = mPdfViewCtrlTabHostFragment.getView();
