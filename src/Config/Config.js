@@ -1,4 +1,6 @@
 export default {
+
+  // Buttons define the various kinds of buttons for the viewer
   Buttons: {
     viewControlsButton: 'viewControlsButton',
     freeHandToolButton: 'freeHandToolButton',
@@ -37,7 +39,11 @@ export default {
     reflowButton: 'reflowButton',
     editMenuButton: 'editMenuButton',
     cropPageButton: 'cropPageButton',
+    undo: 'undo',
+    redo: 'redo'
   },
+
+  // Tools define the various kinds of tools for the viewer
   Tools: {
     annotationEdit: 'AnnotationEdit',
     textSelect: 'TextSelect',
@@ -70,19 +76,27 @@ export default {
     annotationCreateLink: 'AnnotationCreateLink',
     annotationCreateRedactionText: 'AnnotationCreateRedactionText',
     annotationCreateLinkText: 'AnnotationCreateLinkText',
+    annotationCreateFreeHighlighter: 'AnnotationCreateFreeHighlighter',
     formCreateTextField: 'FormCreateTextField',
     formCreateCheckboxField: 'FormCreateCheckboxField',
     formCreateSignatureField: 'FormCreateSignatureField',
     formCreateRadioField: 'FormCreateRadioField',
     formCreateComboBoxField: 'FormCreateComboBoxField',
     formCreateListBoxField: 'FormCreateListBoxField',
+
+    // iOS only.
+    pencilKitDrawing: 'PencilKitDrawing',
   },
+
+  // FitMode define how a page should fit relative to the viewer, alternatively, the default zoom level
   FitMode: {
     FitPage: 'FitPage',
     FitWidth: 'FitWidth',
     FitHeight: 'FitHeight',
     Zoom: 'Zoom',
   },
+
+  // LayoutMode defines the layout mode of the viewer
   LayoutMode: {
     Single: 'Single',
     Continuous: 'Continuous',
@@ -91,10 +105,14 @@ export default {
     FacingCover: 'FacingCover',
     FacingCoverContinuous: 'FacingCoverContinuous',
   },
+
+  // FieldFlags define the property flags for a form field
   FieldFlags: {
     ReadOnly: 0,
     Required: 1,
   },
+
+  // AnnotationMenu defines the menu items when an annotation is selected
   AnnotationMenu: {
     style: 'style',
     note: 'note',
@@ -106,20 +124,27 @@ export default {
     search: 'search',
     share: 'share',
     markupType: 'markupType',
-    textToSpeech: 'textToSpeech',
+    read: 'read',
     screenCapture: 'screenCapture',
     playSound: 'playSound',
     openAttachment: 'openAttachment',
+    calibrate: 'calibrate',
   },
+
+  // LongPressMenu defines the menu items when a long press on empty space or text occurs
   LongPressMenu: {
     copy: 'copy',
     search: 'search',
     share: 'share',
     read: 'read',
   },
+  
+  // Actions define potentially overridable action to the viewer
   Actions: {
     linkPress: 'linkPress',
   },
+
+  // AnnotationFlags define the flags for any annotation in the document
   AnnotationFlags: {
     hidden: "hidden",
     invisible: "invisible",
@@ -131,5 +156,47 @@ export default {
     print: "print",
     readOnly: "readOnly",
     toggleNoView: "toggleNoView"
-  }
+  },
+
+  // DefaultToolbars define a set of pre-designed toolbars for easier customization
+  DefaultToolbars: {
+    View: "PDFTron_View",
+    Annotate: "PDFTron_Annotate",
+    Draw: "PDFTron_Draw",
+    Insert: "PDFTron_Insert",
+    FillAndSign: "PDFTron_Fill_and_Sign",
+    PrepareForm: "PDFTron_Prepare_Form",
+    Measure: "PDFTron_Measure",
+    Pens: "PDFTron_Pens",
+    Redaction: "PDFTron_Redact",
+    Favorite: "PDFTron_Favorite"
+  },
+
+  // ToolbarIcons define default toolbar icons for use for potential custom toolbars
+  ToolbarIcons: {
+    View: "PDFTron_View",
+    Annotate: "PDFTron_Annotate",
+    Draw: "PDFTron_Draw",
+    Insert: "PDFTron_Insert",
+    FillAndSign: "PDFTron_Fill_and_Sign",
+    PrepareForm: "PDFTron_Prepare_Form",
+    Measure: "PDFTron_Measure",
+    Pens: "PDFTron_Pens",
+    Redaction: "PDFTron_Redact",
+    Favorite: "PDFTron_Favorite"
+  },
+
+  // CustomToolbarKey defines the necessary keys for a custom toolbar
+  CustomToolbarKey: {
+    Id: "id",
+    Name: "name",
+    Icon: "icon",
+    Items: "items"
+  },
+
+  // ThumbnailFilterMode defines filter modes in the thumbnails browser
+  ThumbnailFilterMode: {
+    Annotated: "annotated",
+    Bookmarked: "bookmarked",
+  },
 };

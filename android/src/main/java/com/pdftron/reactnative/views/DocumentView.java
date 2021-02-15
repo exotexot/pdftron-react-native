@@ -11,6 +11,7 @@ import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,14 +22,15 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
+import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.pdftron.collab.db.entity.AnnotationEntity;
 import com.pdftron.collab.ui.viewer.CollabManager;
-import com.pdftron.collab.ui.viewer.CollabViewerBuilder;
-import com.pdftron.collab.ui.viewer.CollabViewerTabHostFragment;
+import com.pdftron.collab.ui.viewer.CollabViewerBuilder2;
+import com.pdftron.collab.ui.viewer.CollabViewerTabHostFragment2;
 import com.pdftron.common.PDFNetException;
 import com.pdftron.fdf.FDFDoc;
 import com.pdftron.pdf.Action;
@@ -45,9 +47,11 @@ import com.pdftron.pdf.config.PDFViewCtrlConfig;
 import com.pdftron.pdf.config.ToolConfig;
 import com.pdftron.pdf.config.ToolManagerBuilder;
 import com.pdftron.pdf.config.ViewerConfig;
-import com.pdftron.pdf.controls.PdfViewCtrlTabFragment;
-import com.pdftron.pdf.controls.PdfViewCtrlTabHostFragment;
+import com.pdftron.pdf.controls.PdfViewCtrlTabFragment2;
+import com.pdftron.pdf.controls.PdfViewCtrlTabHostFragment2;
+import com.pdftron.pdf.controls.ThumbnailsViewFragment;
 import com.pdftron.pdf.dialog.ViewModePickerDialogFragment;
+import com.pdftron.pdf.dialog.digitalsignature.DigitalSignatureDialogFragment;
 import com.pdftron.pdf.model.AnnotStyle;
 import com.pdftron.pdf.tools.AdvancedShapeCreate;
 import com.pdftron.pdf.tools.FreehandCreate;
@@ -57,11 +61,15 @@ import com.pdftron.pdf.tools.Tool;
 import com.pdftron.pdf.tools.ToolManager;
 import com.pdftron.pdf.utils.ActionUtils;
 import com.pdftron.pdf.utils.AnnotUtils;
+import com.pdftron.pdf.utils.BookmarkManager;
 import com.pdftron.pdf.utils.CommonToast;
 import com.pdftron.pdf.utils.PdfDocManager;
 import com.pdftron.pdf.utils.PdfViewCtrlSettingsManager;
 import com.pdftron.pdf.utils.Utils;
 import com.pdftron.pdf.utils.ViewerUtils;
+import com.pdftron.pdf.widget.toolbar.builder.AnnotationToolbarBuilder;
+import com.pdftron.pdf.widget.toolbar.builder.ToolbarButtonType;
+import com.pdftron.pdf.widget.toolbar.component.DefaultToolbars;
 import com.pdftron.reactnative.R;
 import com.pdftron.reactnative.nativeviews.RNPdfViewCtrlTabFragment;
 import com.pdftron.reactnative.utils.ReactUtils;
@@ -76,81 +84,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
+import static com.pdftron.reactnative.utils.Constants.*;
+
+public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
 
     private static final String TAG = DocumentView.class.getSimpleName();
 
-    // EVENTS
-    private static final String ON_NAV_BUTTON_PRESSED = "onLeadingNavButtonPressed";
-    private static final String ON_DOCUMENT_LOADED = "onDocumentLoaded";
-    private static final String ON_PAGE_CHANGED = "onPageChanged";
-    private static final String ON_ZOOM_CHANGED = "onZoomChanged";
-    private static final String ON_ANNOTATION_CHANGED = "onAnnotationChanged";
-    private static final String ON_DOCUMENT_ERROR = "onDocumentError";
-    private static final String ON_EXPORT_ANNOTATION_COMMAND = "onExportAnnotationCommand";
-    private static final String ON_ANNOTATION_MENU_PRESS = "onAnnotationMenuPress";
-    private static final String ON_LONG_PRESS_MENU_PRESS = "onLongPressMenuPress";
-    private static final String ON_ANNOTATIONS_SELECTED = "onAnnotationsSelected";
-    private static final String ON_BEHAVIOR_ACTIVATED = "onBehaviorActivated";
-    private static final String ON_FORM_FIELD_VALUE_CHANGED = "onFormFieldValueChanged";
-
-    private static final String PREV_PAGE_KEY = "previousPageNumber";
-    private static final String PAGE_CURRENT_KEY = "pageNumber";
-
-    private static final String ZOOM_KEY = "zoom";
-
-    private static final String KEY_LINK_BEHAVIOR_DATA = "url";
-
-    private static final String KEY_annotList = "annotList";
-    private static final String KEY_annotId = "id";
-    private static final String KEY_annotPage = "pageNumber";
-    private static final String KEY_annotRect = "rect";
-    private static final String KEY_annotFlag = "flag";
-    private static final String KEY_annotFlagValue = "flagValue";
-    private static final String KEY_annotSubject = "subject";
-    private static final String KEY_annotTitle = "title";
-    private static final String KEY_annotContents = "contents";
-    private static final String KEY_annotContentRect = "contentRect";
-
-    private static final String KEY_action = "action";
-    private static final String KEY_action_add = "add";
-    private static final String KEY_action_modify = "modify";
-    private static final String KEY_action_delete = "delete";
-    private static final String KEY_annotations = "annotations";
-    private static final String KEY_xfdfCommand = "xfdfCommand";
-    private static final String Key_fields = "fields";
-    private static final String Key_fieldName = "fieldName";
-    private static final String Key_fieldValue = "fieldValue";
-
-    private static final String KEY_annotationMenu = "annotationMenu";
-    private static final String KEY_longPressMenu = "longPressMenu";
-    private static final String KEY_longPressText = "longPressText";
-
-    private static final String KEY_data = "data";
-
-    private static final String KEY_x1 = "x1";
-    private static final String KEY_x2 = "x2";
-    private static final String KEY_y1 = "y1";
-    private static final String KEY_y2 = "y2";
-    private static final String KEY_width = "width";
-    private static final String KEY_height = "height";
-
-    private static final String KEY_annotFlagHidden = "hidden";
-    private static final String KEY_annotFlagInvisible = "invisible";
-    private static final String KEY_annotFlagLocked = "locked";
-    private static final String KEY_annotFlagLockedContents = "lockedContents";
-    private static final String KEY_annotFlagNoRotate = "noRotate";
-    private static final String KEY_flagNoView = "noView";
-    private static final String KEY_flagNoZoom = "noZoom";
-    private static final String kEY_flagPrint = "print";
-    private static final String KEY_flagReadOnly = "readOnly";
-    private static final String KEY_flagToggleNoView = "toggleNoView";
-    // EVENTS END
-
-    // Config keys
-    private static final String KEY_Config_linkPress = "linkPress";
-
     private String mDocumentPath;
+    private String mTabTitle;
     private boolean mIsBase64;
     private File mTempFile;
 
@@ -165,7 +106,6 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     private String mCacheDir;
     private int mInitialPageNumber = -1;
 
-    private boolean mTopToolbarEnabled = true;
     private boolean mPadStatusBar;
 
     private boolean mAutoSaveEnabled = true;
@@ -189,6 +129,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     // custom behaviour
     private ReadableArray mActionOverrideItems;
 
+    private boolean mReadOnly;
+
     private ArrayList<ViewModePickerDialogFragment.ViewModePickerItems> mViewModePickerItems = new ArrayList<>();
 
     public DocumentView(Context context) {
@@ -204,6 +146,9 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     }
 
     public void setup(ThemedReactContext reactContext) {
+        // Must be called in order to properly pass onActivityResult intent to DigitalSignatureDialogFragment
+        DigitalSignatureDialogFragment.HANDLE_INTENT_IN_ACTIVITY = true;
+
         // intercept toast
         CommonToast.CommonToastHandler.getInstance().setCommonToastListener(new CommonToast.CommonToastListener() {
             @Override
@@ -233,20 +178,26 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             throw new IllegalStateException("FragmentActivity required.");
         }
 
-        mToolManagerBuilder = ToolManagerBuilder.from().setOpenToolbar(true);
+        PdfViewCtrlSettingsManager.setFullScreenMode(currentActivity, false);
+
+        mToolManagerBuilder = ToolManagerBuilder.from()
+                .setShowRichContentOption(false)
+                .setOpenToolbar(true);
         mBuilder = new ViewerConfig.Builder();
         mBuilder
                 .fullscreenModeEnabled(false)
                 .multiTabEnabled(false)
+                .maximumTabCount(Integer.MAX_VALUE)
                 .showCloseTabOption(false)
-                .useSupportActionBar(false);
+                .useSupportActionBar(false)
+                .skipReadOnlyCheck(true);
     }
 
     @Override
-    protected PdfViewCtrlTabHostFragment getViewer() {
+    protected PdfViewCtrlTabHostFragment2 getViewer() {
         if (mCollabEnabled) {
             // Create the Fragment using CollabViewerBuilder
-            return CollabViewerBuilder.withUri(mDocumentUri, mPassword)
+            return CollabViewerBuilder2.withUri(mDocumentUri, mPassword)
                     .usingConfig(mViewerConfig)
                     .usingNavIcon(mShowNavIcon ? mNavIconRes : 0)
                     .usingCustomHeaders(mCustomHeaders)
@@ -259,6 +210,9 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     protected void buildViewer() {
         super.buildViewer();
         mViewerBuilder = mViewerBuilder.usingTabClass(RNPdfViewCtrlTabFragment.class);
+        if (!Utils.isNullOrEmpty(mTabTitle)) {
+            mViewerBuilder = mViewerBuilder.usingTabTitle(mTabTitle);
+        }
     }
 
     public void setDocument(String path) {
@@ -279,6 +233,13 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
     public void setNavResName(String resName) {
         setNavIconResName(resName);
+
+        if (mShowNavIcon && mPdfViewCtrlTabHostFragment != null && mPdfViewCtrlTabHostFragment.getToolbar() != null) {
+            int res = Utils.getResourceDrawable(this.getContext(), resName);
+            if (res != 0) {
+                mPdfViewCtrlTabHostFragment.getToolbar().setNavigationIcon(res);
+            }
+        }
     }
 
     public void setDisabledElements(ReadableArray array) {
@@ -316,31 +277,44 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     }
 
     public void setTopToolbarEnabled(boolean topToolbarEnabled) {
-        mTopToolbarEnabled = topToolbarEnabled;
+        mBuilder = mBuilder.showTopToolbar(topToolbarEnabled);
     }
 
     public void setBottomToolbarEnabled(boolean bottomToolbarEnabled) {
-        mBuilder = mBuilder.showBottomNavBar(bottomToolbarEnabled);
+        mBuilder = mBuilder.showBottomToolbar(bottomToolbarEnabled);
     }
 
     public void setPageIndicatorEnabled(boolean pageIndicatorEnabled) {
         mBuilder = mBuilder.showPageNumberIndicator(pageIndicatorEnabled);
     }
 
+    public void setHideToolbarsOnTap(boolean hideToolbarsOnTap) {
+        mBuilder = mBuilder.permanentToolbars(!hideToolbarsOnTap);
+    }
+
     public void setReadOnly(boolean readOnly) {
-        mBuilder = mBuilder.documentEditingEnabled(!readOnly);
+        mReadOnly = readOnly;
+        if (readOnly) {
+            mBuilder = mBuilder.skipReadOnlyCheck(false);
+        } else {
+            mBuilder = mBuilder.skipReadOnlyCheck(true);
+        }
+        if (getToolManager() != null) {
+            getToolManager().setSkipReadOnlyCheck(false);
+            getToolManager().setReadOnly(readOnly);
+        }
     }
 
     public void setFitMode(String fitMode) {
         if (mPDFViewCtrlConfig != null) {
             PDFViewCtrl.PageViewMode mode = null;
-            if ("FitPage".equals(fitMode)) {
+            if (FIT_MODE_FIT_PAGE.equals(fitMode)) {
                 mode = PDFViewCtrl.PageViewMode.FIT_PAGE;
-            } else if ("FitWidth".equals(fitMode)) {
+            } else if (FIT_MODE_FIT_WIDTH.equals(fitMode)) {
                 mode = PDFViewCtrl.PageViewMode.FIT_WIDTH;
-            } else if ("FitHeight".equals(fitMode)) {
+            } else if (FIT_MODE_FIT_HEIGHT.equals(fitMode)) {
                 mode = PDFViewCtrl.PageViewMode.FIT_HEIGHT;
-            } else if ("Zoom".equals(fitMode)) {
+            } else if (FIT_MODE_ZOOM.equals(fitMode)) {
                 mode = PDFViewCtrl.PageViewMode.ZOOM;
             }
             if (mode != null) {
@@ -351,17 +325,17 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
     public void setLayoutMode(String layoutMode) {
         String mode = null;
-        if ("Single".equals(layoutMode)) {
+        if (LAYOUT_MODE_SINGLE.equals(layoutMode)) {
             mode = PdfViewCtrlSettingsManager.KEY_PREF_VIEWMODE_SINGLEPAGE_VALUE;
-        } else if ("Continuous".equals(layoutMode)) {
+        } else if (LAYOUT_MODE_CONTINUOUS.equals(layoutMode)) {
             mode = PdfViewCtrlSettingsManager.KEY_PREF_VIEWMODE_CONTINUOUS_VALUE;
-        } else if ("Facing".equals(layoutMode)) {
+        } else if (LAYOUT_MODE_FACING.equals(layoutMode)) {
             mode = PdfViewCtrlSettingsManager.KEY_PREF_VIEWMODE_FACING_VALUE;
-        } else if ("FacingContinuous".equals(layoutMode)) {
+        } else if (LAYOUT_MODE_FACING_CONTINUOUS.equals(layoutMode)) {
             mode = PdfViewCtrlSettingsManager.KEY_PREF_VIEWMODE_FACING_CONT_VALUE;
-        } else if ("FacingCover".equals(layoutMode)) {
+        } else if (LAYOUT_MODE_FACING_COVER.equals(layoutMode)) {
             mode = PdfViewCtrlSettingsManager.KEY_PREF_VIEWMODE_FACINGCOVER_VALUE;
-        } else if ("FacingCoverContinuous".equals(layoutMode)) {
+        } else if (LAYOUT_MODE_FACING_COVER_CONTINUOUS.equals(layoutMode)) {
             mode = PdfViewCtrlSettingsManager.KEY_PREF_VIEWMODE_FACINGCOVER_CONT_VALUE;
         }
         Context context = getContext();
@@ -440,6 +414,18 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         }
     }
 
+    public void setMultiTabEnabled(boolean multiTab) {
+        mBuilder = mBuilder.multiTabEnabled(multiTab);
+    }
+
+    public void setTabTitle(String tabTitle) {
+        mTabTitle = tabTitle;
+    }
+
+    public void setMaxTabCount(int maxTabCount) {
+        mBuilder = mBuilder.maximumTabCount(maxTabCount);
+    }
+
     public void setThumbnailViewEditingEnabled(boolean thumbnailViewEditingEnabled) {
         mBuilder = mBuilder.thumbnailViewEditingEnabled(thumbnailViewEditingEnabled);
     }
@@ -467,40 +453,171 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     public void setAnnotationPermissionCheckEnabled(boolean annotPermissionCheckEnabled) {
         mToolManagerBuilder = mToolManagerBuilder.setAnnotPermission(annotPermissionCheckEnabled);
     }
-    
+
+    public void setAnnotationToolbars(ReadableArray toolbars) {
+        if (toolbars.size() == 0) {
+            if (mPdfViewCtrlTabHostFragment != null) {
+                mPdfViewCtrlTabHostFragment.setAnnotationToolbars(new ArrayList<>());
+            } else {
+                // turn back to view toolbar and hide the switcher to achieve the same effect
+                mBuilder = mBuilder
+                        .initialToolbarTag(DefaultToolbars.TAG_VIEW_TOOLBAR)
+                        .rememberLastUsedToolbar(false)
+                        .showToolbarSwitcher(false);
+            }
+            return;
+        }
+        ArrayList<AnnotationToolbarBuilder> annotationToolbarBuilders = new ArrayList<>();
+        for (int i = 0; i < toolbars.size(); i++) {
+            ReadableType type = toolbars.getType(i);
+            if (type == ReadableType.String) {
+                String tag = toolbars.getString(i);
+                if (isValidToolbarTag(tag)) {
+                    AnnotationToolbarBuilder toolbarBuilder = DefaultToolbars.getDefaultAnnotationToolbarBuilderByTag(tag);
+                    mBuilder = mBuilder.addToolbarBuilder(toolbarBuilder);
+                    annotationToolbarBuilders.add(toolbarBuilder);
+                }
+            } else if (type == ReadableType.Map) {
+                // custom toolbars
+                ReadableMap map = toolbars.getMap(i);
+                if (map != null) {
+                    ReadableMapKeySetIterator iterator = map.keySetIterator();
+                    String tag = null, toolbarName = null, toolbarIcon = null;
+                    ReadableArray toolbarItems = null;
+                    while (iterator.hasNextKey()) {
+                        String toolbarKey = iterator.nextKey();
+                        if (TOOLBAR_KEY_ID.equals(toolbarKey)) {
+                            tag = map.getString(toolbarKey);
+                        } else if (TOOLBAR_KEY_NAME.equals(toolbarKey)) {
+                            toolbarName = map.getString(toolbarKey);
+                        } else if (TOOLBAR_KEY_ICON.equals(toolbarKey)) {
+                            toolbarIcon = map.getString(toolbarKey);
+                        } else if (TOOLBAR_KEY_ITEMS.equals(toolbarKey)) {
+                            toolbarItems = map.getArray(toolbarKey);
+                        }
+                    }
+                    if (!Utils.isNullOrEmpty(tag) && !Utils.isNullOrEmpty(toolbarName) &&
+                            toolbarItems != null && toolbarItems.size() > 0) {
+                        AnnotationToolbarBuilder toolbarBuilder = AnnotationToolbarBuilder.withTag(tag)
+                                .setToolbarName(toolbarName)
+                                .setIcon(convStringToToolbarDefaultIconRes(toolbarIcon));
+                        for (int j = 0; j < toolbarItems.size(); j++) {
+                            String toolStr = toolbarItems.getString(j);
+                            ToolbarButtonType buttonType = convStringToToolbarType(toolStr);
+                            int buttonId = convStringToButtonId(toolStr);
+                            if (buttonType != null && buttonId != 0) {
+                                if (buttonType == ToolbarButtonType.UNDO ||
+                                        buttonType == ToolbarButtonType.REDO) {
+                                    toolbarBuilder.addToolStickyButton(buttonType, buttonId);
+                                } else {
+                                    toolbarBuilder.addToolButton(buttonType, buttonId);
+                                }
+                            }
+                        }
+                        mBuilder = mBuilder.addToolbarBuilder(toolbarBuilder);
+                        annotationToolbarBuilders.add(toolbarBuilder);
+                    }
+                }
+            }
+        }
+        if (mPdfViewCtrlTabHostFragment != null) {
+            mPdfViewCtrlTabHostFragment.setAnnotationToolbars(annotationToolbarBuilders);
+        }
+    }
+
+    private boolean isValidToolbarTag(String tag) {
+        if (tag != null) {
+            if (TAG_VIEW_TOOLBAR.equals(tag) ||
+                    TAG_ANNOTATE_TOOLBAR.equals(tag) ||
+                    TAG_DRAW_TOOLBAR.equals(tag) ||
+                    TAG_INSERT_TOOLBAR.equals(tag) ||
+                    TAG_FILL_AND_SIGN_TOOLBAR.equals(tag) ||
+                    TAG_PREPARE_FORM_TOOLBAR.equals(tag) ||
+                    TAG_MEASURE_TOOLBAR.equals(tag) ||
+                    TAG_PENS_TOOLBAR.equals(tag) ||
+                    TAG_REDACTION_TOOLBAR.equals(tag) ||
+                    TAG_FAVORITE_TOOLBAR.equals(tag)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void setHideDefaultAnnotationToolbars(ReadableArray tags) {
+        ArrayList<String> tagList = new ArrayList<>();
+        for (int i = 0; i < tags.size(); i++) {
+            String tag = tags.getString(i);
+            if (!Utils.isNullOrEmpty(tag)) {
+                tagList.add(tag);
+            }
+        }
+        mBuilder = mBuilder.hideToolbars(tagList.toArray(new String[tagList.size()]));
+    }
+
+    public void setHideAnnotationToolbarSwitcher(boolean hideToolbarSwitcher) {
+        mBuilder = mBuilder.showToolbarSwitcher(!hideToolbarSwitcher);
+
+        if (mPdfViewCtrlTabHostFragment != null) {
+            mPdfViewCtrlTabHostFragment.setToolbarSwitcherVisible(!hideToolbarSwitcher);
+        }
+    }
+
+    public void setHideTopToolbars(boolean hideTopToolbars) {
+        mBuilder = mBuilder.showAppBar(!hideTopToolbars);
+    }
+
+    public void setHideTopAppNavBar(boolean hideTopAppNavBar) {
+        mBuilder = mBuilder.showTopToolbar(!hideTopAppNavBar);
+    }
+
+    public void setHideThumbnailFilterModes(ReadableArray filterModes) {
+        ArrayList<ThumbnailsViewFragment.FilterModes> hideList = new ArrayList<>();
+
+        for (int i = 0; i < filterModes.size(); i++) {
+            String mode = filterModes.getString(i);
+            if (THUMBNAIL_FILTER_MODE_ANNOTATED.equals(mode)) {
+                hideList.add(ThumbnailsViewFragment.FilterModes.ANNOTATED);
+            } else if (THUMBNAIL_FILTER_MODE_BOOKMARKED.equals(mode)) {
+                hideList.add(ThumbnailsViewFragment.FilterModes.BOOKMARKED);
+            }
+        }
+
+        mBuilder.hideThumbnailFilterModes(hideList.toArray(new ThumbnailsViewFragment.FilterModes[0]));
+    }
+
     private void disableElements(ReadableArray args) {
         for (int i = 0; i < args.size(); i++) {
             String item = args.getString(i);
-            if ("toolsButton".equals(item)) {
+            if (BUTTON_TOOLS.equals(item)) {
                 mBuilder = mBuilder.showAnnotationToolbarOption(false);
-            } else if ("searchButton".equals(item)) {
+            } else if (BUTTON_SEARCH.equals(item)) {
                 mBuilder = mBuilder.showSearchView(false);
-            } else if ("shareButton".equals(item)) {
+            } else if (BUTTON_SHARE.equals(item)) {
                 mBuilder = mBuilder.showShareOption(false);
-            } else if ("viewControlsButton".equals(item)) {
+            } else if (BUTTON_VIEW_CONTROLS.equals(item)) {
                 mBuilder = mBuilder.showDocumentSettingsOption(false);
-            } else if ("thumbnailsButton".equals(item)) {
+            } else if (BUTTON_THUMBNAILS.equals(item)) {
                 mBuilder = mBuilder.showThumbnailView(false);
-            } else if ("listsButton".equals(item)) {
+            } else if (BUTTON_LISTS.equals(item)) {
                 mBuilder = mBuilder
                         .showAnnotationsList(false)
                         .showOutlineList(false)
                         .showUserBookmarksList(false);
-            } else if ("thumbnailSlider".equals(item)) {
+            } else if (BUTTON_THUMBNAIL_SLIDER.equals(item)) {
                 mBuilder = mBuilder.showBottomNavBar(false);
-            } else if ("editPagesButton".equals(item)) {
+            } else if (BUTTON_EDIT_PAGES.equals(item)) {
                 mBuilder = mBuilder.showEditPagesOption(false);
-            } else if ("printButton".equals(item)) {
+            } else if (BUTTON_PRINT.equals(item)) {
                 mBuilder = mBuilder.showPrintOption(false);
-            } else if ("closeButton".equals(item)) {
+            } else if (BUTTON_CLOSE.equals(item)) {
                 mBuilder = mBuilder.showCloseTabOption(false);
-            } else if ("saveCopyButton".equals(item)) {
+            } else if (BUTTON_SAVE_COPY.equals(item)) {
                 mBuilder = mBuilder.showSaveCopyOption(false);
-            } else if ("formToolsButton".equals(item)) {
+            } else if (BUTTON_FORM_TOOLS.equals(item)) {
                 mBuilder = mBuilder.showFormToolbarOption(false);
-            } else if ("fillSignToolsButton".equals(item)) {
+            } else if (BUTTON_FILL_SIGN_TOOLS.equals(item)) {
                 mBuilder = mBuilder.showFillAndSignToolbarOption(false);
-            } else if ("moreItemsButton".equals(item)) {
+            } else if (BUTTON_MORE_ITEMS.equals(item)) {
                 mBuilder = mBuilder
                         .showEditPagesOption(false)
                         .showPrintOption(false)
@@ -510,18 +627,18 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                         .showFillAndSignToolbarOption(false)
                         .showEditMenuOption(false)
                         .showReflowOption(false);
-            } else if ("outlineListButton".equals(item)) {
+            } else if (BUTTON_OUTLINE_LIST.equals(item)) {
                 mBuilder = mBuilder.showOutlineList(false);
-            } else if ("annotationListButton".equals(item)) {
+            } else if (BUTTON_ANNOTATION_LIST.equals(item)) {
                 mBuilder = mBuilder.showAnnotationsList(false);
-            } else if ("userBookmarkListButton".equals(item)) {
+            } else if (BUTTON_USER_BOOKMARK_LIST.equals(item)) {
                 mBuilder = mBuilder.showUserBookmarksList(false);
-            } else if ("reflowButton".equals(item)) {
+            } else if (BUTTON_REFLOW.equals(item)) {
                 mBuilder = mBuilder.showReflowOption(false);
                 mViewModePickerItems.add(ViewModePickerDialogFragment.ViewModePickerItems.ITEM_ID_REFLOW);
-            } else if ("editMenuButton".equals(item)) {
+            } else if (BUTTON_EDIT_MENU.equals(item)) {
                 mBuilder = mBuilder.showEditMenuOption(false);
-            } else if ("cropPageButton".equals(item)) {
+            } else if (BUTTON_CROP_PAGE.equals(item)) {
                 mViewModePickerItems.add(ViewModePickerDialogFragment.ViewModePickerItems.ITEM_ID_USERCROP);
             }
         }
@@ -541,72 +658,76 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     @Nullable
     private int convStringToAnnotType(String item) {
         int annotType = Annot.e_Unknown;
-        if ("freeHandToolButton".equals(item) || "AnnotationCreateFreeHand".equals(item)) {
+        if (TOOL_BUTTON_FREE_HAND.equals(item) || TOOL_ANNOTATION_CREATE_FREE_HAND.equals(item)) {
             annotType = Annot.e_Ink;
-        } else if ("highlightToolButton".equals(item) || "AnnotationCreateTextHighlight".equals(item)) {
+        } else if (TOOL_BUTTON_HIGHLIGHT.equals(item) || TOOL_ANNOTATION_CREATE_TEXT_HIGHLIGHT.equals(item)) {
             annotType = Annot.e_Highlight;
-        } else if ("underlineToolButton".equals(item) || "AnnotationCreateTextUnderline".equals(item)) {
+        } else if (TOOL_BUTTON_UNDERLINE.equals(item) || TOOL_ANNOTATION_CREATE_TEXT_UNDERLINE.equals(item)) {
             annotType = Annot.e_Underline;
-        } else if ("squigglyToolButton".equals(item) || "AnnotationCreateTextSquiggly".equals(item)) {
+        } else if (TOOL_BUTTON_SQUIGGLY.equals(item) || TOOL_ANNOTATION_CREATE_TEXT_SQUIGGLY.equals(item)) {
             annotType = Annot.e_Squiggly;
-        } else if ("strikeoutToolButton".equals(item) || "AnnotationCreateTextStrikeout".equals(item)) {
+        } else if (TOOL_BUTTON_STRIKEOUT.equals(item) || TOOL_ANNOTATION_CREATE_TEXT_STRIKEOUT.equals(item)) {
             annotType = Annot.e_StrikeOut;
-        } else if ("rectangleToolButton".equals(item) || "AnnotationCreateRectangle".equals(item)) {
+        } else if (TOOL_BUTTON_RECTANGLE.equals(item) || TOOL_ANNOTATION_CREATE_RECTANGLE.equals(item)) {
             annotType = Annot.e_Square;
-        } else if ("ellipseToolButton".equals(item) || "AnnotationCreateEllipse".equals(item)) {
+        } else if (TOOL_BUTTON_ELLIPSE.equals(item) || TOOL_ANNOTATION_CREATE_ELLIPSE.equals(item)) {
             annotType = Annot.e_Circle;
-        } else if ("lineToolButton".equals(item) || "AnnotationCreateLine".equals(item)) {
+        } else if (TOOL_BUTTON_LINE.equals(item) || TOOL_ANNOTATION_CREATE_LINE.equals(item)) {
             annotType = Annot.e_Line;
-        } else if ("arrowToolButton".equals(item) || "AnnotationCreateArrow".equals(item)) {
+        } else if (TOOL_BUTTON_ARROW.equals(item) || TOOL_ANNOTATION_CREATE_ARROW.equals(item)) {
             annotType = AnnotStyle.CUSTOM_ANNOT_TYPE_ARROW;
-        } else if ("polylineToolButton".equals(item) || "AnnotationCreatePolyline".equals(item)) {
+        } else if (TOOL_BUTTON_POLYLINE.equals(item) || TOOL_ANNOTATION_CREATE_POLYLINE.equals(item)) {
             annotType = Annot.e_Polyline;
-        } else if ("polygonToolButton".equals(item) || "AnnotationCreatePolygon".equals(item)) {
+        } else if (TOOL_BUTTON_POLYGON.equals(item) || TOOL_ANNOTATION_CREATE_POLYGON.equals(item)) {
             annotType = Annot.e_Polygon;
-        } else if ("cloudToolButton".equals(item) || "AnnotationCreatePolygonCloud".equals(item)) {
+        } else if (TOOL_BUTTON_CLOUD.equals(item) || TOOL_ANNOTATION_CREATE_POLYGON_CLOUD.equals(item)) {
             annotType = AnnotStyle.CUSTOM_ANNOT_TYPE_CLOUD;
-        } else if ("signatureToolButton".equals(item) || "AnnotationCreateSignature".equals(item)) {
+        } else if (TOOL_BUTTON_SIGNATURE.equals(item) || TOOL_ANNOTATION_CREATE_SIGNATURE.equals(item)) {
             annotType = AnnotStyle.CUSTOM_ANNOT_TYPE_SIGNATURE;
-        } else if ("freeTextToolButton".equals(item) || "AnnotationCreateFreeText".equals(item)) {
+        } else if (TOOL_BUTTON_FREE_TEXT.equals(item) || TOOL_ANNOTATION_CREATE_FREE_TEXT.equals(item)) {
             annotType = Annot.e_FreeText;
-        } else if ("stickyToolButton".equals(item) || "AnnotationCreateSticky".equals(item)) {
+        } else if (TOOL_BUTTON_STICKY.equals(item) || TOOL_ANNOTATION_CREATE_STICKY.equals(item)) {
             annotType = Annot.e_Text;
-        } else if ("calloutToolButton".equals(item) || "AnnotationCreateCallout".equals(item)) {
+        } else if (TOOL_BUTTON_CALLOUT.equals(item) || TOOL_ANNOTATION_CREATE_CALLOUT.equals(item)) {
             annotType = AnnotStyle.CUSTOM_ANNOT_TYPE_CALLOUT;
-        } else if ("stampToolButton".equals(item) || "AnnotationCreateStamp".equals(item)) {
+        } else if (TOOL_BUTTON_STAMP.equals(item) || TOOL_ANNOTATION_CREATE_STAMP.equals(item)) {
             annotType = Annot.e_Stamp;
-        } else if ("AnnotationCreateDistanceMeasurement".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_DISTANCE_MEASUREMENT.equals(item)) {
             annotType = AnnotStyle.CUSTOM_ANNOT_TYPE_RULER;
-        } else if ("AnnotationCreatePerimeterMeasurement".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_PERIMETER_MEASUREMENT.equals(item)) {
             annotType = AnnotStyle.CUSTOM_ANNOT_TYPE_PERIMETER_MEASURE;
-        } else if ("AnnotationCreateAreaMeasurement".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_AREA_MEASUREMENT.equals(item)) {
             annotType = AnnotStyle.CUSTOM_ANNOT_TYPE_AREA_MEASURE;
-        } else if ("AnnotationCreateFileAttachment".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_FILE_ATTACHMENT.equals(item)) {
             annotType = Annot.e_FileAttachment;
-        } else if ("AnnotationCreateSound".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_SOUND.equals(item)) {
             annotType = Annot.e_Sound;
-        } else if ("AnnotationCreateRedaction".equals(item) || "AnnotationCreateRedactionText".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_REDACTION.equals(item) || TOOL_ANNOTATION_CREATE_REDACTION_TEXT.equals(item)) {
             annotType = Annot.e_Redact;
-        } else if ("AnnotationCreateLink".equals(item) || "AnnotationCreateLinkText".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_LINK.equals(item) || TOOL_ANNOTATION_CREATE_LINK_TEXT.equals(item)) {
             annotType = Annot.e_Link;
-        } else if ("TextSelect".equals(item)) {
+        } else if (TOOL_TEXT_SELECT.equals(item)) {
             annotType = Annot.e_Unknown;
-        } else if ("Pan".equals(item)) {
+        } else if (TOOL_PAN.equals(item)) {
             annotType = Annot.e_Unknown;
-        } else if ("AnnotationEdit".equals(item)) {
+        } else if (TOOL_ANNOTATION_EDIT.equals(item)) {
             annotType = Annot.e_Unknown;
-        } else if ("FormCreateTextField".equals(item)) {
+        } else if (TOOL_FORM_CREATE_TEXT_FIELD.equals(item)) {
             annotType = Annot.e_Widget;
-        } else if ("FormCreateCheckboxField".equals(item)) {
+        } else if (TOOL_FORM_CREATE_CHECKBOX_FIELD.equals(item)) {
             annotType = Annot.e_Widget;
-        } else if ("FormCreateSignatureField".equals(item)) {
+        } else if (TOOL_FORM_CREATE_SIGNATURE_FIELD.equals(item)) {
             annotType = Annot.e_Widget;
-        } else if ("FormCreateRadioField".equals(item)) {
+        } else if (TOOL_FORM_CREATE_RADIO_FIELD.equals(item)) {
             annotType = Annot.e_Widget;
-        } else if ("FormCreateComboBoxField".equals(item)) {
+        } else if (TOOL_FORM_CREATE_COMBO_BOX_FIELD.equals(item)) {
             annotType = Annot.e_Widget;
-        } else if ("FormCreateListBoxField".equals(item)) {
+        } else if (TOOL_FORM_CREATE_TOOL_BOX_FIELD.equals(item)) {
             annotType = Annot.e_Widget;
+        } else if (TOOL_FORM_CREATE_LIST_BOX_FIELD.equals(item)) {
+            annotType = Annot.e_Widget;
+        } else if (TOOL_ANNOTATION_CREATE_FREE_HIGHLIGHTER.equals(item)) {
+            annotType = AnnotStyle.CUSTOM_ANNOT_TYPE_FREE_HIGHLIGHTER;
         }
         return annotType;
     }
@@ -614,82 +735,391 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     @Nullable
     private ToolManager.ToolMode convStringToToolMode(String item) {
         ToolManager.ToolMode mode = null;
-        if ("freeHandToolButton".equals(item) || "AnnotationCreateFreeHand".equals(item)) {
+        if (TOOL_BUTTON_FREE_HAND.equals(item) || TOOL_ANNOTATION_CREATE_FREE_HAND.equals(item)) {
             mode = ToolManager.ToolMode.INK_CREATE;
-        } else if ("highlightToolButton".equals(item) || "AnnotationCreateTextHighlight".equals(item)) {
+        } else if (TOOL_BUTTON_HIGHLIGHT.equals(item) || TOOL_ANNOTATION_CREATE_TEXT_HIGHLIGHT.equals(item)) {
             mode = ToolManager.ToolMode.TEXT_HIGHLIGHT;
-        } else if ("underlineToolButton".equals(item) || "AnnotationCreateTextUnderline".equals(item)) {
+        } else if (TOOL_BUTTON_UNDERLINE.equals(item) || TOOL_ANNOTATION_CREATE_TEXT_UNDERLINE.equals(item)) {
             mode = ToolManager.ToolMode.TEXT_UNDERLINE;
-        } else if ("squigglyToolButton".equals(item) || "AnnotationCreateTextSquiggly".equals(item)) {
+        } else if (TOOL_BUTTON_SQUIGGLY.equals(item) || TOOL_ANNOTATION_CREATE_TEXT_SQUIGGLY.equals(item)) {
             mode = ToolManager.ToolMode.TEXT_SQUIGGLY;
-        } else if ("strikeoutToolButton".equals(item) || "AnnotationCreateTextStrikeout".equals(item)) {
+        } else if (TOOL_BUTTON_STRIKEOUT.equals(item) || TOOL_ANNOTATION_CREATE_TEXT_STRIKEOUT.equals(item)) {
             mode = ToolManager.ToolMode.TEXT_STRIKEOUT;
-        } else if ("rectangleToolButton".equals(item) || "AnnotationCreateRectangle".equals(item)) {
+        } else if (TOOL_BUTTON_RECTANGLE.equals(item) || TOOL_ANNOTATION_CREATE_RECTANGLE.equals(item)) {
             mode = ToolManager.ToolMode.RECT_CREATE;
-        } else if ("ellipseToolButton".equals(item) || "AnnotationCreateEllipse".equals(item)) {
+        } else if (TOOL_BUTTON_ELLIPSE.equals(item) || TOOL_ANNOTATION_CREATE_ELLIPSE.equals(item)) {
             mode = ToolManager.ToolMode.OVAL_CREATE;
-        } else if ("lineToolButton".equals(item) || "AnnotationCreateLine".equals(item)) {
+        } else if (TOOL_BUTTON_LINE.equals(item) || TOOL_ANNOTATION_CREATE_LINE.equals(item)) {
             mode = ToolManager.ToolMode.LINE_CREATE;
-        } else if ("arrowToolButton".equals(item) || "AnnotationCreateArrow".equals(item)) {
+        } else if (TOOL_BUTTON_ARROW.equals(item) || TOOL_ANNOTATION_CREATE_ARROW.equals(item)) {
             mode = ToolManager.ToolMode.ARROW_CREATE;
-        } else if ("polylineToolButton".equals(item) || "AnnotationCreatePolyline".equals(item)) {
+        } else if (TOOL_BUTTON_POLYLINE.equals(item) || TOOL_ANNOTATION_CREATE_POLYLINE.equals(item)) {
             mode = ToolManager.ToolMode.POLYLINE_CREATE;
-        } else if ("polygonToolButton".equals(item) || "AnnotationCreatePolygon".equals(item)) {
+        } else if (TOOL_BUTTON_POLYGON.equals(item) || TOOL_ANNOTATION_CREATE_POLYGON.equals(item)) {
             mode = ToolManager.ToolMode.POLYGON_CREATE;
-        } else if ("cloudToolButton".equals(item) || "AnnotationCreatePolygonCloud".equals(item)) {
+        } else if (TOOL_BUTTON_CLOUD.equals(item) || TOOL_ANNOTATION_CREATE_POLYGON_CLOUD.equals(item)) {
             mode = ToolManager.ToolMode.CLOUD_CREATE;
-        } else if ("signatureToolButton".equals(item) || "AnnotationCreateSignature".equals(item)) {
+        } else if (TOOL_BUTTON_SIGNATURE.equals(item) || TOOL_ANNOTATION_CREATE_SIGNATURE.equals(item)) {
             mode = ToolManager.ToolMode.SIGNATURE;
-        } else if ("freeTextToolButton".equals(item) || "AnnotationCreateFreeText".equals(item)) {
+        } else if (TOOL_BUTTON_FREE_TEXT.equals(item) || TOOL_ANNOTATION_CREATE_FREE_TEXT.equals(item)) {
             mode = ToolManager.ToolMode.TEXT_CREATE;
-        } else if ("stickyToolButton".equals(item) || "AnnotationCreateSticky".equals(item)) {
+        } else if (TOOL_BUTTON_STICKY.equals(item) || TOOL_ANNOTATION_CREATE_STICKY.equals(item)) {
             mode = ToolManager.ToolMode.TEXT_ANNOT_CREATE;
-        } else if ("calloutToolButton".equals(item) || "AnnotationCreateCallout".equals(item)) {
+        } else if (TOOL_BUTTON_CALLOUT.equals(item) || TOOL_ANNOTATION_CREATE_CALLOUT.equals(item)) {
             mode = ToolManager.ToolMode.CALLOUT_CREATE;
-        } else if ("stampToolButton".equals(item) || "AnnotationCreateStamp".equals(item)) {
+        } else if (TOOL_BUTTON_STAMP.equals(item) || TOOL_ANNOTATION_CREATE_STAMP.equals(item)) {
             mode = ToolManager.ToolMode.STAMPER;
-        } else if ("AnnotationCreateRubberStamp".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_RUBBER_STAMP.equals(item)) {
             mode = ToolManager.ToolMode.RUBBER_STAMPER;
-        } else if ("AnnotationCreateDistanceMeasurement".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_DISTANCE_MEASUREMENT.equals(item)) {
             mode = ToolManager.ToolMode.RULER_CREATE;
-        } else if ("AnnotationCreatePerimeterMeasurement".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_PERIMETER_MEASUREMENT.equals(item)) {
             mode = ToolManager.ToolMode.PERIMETER_MEASURE_CREATE;
-        } else if ("AnnotationCreateAreaMeasurement".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_AREA_MEASUREMENT.equals(item)) {
             mode = ToolManager.ToolMode.AREA_MEASURE_CREATE;
-        } else if ("AnnotationCreateFileAttachment".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_FILE_ATTACHMENT.equals(item)) {
             mode = ToolManager.ToolMode.FILE_ATTACHMENT_CREATE;
-        } else if ("AnnotationCreateSound".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_SOUND.equals(item)) {
             mode = ToolManager.ToolMode.SOUND_CREATE;
-        } else if ("AnnotationCreateRedaction".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_REDACTION.equals(item)) {
             mode = ToolManager.ToolMode.RECT_REDACTION;
-        } else if ("AnnotationCreateLink".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_LINK.equals(item)) {
             mode = ToolManager.ToolMode.RECT_LINK;
-        } else if ("AnnotationCreateRedactionText".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_REDACTION_TEXT.equals(item)) {
             mode = ToolManager.ToolMode.TEXT_REDACTION;
-        } else if ("AnnotationCreateLinkText".equals(item)) {
+        } else if (TOOL_ANNOTATION_CREATE_LINK_TEXT.equals(item)) {
             mode = ToolManager.ToolMode.TEXT_LINK_CREATE;
-        } else if ("TextSelect".equals(item)) {
+        } else if (TOOL_TEXT_SELECT.equals(item)) {
             mode = ToolManager.ToolMode.TEXT_SELECT;
-        } else if ("Pan".equals(item)) {
+        } else if (TOOL_PAN.equals(item)) {
             mode = ToolManager.ToolMode.PAN;
-        } else if ("AnnotationEdit".equals(item)) {
+        } else if (TOOL_ANNOTATION_EDIT.equals(item)) {
             mode = ToolManager.ToolMode.ANNOT_EDIT_RECT_GROUP;
-        } else if ("FormCreateTextField".equals(item)) {
+        } else if (TOOL_FORM_CREATE_TEXT_FIELD.equals(item)) {
             mode = ToolManager.ToolMode.FORM_TEXT_FIELD_CREATE;
-        } else if ("FormCreateCheckboxField".equals(item)) {
+        } else if (TOOL_FORM_CREATE_CHECKBOX_FIELD.equals(item)) {
             mode = ToolManager.ToolMode.FORM_CHECKBOX_CREATE;
-        } else if ("FormCreateSignatureField".equals(item)) {
+        } else if (TOOL_FORM_CREATE_SIGNATURE_FIELD.equals(item)) {
             mode = ToolManager.ToolMode.FORM_SIGNATURE_CREATE;
-        } else if ("FormCreateRadioField".equals(item)) {
+        } else if (TOOL_FORM_CREATE_RADIO_FIELD.equals(item)) {
             mode = ToolManager.ToolMode.FORM_RADIO_GROUP_CREATE;
-        } else if ("FormCreateComboBoxField".equals(item)) {
+        } else if (TOOL_FORM_CREATE_COMBO_BOX_FIELD.equals(item)) {
             mode = ToolManager.ToolMode.FORM_COMBO_BOX_CREATE;
-        } else if ("FormCreateListBoxField".equals(item)) {
+        } else if (TOOL_FORM_CREATE_LIST_BOX_FIELD.equals(item)) {
             mode = ToolManager.ToolMode.FORM_LIST_BOX_CREATE;
-        } else if ("AnnotationEraserTool".equals(item)) {
+        } else if (TOOL_ANNOTATION_ERASER_TOOL.equals(item)) {
             mode = ToolManager.ToolMode.INK_ERASER;
+        } else if (TOOL_ANNOTATION_CREATE_FREE_HIGHLIGHTER.equals(item)) {
+            mode = ToolManager.ToolMode.FREE_HIGHLIGHTER;
         }
         return mode;
+    }
+
+    @Nullable
+    private String convToolModeToString(ToolManager.ToolMode toolMode) {
+        String toolModeString = null;
+        switch (toolMode) {
+            case INK_CREATE:
+                toolModeString = TOOL_ANNOTATION_CREATE_FREE_HAND;
+                break;
+            case TEXT_UNDERLINE:
+                toolModeString = TOOL_ANNOTATION_CREATE_TEXT_UNDERLINE;
+                break;
+            case TEXT_SQUIGGLY:
+                toolModeString = TOOL_ANNOTATION_CREATE_TEXT_SQUIGGLY;
+                break;
+            case TEXT_STRIKEOUT:
+                toolModeString = TOOL_ANNOTATION_CREATE_TEXT_STRIKEOUT;
+                break;
+            case RECT_CREATE:
+                toolModeString = TOOL_ANNOTATION_CREATE_RECTANGLE;
+                break;
+            case OVAL_CREATE:
+                toolModeString = TOOL_ANNOTATION_CREATE_ELLIPSE;
+                break;
+            case LINE_CREATE:
+                toolModeString = TOOL_ANNOTATION_CREATE_LINE;
+                break;
+            case ARROW_CREATE:
+                toolModeString = TOOL_ANNOTATION_CREATE_ARROW;
+                break;
+            case POLYLINE_CREATE:
+                toolModeString = TOOL_ANNOTATION_CREATE_POLYLINE;
+                break;
+            case POLYGON_CREATE:
+                toolModeString = TOOL_ANNOTATION_CREATE_POLYGON;
+                break;
+            case CLOUD_CREATE:
+                toolModeString = TOOL_ANNOTATION_CREATE_POLYGON_CLOUD;
+                break;
+            case SIGNATURE:
+                toolModeString = TOOL_ANNOTATION_CREATE_SIGNATURE;
+                break;
+            case TEXT_CREATE:
+                toolModeString = TOOL_ANNOTATION_CREATE_FREE_TEXT;
+                break;
+            case TEXT_ANNOT_CREATE:
+                toolModeString = TOOL_ANNOTATION_CREATE_STICKY;
+                break;
+            case STAMPER:
+                toolModeString = TOOL_ANNOTATION_CREATE_STAMP;
+                break;
+            case RUBBER_STAMPER:
+                toolModeString = TOOL_ANNOTATION_CREATE_RUBBER_STAMP;
+                break;
+            case RULER_CREATE:
+                toolModeString = TOOL_ANNOTATION_CREATE_DISTANCE_MEASUREMENT;
+                break;
+            case PERIMETER_MEASURE_CREATE:
+                toolModeString = TOOL_ANNOTATION_CREATE_PERIMETER_MEASUREMENT;
+                break;
+            case AREA_MEASURE_CREATE:
+                toolModeString = TOOL_ANNOTATION_CREATE_AREA_MEASUREMENT;
+                break;
+            case FILE_ATTACHMENT_CREATE:
+                toolModeString = TOOL_ANNOTATION_CREATE_FILE_ATTACHMENT;
+                break;
+            case SOUND_CREATE:
+                toolModeString = TOOL_ANNOTATION_CREATE_SOUND;
+                break;
+            case RECT_REDACTION:
+                toolModeString = TOOL_ANNOTATION_CREATE_REDACTION;
+                break;
+            case RECT_LINK:
+                toolModeString = TOOL_ANNOTATION_CREATE_LINK;
+                break;
+            case TEXT_REDACTION:
+                toolModeString = TOOL_ANNOTATION_CREATE_REDACTION_TEXT;
+                break;
+            case TEXT_LINK_CREATE:
+                toolModeString = TOOL_ANNOTATION_CREATE_LINK_TEXT;
+                break;
+            case TEXT_SELECT:
+                toolModeString = TOOL_TEXT_SELECT;
+                break;
+            case PAN:
+                toolModeString = TOOL_PAN;
+                break;
+            case ANNOT_EDIT_RECT_GROUP:
+                toolModeString = TOOL_ANNOTATION_EDIT;
+                break;
+            case FORM_TEXT_FIELD_CREATE:
+                toolModeString = TOOL_FORM_CREATE_TEXT_FIELD;
+                break;
+            case FORM_CHECKBOX_CREATE:
+                toolModeString = TOOL_FORM_CREATE_CHECKBOX_FIELD;
+                break;
+            case FORM_SIGNATURE_CREATE:
+                toolModeString = TOOL_FORM_CREATE_SIGNATURE_FIELD;
+                break;
+            case FORM_RADIO_GROUP_CREATE:
+                toolModeString = TOOL_FORM_CREATE_RADIO_FIELD;
+                break;
+            case FORM_COMBO_BOX_CREATE:
+                toolModeString = TOOL_FORM_CREATE_COMBO_BOX_FIELD;
+                break;
+            case FORM_LIST_BOX_CREATE:
+                toolModeString = TOOL_FORM_CREATE_LIST_BOX_FIELD;
+                break;
+            case INK_ERASER:
+                toolModeString = TOOL_ANNOTATION_ERASER_TOOL;
+                break;
+            case FREE_HIGHLIGHTER:
+                toolModeString = TOOL_ANNOTATION_CREATE_FREE_HIGHLIGHTER;
+                break;
+        }
+
+        return toolModeString;
+    }
+
+    private int convStringToButtonId(String item) {
+        int buttonId = 0;
+        if (TOOL_BUTTON_FREE_HAND.equals(item) || TOOL_ANNOTATION_CREATE_FREE_HAND.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.INK.value();
+        } else if (TOOL_BUTTON_HIGHLIGHT.equals(item) || TOOL_ANNOTATION_CREATE_TEXT_HIGHLIGHT.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.TEXT_HIGHLIGHT.value();
+        } else if (TOOL_BUTTON_UNDERLINE.equals(item) || TOOL_ANNOTATION_CREATE_TEXT_UNDERLINE.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.TEXT_UNDERLINE.value();
+        } else if (TOOL_BUTTON_SQUIGGLY.equals(item) || TOOL_ANNOTATION_CREATE_TEXT_SQUIGGLY.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.TEXT_SQUIGGLY.value();
+        } else if (TOOL_BUTTON_STRIKEOUT.equals(item) || TOOL_ANNOTATION_CREATE_TEXT_STRIKEOUT.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.TEXT_STRIKEOUT.value();
+        } else if (TOOL_BUTTON_RECTANGLE.equals(item) || TOOL_ANNOTATION_CREATE_RECTANGLE.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.SQUARE.value();
+        } else if (TOOL_BUTTON_ELLIPSE.equals(item) || TOOL_ANNOTATION_CREATE_ELLIPSE.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.CIRCLE.value();
+        } else if (TOOL_BUTTON_LINE.equals(item) || TOOL_ANNOTATION_CREATE_LINE.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.LINE.value();
+        } else if (TOOL_BUTTON_ARROW.equals(item) || TOOL_ANNOTATION_CREATE_ARROW.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.ARROW.value();
+        } else if (TOOL_BUTTON_POLYLINE.equals(item) || TOOL_ANNOTATION_CREATE_POLYLINE.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.POLYLINE.value();
+        } else if (TOOL_BUTTON_POLYGON.equals(item) || TOOL_ANNOTATION_CREATE_POLYGON.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.POLYGON.value();
+        } else if (TOOL_BUTTON_CLOUD.equals(item) || TOOL_ANNOTATION_CREATE_POLYGON_CLOUD.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.POLY_CLOUD.value();
+        } else if (TOOL_BUTTON_SIGNATURE.equals(item) || TOOL_ANNOTATION_CREATE_SIGNATURE.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.SIGNATURE.value();
+        } else if (TOOL_BUTTON_FREE_TEXT.equals(item) || TOOL_ANNOTATION_CREATE_FREE_TEXT.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.FREE_TEXT.value();
+        } else if (TOOL_BUTTON_STICKY.equals(item) || TOOL_ANNOTATION_CREATE_STICKY.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.STICKY_NOTE.value();
+        } else if (TOOL_BUTTON_CALLOUT.equals(item) || TOOL_ANNOTATION_CREATE_CALLOUT.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.CALLOUT.value();
+        } else if (TOOL_BUTTON_STAMP.equals(item) || TOOL_ANNOTATION_CREATE_STAMP.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.STAMP.value();
+        } else if (TOOL_ANNOTATION_CREATE_RUBBER_STAMP.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.STAMP.value();
+        } else if (TOOL_ANNOTATION_CREATE_DISTANCE_MEASUREMENT.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.RULER.value();
+        } else if (TOOL_ANNOTATION_CREATE_PERIMETER_MEASUREMENT.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.PERIMETER.value();
+        } else if (TOOL_ANNOTATION_CREATE_AREA_MEASUREMENT.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.AREA.value();
+        } else if (TOOL_ANNOTATION_CREATE_FILE_ATTACHMENT.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.ATTACHMENT.value();
+        } else if (TOOL_ANNOTATION_CREATE_SOUND.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.SOUND.value();
+        } else if (TOOL_ANNOTATION_CREATE_REDACTION.equals(item)) {
+            // TODO
+        } else if (TOOL_ANNOTATION_CREATE_LINK.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.LINK.value();
+        } else if (TOOL_ANNOTATION_CREATE_REDACTION_TEXT.equals(item)) {
+            // TODO
+        } else if (TOOL_ANNOTATION_CREATE_LINK_TEXT.equals(item)) {
+            // TODO
+        } else if (TOOL_ANNOTATION_EDIT.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.MULTI_SELECT.value();
+        } else if (TOOL_FORM_CREATE_TEXT_FIELD.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.TEXT_FIELD.value();
+        } else if (TOOL_FORM_CREATE_CHECKBOX_FIELD.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.CHECKBOX.value();
+        } else if (TOOL_FORM_CREATE_SIGNATURE_FIELD.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.SIGNATURE_FIELD.value();
+        } else if (TOOL_FORM_CREATE_RADIO_FIELD.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.RADIO_BUTTON.value();
+        } else if (TOOL_FORM_CREATE_COMBO_BOX_FIELD.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.COMBO_BOX.value();
+        } else if (TOOL_FORM_CREATE_LIST_BOX_FIELD.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.LIST_BOX.value();
+        } else if (TOOL_ANNOTATION_ERASER_TOOL.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.ERASER.value();
+        } else if (TOOL_ANNOTATION_CREATE_FREE_HIGHLIGHTER.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.FREE_HIGHLIGHT.value();
+        } else if (BUTTON_UNDO.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.UNDO.value();
+        } else if (BUTTON_REDO.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.REDO.value();
+        }
+        return buttonId;
+    }
+
+    @Nullable
+    private ToolbarButtonType convStringToToolbarType(String item) {
+        ToolbarButtonType buttonType = null;
+        if (TOOL_BUTTON_FREE_HAND.equals(item) || TOOL_ANNOTATION_CREATE_FREE_HAND.equals(item)) {
+            buttonType = ToolbarButtonType.INK;
+        } else if (TOOL_BUTTON_HIGHLIGHT.equals(item) || TOOL_ANNOTATION_CREATE_TEXT_HIGHLIGHT.equals(item)) {
+            buttonType = ToolbarButtonType.TEXT_HIGHLIGHT;
+        } else if (TOOL_BUTTON_UNDERLINE.equals(item) || TOOL_ANNOTATION_CREATE_TEXT_UNDERLINE.equals(item)) {
+            buttonType = ToolbarButtonType.TEXT_UNDERLINE;
+        } else if (TOOL_BUTTON_SQUIGGLY.equals(item) || TOOL_ANNOTATION_CREATE_TEXT_SQUIGGLY.equals(item)) {
+            buttonType = ToolbarButtonType.TEXT_SQUIGGLY;
+        } else if (TOOL_BUTTON_STRIKEOUT.equals(item) || TOOL_ANNOTATION_CREATE_TEXT_STRIKEOUT.equals(item)) {
+            buttonType = ToolbarButtonType.TEXT_STRIKEOUT;
+        } else if (TOOL_BUTTON_RECTANGLE.equals(item) || TOOL_ANNOTATION_CREATE_RECTANGLE.equals(item)) {
+            buttonType = ToolbarButtonType.SQUARE;
+        } else if (TOOL_BUTTON_ELLIPSE.equals(item) || TOOL_ANNOTATION_CREATE_ELLIPSE.equals(item)) {
+            buttonType = ToolbarButtonType.CIRCLE;
+        } else if (TOOL_BUTTON_LINE.equals(item) || TOOL_ANNOTATION_CREATE_LINE.equals(item)) {
+            buttonType = ToolbarButtonType.LINE;
+        } else if (TOOL_BUTTON_ARROW.equals(item) || TOOL_ANNOTATION_CREATE_ARROW.equals(item)) {
+            buttonType = ToolbarButtonType.ARROW;
+        } else if (TOOL_BUTTON_POLYLINE.equals(item) || TOOL_ANNOTATION_CREATE_POLYLINE.equals(item)) {
+            buttonType = ToolbarButtonType.POLYLINE;
+        } else if (TOOL_BUTTON_POLYGON.equals(item) || TOOL_ANNOTATION_CREATE_POLYGON.equals(item)) {
+            buttonType = ToolbarButtonType.POLYGON;
+        } else if (TOOL_BUTTON_CLOUD.equals(item) || TOOL_ANNOTATION_CREATE_POLYGON_CLOUD.equals(item)) {
+            buttonType = ToolbarButtonType.POLY_CLOUD;
+        } else if (TOOL_BUTTON_SIGNATURE.equals(item) || TOOL_ANNOTATION_CREATE_SIGNATURE.equals(item)) {
+            buttonType = ToolbarButtonType.SIGNATURE;
+        } else if (TOOL_BUTTON_FREE_TEXT.equals(item) || TOOL_ANNOTATION_CREATE_FREE_TEXT.equals(item)) {
+            buttonType = ToolbarButtonType.FREE_TEXT;
+        } else if (TOOL_BUTTON_STICKY.equals(item) || TOOL_ANNOTATION_CREATE_STICKY.equals(item)) {
+            buttonType = ToolbarButtonType.STICKY_NOTE;
+        } else if (TOOL_BUTTON_CALLOUT.equals(item) || TOOL_ANNOTATION_CREATE_CALLOUT.equals(item)) {
+            buttonType = ToolbarButtonType.CALLOUT;
+        } else if (TOOL_BUTTON_STAMP.equals(item) || TOOL_ANNOTATION_CREATE_STAMP.equals(item)) {
+            buttonType = ToolbarButtonType.STAMP;
+        } else if (TOOL_ANNOTATION_CREATE_RUBBER_STAMP.equals(item)) {
+            buttonType = ToolbarButtonType.STAMP;
+        } else if (TOOL_ANNOTATION_CREATE_DISTANCE_MEASUREMENT.equals(item)) {
+            buttonType = ToolbarButtonType.RULER;
+        } else if (TOOL_ANNOTATION_CREATE_PERIMETER_MEASUREMENT.equals(item)) {
+            buttonType = ToolbarButtonType.PERIMETER;
+        } else if (TOOL_ANNOTATION_CREATE_AREA_MEASUREMENT.equals(item)) {
+            buttonType = ToolbarButtonType.AREA;
+        } else if (TOOL_ANNOTATION_CREATE_FILE_ATTACHMENT.equals(item)) {
+            buttonType = ToolbarButtonType.ATTACHMENT;
+        } else if (TOOL_ANNOTATION_CREATE_SOUND.equals(item)) {
+            buttonType = ToolbarButtonType.SOUND;
+        } else if (TOOL_ANNOTATION_CREATE_REDACTION.equals(item)) {
+            // TODO
+        } else if (TOOL_ANNOTATION_CREATE_LINK.equals(item)) {
+            buttonType = ToolbarButtonType.LINK;
+        } else if (TOOL_ANNOTATION_CREATE_REDACTION_TEXT.equals(item)) {
+            // TODO
+        } else if (TOOL_ANNOTATION_CREATE_LINK_TEXT.equals(item)) {
+            // TODO
+        } else if (TOOL_ANNOTATION_EDIT.equals(item)) {
+            buttonType = ToolbarButtonType.MULTI_SELECT;
+        } else if (TOOL_FORM_CREATE_TEXT_FIELD.equals(item)) {
+            buttonType = ToolbarButtonType.TEXT_FIELD;
+        } else if (TOOL_FORM_CREATE_CHECKBOX_FIELD.equals(item)) {
+            buttonType = ToolbarButtonType.CHECKBOX;
+        } else if (TOOL_FORM_CREATE_SIGNATURE_FIELD.equals(item)) {
+            buttonType = ToolbarButtonType.SIGNATURE_FIELD;
+        } else if (TOOL_FORM_CREATE_RADIO_FIELD.equals(item)) {
+            buttonType = ToolbarButtonType.RADIO_BUTTON;
+        } else if (TOOL_FORM_CREATE_COMBO_BOX_FIELD.equals(item)) {
+            buttonType = ToolbarButtonType.COMBO_BOX;
+        } else if (TOOL_FORM_CREATE_LIST_BOX_FIELD.equals(item)) {
+            buttonType = ToolbarButtonType.LIST_BOX;
+        } else if (TOOL_ANNOTATION_ERASER_TOOL.equals(item)) {
+            buttonType = ToolbarButtonType.ERASER;
+        } else if (TOOL_ANNOTATION_CREATE_FREE_HIGHLIGHTER.equals(item)) {
+            buttonType = ToolbarButtonType.FREE_HIGHLIGHT;
+        } else if (BUTTON_UNDO.equals(item)) {
+            buttonType = ToolbarButtonType.UNDO;
+        } else if (BUTTON_REDO.equals(item)) {
+            buttonType = ToolbarButtonType.REDO;
+        }
+        return buttonType;
+    }
+
+    private int convStringToToolbarDefaultIconRes(String item) {
+        if (TAG_VIEW_TOOLBAR.equals(item)) {
+            return R.drawable.ic_view;
+        } else if (TAG_ANNOTATE_TOOLBAR.equals(item)) {
+            return R.drawable.ic_annotation_underline_black_24dp;
+        } else if (TAG_DRAW_TOOLBAR.equals(item)) {
+            return R.drawable.ic_pens_and_shapes;
+        } else if (TAG_INSERT_TOOLBAR.equals(item)) {
+            return R.drawable.ic_add_image_white;
+        } else if (TAG_FILL_AND_SIGN_TOOLBAR.equals(item)) {
+            return R.drawable.ic_fill_and_sign;
+        } else if (TAG_PREPARE_FORM_TOOLBAR.equals(item)) {
+            return R.drawable.ic_prepare_form;
+        } else if (TAG_MEASURE_TOOLBAR.equals(item)) {
+            return R.drawable.ic_annotation_distance_black_24dp;
+        } else if (TAG_PENS_TOOLBAR.equals(item)) {
+            return R.drawable.ic_annotation_freehand_black_24dp;
+        } else if (TAG_REDACTION_TOOLBAR.equals(item)) {
+            return R.drawable.ic_annotation_redact_black_24dp;
+        } else if (TAG_FAVORITE_TOOLBAR.equals(item)) {
+            return R.drawable.ic_star_white_24dp;
+        }
+        return 0;
     }
 
     private void checkQuickMenu(List<QuickMenuItem> menuItems, ArrayList<Object> keepList, List<QuickMenuItem> removeList) {
@@ -710,40 +1140,153 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     private String convQuickMenuIdToString(int id) {
         String menuStr = null;
         if (id == R.id.qm_appearance) {
-            menuStr = "style";
+            menuStr = MENU_ID_STRING_STYLE;
         } else if (id == R.id.qm_note) {
-            menuStr = "note";
+            menuStr = MENU_ID_STRING_NOTE;
         } else if (id == R.id.qm_copy) {
-            menuStr = "copy";
+            menuStr = MENU_ID_STRING_COPY;
         } else if (id == R.id.qm_delete) {
-            menuStr = "delete";
+            menuStr = MENU_ID_STRING_DELETE;
         } else if (id == R.id.qm_flatten) {
-            menuStr = "flatten";
+            menuStr = MENU_ID_STRING_FLATTEN;
         } else if (id == R.id.qm_text) {
-            menuStr = "editText";
+            menuStr = MENU_ID_STRING_TEXT;
         } else if (id == R.id.qm_edit) {
-            menuStr = "editInk";
+            menuStr = MENU_ID_STRING_EDIT_INK;
         } else if (id == R.id.qm_search) {
-            menuStr = "search";
+            menuStr = MENU_ID_STRING_SEARCH;
         } else if (id == R.id.qm_share) {
-            menuStr = "share";
+            menuStr = MENU_ID_STRING_SHARE;
         } else if (id == R.id.qm_type) {
-            menuStr = "markupType";
-        } else if (id == R.id.qm_tts) {
-            menuStr = "textToSpeech";
+            menuStr = MENU_ID_STRING_MARKUP_TYPE;
         } else if (id == R.id.qm_screencap_create) {
-            menuStr = "screenCapture";
+            menuStr = MENU_ID_STRING_SCREEN_CAPTURE;
         } else if (id == R.id.qm_play_sound) {
-            menuStr = "playSound";
+            menuStr = MENU_ID_STRING_PLAY_SOUND;
         } else if (id == R.id.qm_open_attachment) {
-            menuStr = "openAttachment";
+            menuStr = MENU_ID_STRING_OPEN_ATTACHMENT;
         } else if (id == R.id.qm_tts) {
-            menuStr = "read";
-        } else if (id == R.id.qm_share) {
-            menuStr = "share";
-        } else if (id == R.id.qm_search) {
-            menuStr = "search";
+            menuStr = MENU_ID_STRING_READ;
+        } else if (id == R.id.qm_calibrate) {
+            menuStr = MENU_ID_STRING_CALIBRATE;
+        } else if (id == R.id.qm_underline) {
+            menuStr = MENU_ID_STRING_UNDERLINE;
+        } else if (id == R.id.qm_redact) {
+            menuStr = MENU_ID_STRING_REDACT;
+        } else if (id == R.id.qm_redaction) {
+            menuStr = MENU_ID_STRING_REDACTION;
+        } else if (id == R.id.qm_strikeout) {
+            menuStr = MENU_ID_STRING_STRIKEOUT;
+        } else if (id == R.id.qm_squiggly) {
+            menuStr = MENU_ID_STRING_SQUIGGLY;
+        } else if (id == R.id.qm_link) {
+            menuStr = MENU_ID_STRING_LINK;
+        } else if (id == R.id.qm_highlight) {
+            menuStr = MENU_ID_STRING_HIGHLIGHT;
+        } else if (id == R.id.qm_floating_sig) {
+            menuStr = MENU_ID_STRING_SIGNATURE;
+        } else if (id == R.id.qm_rectangle) {
+            menuStr = MENU_ID_STRING_RECTANGLE;
+        } else if (id == R.id.qm_line) {
+            menuStr = MENU_ID_STRING_LINE;
+        } else if (id == R.id.qm_free_hand) {
+            menuStr = MENU_ID_STRING_FREE_HAND;
+        } else if (id == R.id.qm_image_stamper) {
+            menuStr = MENU_ID_STRING_IMAGE;
+        } else if (id == R.id.qm_form_text) {
+            menuStr = MENU_ID_STRING_FORM_TEXT;
+        } else if (id == R.id.qm_sticky_note) {
+            menuStr = MENU_ID_STRING_STICKY_NOTE;
+        } else if (id == R.id.qm_overflow) {
+            menuStr = MENU_ID_STRING_OVERFLOW;
+        } else if (id == R.id.qm_ink_eraser) {
+            menuStr = MENU_ID_STRING_ERASER;
+        } else if (id == R.id.qm_rubber_stamper) {
+            menuStr = MENU_ID_STRING_STAMP;
+        } else if (id == R.id.qm_page_redaction) {
+            menuStr = MENU_ID_STRING_PAGE_REDACTION;
+        } else if (id == R.id.qm_rect_redaction) {
+            menuStr = MENU_ID_STRING_RECT_REDACTION;
+        } else if (id == R.id.qm_search_redaction) {
+            menuStr = MENU_ID_STRING_SEARCH_REDACTION;
+        } else if (id == R.id.qm_shape) {
+            menuStr = MENU_ID_STRING_SHAPE;
+        } else if (id == R.id.qm_cloud) {
+            menuStr = MENU_ID_STRING_CLOUD;
+        } else if (id == R.id.qm_polygon) {
+            menuStr = MENU_ID_STRING_POLYGON;
+        } else if (id == R.id.qm_polyline) {
+            menuStr = MENU_ID_STRING_POLYLINE;
+        } else if (id == R.id.qm_free_highlighter) {
+            menuStr = MENU_ID_STRING_FREE_HIGHLIGHTER;
+        } else if (id == R.id.qm_arrow) {
+            menuStr = MENU_ID_STRING_ARROW;
+        } else if (id == R.id.qm_oval) {
+            menuStr = MENU_ID_STRING_OVAL;
+        } else if (id == R.id.qm_callout) {
+            menuStr = MENU_ID_STRING_CALLOUT;
+        } else if (id == R.id.qm_measurement) {
+            menuStr = MENU_ID_STRING_MEASUREMENT;
+        } else if (id == R.id.qm_area_measure) {
+            menuStr = MENU_ID_STRING_AREA_MEASUREMENT;
+        } else if (id == R.id.qm_perimeter_measure) {
+            menuStr = MENU_ID_STRING_PERIMETER_MEASUREMENT;
+        } else if (id == R.id.qm_rect_area_measure) {
+            menuStr = MENU_ID_STRING_RECT_AREA_MEASUREMENT;
+        } else if (id == R.id.qm_ruler) {
+            menuStr = MENU_ID_STRING_RULER;
+        } else if (id == R.id.qm_form) {
+            menuStr = MENU_ID_STRING_FORM;
+        } else if (id == R.id.qm_form_combo_box) {
+            menuStr = MENU_ID_STRING_FORM_COMBO_BOX;
+        } else if (id == R.id.qm_form_list_box) {
+            menuStr = MENU_ID_STRING_FORM_LIST_BOX;
+        } else if (id == R.id.qm_form_check_box) {
+            menuStr = MENU_ID_STRING_FORM_CHECK_BOX;
+        } else if (id == R.id.qm_form_signature) {
+            menuStr = MENU_ID_STRING_FORM_SIGNATURE;
+        } else if (id == R.id.qm_form_radio_group) {
+            menuStr = MENU_ID_STRING_FORM_RADIO_GROUP;
+        } else if (id == R.id.qm_attach) {
+            menuStr = MENU_ID_STRING_ATTACH;
+        } else if (id == R.id.qm_file_attachment) {
+            menuStr = MENU_ID_STRING_FILE_ATTACHMENT;
+        } else if (id == R.id.qm_sound) {
+            menuStr = MENU_ID_STRING_SOUND;
+        } else if (id == R.id.qm_free_text) {
+            menuStr = MENU_ID_STRING_FREE_TEXT;
+        } else if (id == R.id.qm_crop) {
+            menuStr = MENU_ID_STRING_CROP;
+        } else if (id == R.id.qm_crop_ok) {
+            menuStr = MENU_ID_STRING_CROP_OK;
+        } else if (id == R.id.qm_crop_cancel) {
+            menuStr = MENU_ID_STRING_CROP_CANCEL;
+        } else if (id == R.id.qm_define) {
+            menuStr = MENU_ID_STRING_DEFINE;
+        } else if (id == R.id.qm_field_signed) {
+            menuStr = MENU_ID_STRING_FIELD_SIGNED;
+        } else if (id == R.id.qm_first_row_group) {
+            menuStr = MENU_ID_STRING_FIRST_ROW_GROUP;
+        } else if (id == R.id.qm_second_row_group) {
+            menuStr = MENU_ID_STRING_SECOND_ROW_GROUP;
+        } else if (id == R.id.qm_group) {
+            menuStr = MENU_ID_STRING_GROUP;
+        } else if (id == R.id.qm_paste) {
+            menuStr = MENU_ID_STRING_PASTE;
+        } else if (id == R.id.qm_rect_group_select) {
+            menuStr = MENU_ID_STRING_RECT_GROUP_SELECT;
+        } else if (id == R.id.qm_sign_and_save) {
+            menuStr = MENU_ID_STRING_SIGN_AND_SAVE;
+        } else if (id == R.id.qm_thickness) {
+            menuStr = MENU_ID_STRING_THICKNESS;
+        } else if (id == R.id.qm_translate) {
+            menuStr = MENU_ID_STRING_TRANSLATE;
+        } else if (id == R.id.qm_type) {
+            menuStr = MENU_ID_STRING_TYPE;
+        } else if (id == R.id.qm_ungroup) {
+            menuStr = MENU_ID_STRING_UNGROUP;
         }
+
         return menuStr;
     }
 
@@ -847,15 +1390,6 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             }
         }
 
-        if (mPdfViewCtrlTabHostFragment != null) {
-            if (!mTopToolbarEnabled) {
-                mPdfViewCtrlTabHostFragment.setToolbarTimerDisabled(true);
-                if (mPdfViewCtrlTabHostFragment.getToolbar() != null) {
-                    mPdfViewCtrlTabHostFragment.getToolbar().setVisibility(GONE);
-                }
-            }
-        }
-
         getViewTreeObserver().addOnGlobalLayoutListener(mOnGlobalLayoutListener);
     }
 
@@ -868,6 +1402,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         if (getToolManager() != null) {
             getToolManager().removeAnnotationModificationListener(mAnnotationModificationListener);
             getToolManager().removeAnnotationsSelectionListener(mAnnotationsSelectionListener);
+            getToolManager().removePdfDocModificationListener(mPdfDocModificationListener);
+            getToolManager().removeToolChangedListener(mToolChangedListener);
         }
         if (getPdfViewCtrlTabFragment() != null) {
             getPdfViewCtrlTabFragment().removeQuickMenuListener(mQuickMenuListener);
@@ -934,19 +1470,19 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                 e.printStackTrace();
             }
             if (uid != null) {
-                annotPair.putString(KEY_annotId, uid);
-                annotPair.putInt(KEY_annotPage, value);
+                annotPair.putString(KEY_ANNOTATION_ID, uid);
+                annotPair.putInt(KEY_ANNOTATION_PAGE, value);
                 // try to obtain bbox
                 try {
                     com.pdftron.pdf.Rect bbox = getPdfViewCtrl().getScreenRectForAnnot(key, value);
                     WritableMap bboxMap = Arguments.createMap();
-                    bboxMap.putDouble(KEY_x1, bbox.getX1());
-                    bboxMap.putDouble(KEY_y1, bbox.getY1());
-                    bboxMap.putDouble(KEY_x2, bbox.getX2());
-                    bboxMap.putDouble(KEY_y2, bbox.getY2());
-                    bboxMap.putDouble(KEY_width, bbox.getWidth());
-                    bboxMap.putDouble(KEY_height, bbox.getHeight());
-                    annotPair.putMap(KEY_annotRect, bboxMap);
+                    bboxMap.putDouble(KEY_X1, bbox.getX1());
+                    bboxMap.putDouble(KEY_Y1, bbox.getY1());
+                    bboxMap.putDouble(KEY_X2, bbox.getX2());
+                    bboxMap.putDouble(KEY_Y2, bbox.getY2());
+                    bboxMap.putDouble(KEY_WIDTH, bbox.getWidth());
+                    bboxMap.putDouble(KEY_HEIGHT, bbox.getHeight());
+                    annotPair.putMap(KEY_ANNOTATION_RECT, bboxMap);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -975,8 +1511,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                         // notify event
                         WritableMap params = Arguments.createMap();
                         params.putString(ON_ANNOTATION_MENU_PRESS, ON_ANNOTATION_MENU_PRESS);
-                        params.putString(KEY_annotationMenu, menuStr);
-                        params.putArray(KEY_annotations, getAnnotationsData());
+                        params.putString(KEY_ANNOTATION_MENU, menuStr);
+                        params.putArray(KEY_ANNOTATIONS, getAnnotationsData());
                         onReceiveNativeEvent(params);
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -989,8 +1525,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                         // notify event
                         WritableMap params = Arguments.createMap();
                         params.putString(ON_LONG_PRESS_MENU_PRESS, ON_LONG_PRESS_MENU_PRESS);
-                        params.putString(KEY_longPressMenu, menuStr);
-                        params.putString(KEY_longPressText, ViewerUtils.getSelectedString(getPdfViewCtrl()));
+                        params.putString(KEY_LONG_PRESS_MENU, menuStr);
+                        params.putString(KEY_LONG_PRESS_TEXT, ViewerUtils.getSelectedString(getPdfViewCtrl()));
                         onReceiveNativeEvent(params);
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -1077,7 +1613,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                     // notify event
                     WritableMap params = Arguments.createMap();
                     params.putString(ON_ANNOTATIONS_SELECTED, ON_ANNOTATIONS_SELECTED);
-                    params.putArray(KEY_annotations, getAnnotationsData());
+                    params.putArray(KEY_ANNOTATIONS, getAnnotationsData());
                     onReceiveNativeEvent(params);
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -1093,7 +1629,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     private ActionUtils.ActionInterceptCallback mActionInterceptCallback = new ActionUtils.ActionInterceptCallback() {
         @Override
         public boolean onInterceptExecuteAction(ActionParameter actionParameter, PDFViewCtrl pdfViewCtrl) {
-            if (!isOverrideAction(KEY_Config_linkPress)) {
+            if (!isOverrideAction(KEY_CONFIG_LINK_PRESS)) {
                 return false;
             }
             String url = null;
@@ -1121,11 +1657,11 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             if (url != null) {
                 WritableMap params = Arguments.createMap();
                 params.putString(ON_BEHAVIOR_ACTIVATED, ON_BEHAVIOR_ACTIVATED);
-                params.putString(KEY_action, KEY_Config_linkPress);
+                params.putString(KEY_ACTION, KEY_CONFIG_LINK_PRESS);
 
                 WritableMap data = Arguments.createMap();
                 data.putString(KEY_LINK_BEHAVIOR_DATA, url);
-                params.putMap(KEY_data, data);
+                params.putMap(KEY_DATA, data);
 
                 onReceiveNativeEvent(params);
 
@@ -1161,9 +1697,9 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     private ToolManager.AnnotationModificationListener mAnnotationModificationListener = new ToolManager.AnnotationModificationListener() {
         @Override
         public void onAnnotationsAdded(Map<Annot, Integer> map) {
-            handleAnnotationChanged(KEY_action_add, map);
+            handleAnnotationChanged(KEY_ACTION_ADD, map);
 
-            handleExportAnnotationCommand(KEY_action_add, map);
+            handleExportAnnotationCommand(KEY_ACTION_ADD, map);
         }
 
         @Override
@@ -1173,9 +1709,9 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
         @Override
         public void onAnnotationsModified(Map<Annot, Integer> map, Bundle bundle) {
-            handleAnnotationChanged(KEY_action_modify, map);
+            handleAnnotationChanged(KEY_ACTION_MODIFY, map);
 
-            handleExportAnnotationCommand(KEY_action_modify, map);
+            handleExportAnnotationCommand(KEY_ACTION_MODIFY, map);
 
             // handle form fields change
             WritableMap params = Arguments.createMap();
@@ -1192,8 +1728,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                             Field field = widget.getField();
                             String name = field.getName();
 
-                            resultMap.putString(Key_fieldName, name);
-                            resultMap.putString(Key_fieldValue, field.getValueAsString());
+                            resultMap.putString(KEY_FIELD_NAME, name);
+                            resultMap.putString(KEY_FIELD_VALUE, field.getValueAsString());
                             fieldsArray.pushMap(resultMap);
                         }
                     }
@@ -1201,15 +1737,15 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                     ex.printStackTrace();
                 }
             }
-            params.putArray(Key_fields, fieldsArray);
+            params.putArray(KEY_FIELDS, fieldsArray);
             onReceiveNativeEvent(params);
         }
 
         @Override
         public void onAnnotationsPreRemove(Map<Annot, Integer> map) {
-            handleAnnotationChanged(KEY_action_delete, map);
+            handleAnnotationChanged(KEY_ACTION_DELETE, map);
 
-            handleExportAnnotationCommand(KEY_action_delete, map);
+            handleExportAnnotationCommand(KEY_ACTION_DELETE, map);
         }
 
         @Override
@@ -1228,10 +1764,99 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         }
     };
 
+    private ToolManager.PdfDocModificationListener mPdfDocModificationListener = new ToolManager.PdfDocModificationListener() {
+        @Override
+        public void onBookmarkModified() {
+            if (getPdfDoc() != null) {
+                WritableMap params = Arguments.createMap();
+                params.putString(ON_BOOKMARK_CHANGED, ON_BOOKMARK_CHANGED);
+                String bookmarkJson = null;
+                try {
+                    bookmarkJson = BookmarkManager.exportPdfBookmarks(getPdfDoc());
+                } catch (JSONException ex) {
+                    ex.printStackTrace();
+                }
+
+                if (bookmarkJson == null) {
+                    params.putString(KEY_ERROR, "Bookmark cannot be exported");
+                } else {
+                    params.putString(KEY_BOOKMARK_JSON, bookmarkJson);
+                }
+
+                onReceiveNativeEvent(params);
+            }
+        }
+
+        @Override
+        public void onPagesCropped() {
+
+        }
+
+        @Override
+        public void onPagesAdded(List<Integer> list) {
+
+        }
+
+        @Override
+        public void onPagesDeleted(List<Integer> list) {
+
+        }
+
+        @Override
+        public void onPagesRotated(List<Integer> list) {
+
+        }
+
+        @Override
+        public void onPageMoved(int i, int i1) {
+
+        }
+
+        @Override
+        public void onPageLabelsChanged() {
+
+        }
+
+        @Override
+        public void onAllAnnotationsRemoved() {
+
+        }
+
+        @Override
+        public void onAnnotationAction() {
+
+        }
+    };
+
+    private ToolManager.ToolChangedListener mToolChangedListener = new ToolManager.ToolChangedListener() {
+        @Override
+        public void toolChanged(ToolManager.Tool newTool, @Nullable ToolManager.Tool oldTool) {
+
+            String newToolString = null;
+            if (newTool != null) {
+                newToolString = convToolModeToString((ToolManager.ToolMode) newTool.getToolMode());
+            }
+
+            String oldToolString = null;
+            if (oldTool != null) {
+                oldToolString = convToolModeToString((ToolManager.ToolMode) newTool.getToolMode());
+            }
+
+            String unknownString = "unknown tool";
+
+            WritableMap params = Arguments.createMap();
+            params.putString(ON_TOOL_CHANGED, ON_TOOL_CHANGED);
+            params.putString(KEY_PREVIOUS_TOOL, oldToolString != null ? oldToolString : unknownString);
+            params.putString(KEY_TOOL, newToolString != null ? newToolString : unknownString);
+
+            onReceiveNativeEvent(params);
+        }
+    };
+
     private void handleAnnotationChanged(String action, Map<Annot, Integer> map) {
         WritableMap params = Arguments.createMap();
         params.putString(ON_ANNOTATION_CHANGED, ON_ANNOTATION_CHANGED);
-        params.putString(KEY_action, action);
+        params.putString(KEY_ACTION, action);
 
         WritableArray annotList = Arguments.createArray();
         for (Map.Entry<Annot, Integer> entry : map.entrySet()) {
@@ -1246,13 +1871,13 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             if (uid != null) {
                 Integer value = entry.getValue();
                 WritableMap annotData = Arguments.createMap();
-                annotData.putString(KEY_annotId, uid);
-                annotData.putInt(KEY_annotPage, value);
+                annotData.putString(KEY_ANNOTATION_ID, uid);
+                annotData.putInt(KEY_ANNOTATION_PAGE, value);
                 annotList.pushMap(annotData);
             }
         }
 
-        params.putArray(KEY_annotations, annotList);
+        params.putArray(KEY_ANNOTATIONS, annotList);
         onReceiveNativeEvent(params);
     }
 
@@ -1262,9 +1887,9 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             ArrayList<Annot> annots = new ArrayList<>(map.keySet());
             String xfdfCommand = null;
             try {
-                if (KEY_action_add.equals(action)) {
+                if (KEY_ACTION_ADD.equals(action)) {
                     xfdfCommand = generateXfdfCommand(annots, null, null);
-                } else if (KEY_action_modify.equals(action)) {
+                } else if (KEY_ACTION_MODIFY.equals(action)) {
                     xfdfCommand = generateXfdfCommand(null, annots, null);
                 } else {
                     xfdfCommand = generateXfdfCommand(null, null, annots);
@@ -1273,21 +1898,23 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                 e.printStackTrace();
             }
 
+            WritableMap params = Arguments.createMap();
+            params.putString(ON_EXPORT_ANNOTATION_COMMAND, ON_EXPORT_ANNOTATION_COMMAND);
             if (xfdfCommand != null) {
-                WritableMap params = Arguments.createMap();
-                params.putString(ON_EXPORT_ANNOTATION_COMMAND, ON_EXPORT_ANNOTATION_COMMAND);
-                params.putString(KEY_action, action);
-                params.putString(KEY_xfdfCommand, xfdfCommand);
-                onReceiveNativeEvent(params);
+                params.putString(KEY_ERROR, "XFDF command cannot be generated");
+            } else {
+                params.putString(KEY_ACTION, action);
+                params.putString(KEY_XFDF_COMMAND, xfdfCommand);
             }
+            onReceiveNativeEvent(params);
         }
     }
 
     // helper
     @Nullable
     private String generateXfdfCommand(@Nullable ArrayList<Annot> added,
-            @Nullable ArrayList<Annot> modified,
-            @Nullable ArrayList<Annot> removed) throws PDFNetException {
+                                       @Nullable ArrayList<Annot> modified,
+                                       @Nullable ArrayList<Annot> removed) throws PDFNetException {
         PDFDoc pdfDoc = getPdfDoc();
         if (pdfDoc != null) {
             FDFDoc fdfDoc = pdfDoc.fdfExtract(added, modified, removed);
@@ -1312,11 +1939,17 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             getPdfViewCtrlTabFragment().setSavingEnabled(mAutoSaveEnabled);
         }
 
+        if (mReadOnly) {
+            getToolManager().setReadOnly(true);
+        }
+
         getPdfViewCtrl().addPageChangeListener(mPageChangeListener);
         getPdfViewCtrl().addOnCanvasSizeChangeListener(mOnCanvasSizeChangeListener);
 
         getToolManager().addAnnotationModificationListener(mAnnotationModificationListener);
         getToolManager().addAnnotationsSelectionListener(mAnnotationsSelectionListener);
+        getToolManager().addPdfDocModificationListener(mPdfDocModificationListener);
+        getToolManager().addToolChangedListener(mToolChangedListener);
 
         getToolManager().setStylusAsPen(mUseStylusAsPen);
         getToolManager().setSignSignatureFieldsWithStamps(mSignWithStamps);
@@ -1326,8 +1959,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         ActionUtils.getInstance().setActionInterceptCallback(mActionInterceptCallback);
 
         // collab
-        if (mPdfViewCtrlTabHostFragment instanceof CollabViewerTabHostFragment) {
-            CollabViewerTabHostFragment collabHost = (CollabViewerTabHostFragment) mPdfViewCtrlTabHostFragment;
+        if (mPdfViewCtrlTabHostFragment instanceof CollabViewerTabHostFragment2) {
+            CollabViewerTabHostFragment2 collabHost = (CollabViewerTabHostFragment2) mPdfViewCtrlTabHostFragment;
             mCollabManager = collabHost.getCollabManager();
             if (mCollabManager != null) {
                 if (mCurrentUser != null) {
@@ -1339,8 +1972,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                             if (mCollabManager != null) {
                                 WritableMap params = Arguments.createMap();
                                 params.putString(ON_EXPORT_ANNOTATION_COMMAND, ON_EXPORT_ANNOTATION_COMMAND);
-                                params.putString(KEY_action, s);
-                                params.putString(KEY_xfdfCommand, mCollabManager.getLastXfdf());
+                                params.putString(KEY_ACTION, s);
+                                params.putString(KEY_XFDF_COMMAND, mCollabManager.getLastXfdf());
                                 onReceiveNativeEvent(params);
                             }
                         }
@@ -1381,6 +2014,42 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         }
         onReceiveNativeEvent(ON_DOCUMENT_ERROR, error);
         return true;
+    }
+
+    public void importBookmarkJson(String bookmarkJson) throws PDFNetException {
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+
+        PDFDoc pdfDoc = pdfViewCtrl.getDoc();
+
+        boolean shouldUnlockRead = false;
+        try {
+            pdfViewCtrl.docLockRead();
+            shouldUnlockRead = true;
+
+            if (pdfDoc.hasDownloader()) {
+                // still downloading file, let's wait for next call
+                return;
+            }
+        } finally {
+            if (shouldUnlockRead) {
+                pdfViewCtrl.docUnlockRead();
+            }
+        }
+
+        boolean shouldUnlock = false;
+        try {
+            pdfViewCtrl.docLock(true);
+            shouldUnlock = true;
+
+            BookmarkManager.importPdfBookmarks(pdfViewCtrl, bookmarkJson);
+            pdfViewCtrl.update(true);
+        } catch (JSONException ex) {
+            throw new PDFNetException("", 0L, TAG, "importBookmarkJson", "Unable to parse bookmark json.");
+        } finally {
+            if (shouldUnlock) {
+                pdfViewCtrl.docUnlock();
+            }
+        }
     }
 
     public void importAnnotationCommand(String xfdfCommand, boolean initialLoad) throws PDFNetException {
@@ -1468,16 +2137,16 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             shouldUnlockRead = true;
 
             PDFDoc pdfDoc = pdfViewCtrl.getDoc();
-            if (null == options || !options.hasKey(KEY_annotList)) {
+            if (null == options || !options.hasKey(KEY_ANNOTATION_LIST)) {
                 FDFDoc fdfDoc = pdfDoc.fdfExtract(PDFDoc.e_both);
                 return fdfDoc.saveAsXFDF();
             } else {
-                ReadableArray arr = options.getArray(KEY_annotList);
+                ReadableArray arr = options.getArray(KEY_ANNOTATION_LIST);
                 ArrayList<Annot> annots = new ArrayList<>(arr.size());
                 for (int i = 0; i < arr.size(); i++) {
                     ReadableMap annotData = arr.getMap(i);
-                    String id = annotData.getString(KEY_annotId);
-                    int page = annotData.getInt(KEY_annotPage);
+                    String id = annotData.getString(KEY_ANNOTATION_ID);
+                    int page = annotData.getInt(KEY_ANNOTATION_PAGE);
                     if (!Utils.isNullOrEmpty(id)) {
                         Annot ann = ViewerUtils.getAnnotById(getPdfViewCtrl(), id, page);
                         if (ann != null && ann.isValid()) {
@@ -1512,7 +2181,9 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                     return "";
                 }
             } else {
-                return getPdfViewCtrlTabFragment().getFilePath();
+                if (getPdfViewCtrlTabFragment() != null) {
+                    return getPdfViewCtrlTabFragment().getFilePath();
+                }
             }
         }
         return null;
@@ -1555,8 +2226,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
             if (null == annotData) {
                 continue;
             }
-            String annotId = annotData.getString(KEY_annotId);
-            int pageNum = annotData.getInt(KEY_annotPage);
+            String annotId = annotData.getString(KEY_ANNOTATION_ID);
+            int pageNum = annotData.getInt(KEY_ANNOTATION_PAGE);
             Annot annot = ViewerUtils.getAnnotById(pdfViewCtrl, annotId, pageNum);
             if (annot != null && annot.isValid()) {
                 boolean shouldUnlock = false;
@@ -1583,7 +2254,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         }
     }
 
-    public void setValueForFields(ReadableMap readableMap) throws PDFNetException {
+    public void setValuesForFields(ReadableMap readableMap) throws PDFNetException {
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
         PDFDoc pdfDoc = pdfViewCtrl.getDoc();
 
@@ -1683,9 +2354,10 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
     public String getDocumentPath() {
         if (mIsBase64 && mTempFile != null) {
             return mTempFile.getAbsolutePath();
-        } else {
+        } else if (getPdfViewCtrlTabFragment() != null) {
             return getPdfViewCtrlTabFragment().getFilePath();
         }
+        return null;
     }
 
     public void setToolMode(String item) {
@@ -1727,7 +2399,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         return false;
     }
 
-    public void setPropertyForAnnotation(String annotId, int pageNumber, ReadableMap propertyMap) throws PDFNetException {
+    public void setPropertiesForAnnotation(String annotId, int pageNumber, ReadableMap propertyMap) throws PDFNetException {
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
         ToolManager toolManager = getToolManager();
 
@@ -1743,22 +2415,22 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                 map.put(annot, pageNumber);
                 toolManager.raiseAnnotationsPreModifyEvent(map);
 
-                if (propertyMap.hasKey(KEY_annotContents)) {
-                    String contents = propertyMap.getString(KEY_annotContents);
+                if (propertyMap.hasKey(KEY_ANNOTATION_CONTENTS)) {
+                    String contents = propertyMap.getString(KEY_ANNOTATION_CONTENTS);
                     if (contents != null) {
                         annot.setContents(contents);
                     }
                 }
 
-                if (propertyMap.hasKey(KEY_annotRect)) {
-                    ReadableMap rectMap = propertyMap.getMap(KEY_annotRect);
+                if (propertyMap.hasKey(KEY_ANNOTATION_RECT)) {
+                    ReadableMap rectMap = propertyMap.getMap(KEY_ANNOTATION_RECT);
 
-                    if (rectMap != null && rectMap.hasKey(KEY_x1) && rectMap.hasKey(KEY_y1) &&
-                                rectMap.hasKey(KEY_x2) && rectMap.hasKey(KEY_y2)) {
-                        double rectX1 = rectMap.getDouble(KEY_x1);
-                        double rectY1 = rectMap.getDouble(KEY_y1);
-                        double rectX2 = rectMap.getDouble(KEY_x2);
-                        double rectY2 = rectMap.getDouble(KEY_y2);
+                    if (rectMap != null && rectMap.hasKey(KEY_X1) && rectMap.hasKey(KEY_Y1) &&
+                            rectMap.hasKey(KEY_X2) && rectMap.hasKey(KEY_Y2)) {
+                        double rectX1 = rectMap.getDouble(KEY_X1);
+                        double rectY1 = rectMap.getDouble(KEY_Y1);
+                        double rectX2 = rectMap.getDouble(KEY_X2);
+                        double rectY2 = rectMap.getDouble(KEY_Y2);
                         com.pdftron.pdf.Rect rect = new com.pdftron.pdf.Rect(rectX1, rectY1, rectX2, rectY2);
                         annot.setRect(rect);
                     }
@@ -1767,28 +2439,28 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                 if (annot.isMarkup()) {
                     Markup markupAnnot = new Markup(annot);
 
-                    if (propertyMap.hasKey(KEY_annotSubject)) {
-                        String subject = propertyMap.getString(KEY_annotSubject);
+                    if (propertyMap.hasKey(KEY_ANNOTATION_SUBJECT)) {
+                        String subject = propertyMap.getString(KEY_ANNOTATION_SUBJECT);
                         if (subject != null) {
                             markupAnnot.setSubject(subject);
                         }
                     }
 
-                    if (propertyMap.hasKey(KEY_annotTitle)) {
-                        String title = propertyMap.getString(KEY_annotTitle);
+                    if (propertyMap.hasKey(KEY_ANNOTATION_TITLE)) {
+                        String title = propertyMap.getString(KEY_ANNOTATION_TITLE);
                         if (title != null) {
                             markupAnnot.setTitle(title);
                         }
                     }
 
-                    if (propertyMap.hasKey(KEY_annotContentRect)) {
-                        ReadableMap contentRectMap = propertyMap.getMap(KEY_annotContentRect);
-                        if (contentRectMap != null && contentRectMap.hasKey(KEY_x1) && contentRectMap.hasKey(KEY_y1) &&
-                                contentRectMap.hasKey(KEY_x2) && contentRectMap.hasKey(KEY_y2)) {
-                            double rectX1 = contentRectMap.getDouble(KEY_x1);
-                            double rectY1 = contentRectMap.getDouble(KEY_y1);
-                            double rectX2 = contentRectMap.getDouble(KEY_x2);
-                            double rectY2 = contentRectMap.getDouble(KEY_y2);
+                    if (propertyMap.hasKey(KEY_ANNOTATION_CONTENT_RECT)) {
+                        ReadableMap contentRectMap = propertyMap.getMap(KEY_ANNOTATION_CONTENT_RECT);
+                        if (contentRectMap != null && contentRectMap.hasKey(KEY_X1) && contentRectMap.hasKey(KEY_Y1) &&
+                                contentRectMap.hasKey(KEY_X2) && contentRectMap.hasKey(KEY_Y2)) {
+                            double rectX1 = contentRectMap.getDouble(KEY_X1);
+                            double rectY1 = contentRectMap.getDouble(KEY_Y1);
+                            double rectX2 = contentRectMap.getDouble(KEY_X2);
+                            double rectY2 = contentRectMap.getDouble(KEY_Y2);
                             com.pdftron.pdf.Rect contentRect = new com.pdftron.pdf.Rect(rectX1, rectY1, rectX2, rectY2);
                             markupAnnot.setContentRect(contentRect);
                         }
@@ -1799,15 +2471,14 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
                 toolManager.raiseAnnotationsModifiedEvent(map, Tool.getAnnotationModificationBundle(null));
             }
-        }
-        finally {
+        } finally {
             if (shouldUnlock) {
                 pdfViewCtrl.docUnlock();
             }
         }
     }
 
-    public void setFlagForAnnotations(ReadableArray annotationFlagList) throws PDFNetException {
+    public void setFlagsForAnnotations(ReadableArray annotationFlagList) throws PDFNetException {
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
         ToolManager toolManager = getToolManager();
         int flagCount = annotationFlagList.size();
@@ -1821,43 +2492,43 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
                 if (null == annotFlagData) {
                     continue;
                 }
-                String annotId = annotFlagData.getString(KEY_annotId);
-                int pageNum = annotFlagData.getInt(KEY_annotPage);
-                String flag = annotFlagData.getString(KEY_annotFlag);
-                boolean flagValue = annotFlagData.getBoolean(KEY_annotFlagValue);
+                String annotId = annotFlagData.getString(KEY_ANNOTATION_ID);
+                int pageNum = annotFlagData.getInt(KEY_ANNOTATION_PAGE);
+                String flag = annotFlagData.getString(KEY_ANNOTATION_FLAG);
+                boolean flagValue = annotFlagData.getBoolean(KEY_ANNOTATION_FLAG_VALUE);
 
                 Annot annot = ViewerUtils.getAnnotById(pdfViewCtrl, annotId, pageNum);
                 if (annot != null && annot.isValid() && flag != null) {
                     int flagNum = -1;
                     switch (flag) {
-                        case KEY_annotFlagHidden:
+                        case KEY_ANNOTATION_FLAG_HIDDEN:
                             flagNum = Annot.e_hidden;
                             break;
-                        case KEY_annotFlagInvisible:
+                        case KEY_ANNOTATION_FLAG_INVISIBLE:
                             flagNum = Annot.e_invisible;
                             break;
-                        case KEY_annotFlagLocked:
+                        case KEY_ANNOTATION_FLAG_LOCKED:
                             flagNum = Annot.e_locked;
                             break;
-                        case KEY_annotFlagLockedContents:
+                        case KEY_ANNOTATION_FLAG_LOCKED_CONTENTS:
                             flagNum = Annot.e_locked_contents;
                             break;
-                        case KEY_annotFlagNoRotate:
+                        case KEY_ANNOTATION_FLAG_NO_ROTATE:
                             flagNum = Annot.e_no_rotate;
                             break;
-                        case KEY_flagNoView:
+                        case KEY_ANNOTATION_FLAG_NO_VIEW:
                             flagNum = Annot.e_no_view;
                             break;
-                        case KEY_flagNoZoom:
+                        case KEY_ANNOTATION_FLAG_NO_ZOOM:
                             flagNum = Annot.e_no_zoom;
                             break;
-                        case kEY_flagPrint:
+                        case KEY_ANNOTATION_FLAG_PRINT:
                             flagNum = Annot.e_print;
                             break;
-                        case KEY_flagReadOnly:
+                        case KEY_ANNOTATION_FLAG_READ_ONLY:
                             flagNum = Annot.e_read_only;
                             break;
-                        case KEY_flagToggleNoView:
+                        case KEY_ANNOTATION_FLAG_TOGGLE_NO_VIEW:
                             flagNum = Annot.e_toggle_no_view;
                     }
                     if (flagNum != -1) {
@@ -1885,12 +2556,12 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
         WritableMap map = Arguments.createMap();
 
-        map.putDouble(KEY_x1, rect.getX1());
-        map.putDouble(KEY_y1, rect.getY1());
-        map.putDouble(KEY_x2, rect.getX2());
-        map.putDouble(KEY_y2, rect.getY2());
-        map.putDouble(KEY_width, rect.getWidth());
-        map.putDouble(KEY_height, rect.getHeight());
+        map.putDouble(KEY_X1, rect.getX1());
+        map.putDouble(KEY_Y1, rect.getY1());
+        map.putDouble(KEY_X2, rect.getX2());
+        map.putDouble(KEY_Y2, rect.getY2());
+        map.putDouble(KEY_WIDTH, rect.getWidth());
+        map.putDouble(KEY_HEIGHT, rect.getHeight());
 
         return map;
     }
@@ -1900,7 +2571,18 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
         return pdfViewCtrl.setCurrentPage(pageNumber);
     }
 
-    public PdfViewCtrlTabFragment getPdfViewCtrlTabFragment() {
+    public void closeAllTabs() {
+        if (mPdfViewCtrlTabHostFragment != null) {
+            mPdfViewCtrlTabHostFragment.closeAllTabs();
+        }
+    }
+
+    public double getZoom() {
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+        return pdfViewCtrl.getZoom();
+    }
+
+    public PdfViewCtrlTabFragment2 getPdfViewCtrlTabFragment() {
         if (mPdfViewCtrlTabHostFragment != null) {
             return mPdfViewCtrlTabHostFragment.getCurrentPdfViewCtrlFragment();
         }
