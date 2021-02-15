@@ -152,7 +152,7 @@ NS_ASSUME_NONNULL_END
         [self applyLayoutMode:self.documentViewController.pdfViewCtrl];
     }
     
-    [self customInit];
+    //[self customInit];
 }
 
 - (void)setDocument:(NSString *)document
@@ -2926,6 +2926,8 @@ NS_ASSUME_NONNULL_END
 }
 
 
+
++ (Class)toolClassForKey:(NSString *)key
 {
     if ([key isEqualToString:PTAnnotationEditToolKey]) {
         return [PTAnnotSelectTool class];
@@ -3174,20 +3176,26 @@ NS_ASSUME_NONNULL_END
 }
 
 
+
+
+
+
+
+
 #pragma mark - Custom CAT
 
 static NSMutableArray* globalSearchResults;
 
 - (void)toggleSidebar
 {
-    if([self.delegate respondsToSelector:@selector(toggleSidebar:)]) {
-        [self.delegate toggleSidebar:self];
-    }
+//    if([self.delegate respondsToSelector:@selector(toggleSidebar:)]) {
+//        [self.delegate toggleSidebar:self];
+//    }
 }
 
 - (void)customInit
 {
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
     [pdfViewCtrl SetPageSpacing:10 vert_col_space:10 horiz_pad:0 vert_pad:100];
     [pdfViewCtrl SetupThumbnails:YES generate_at_runtime:YES use_disk_cache:YES thumb_max_side_length:300 max_abs_cache_size:300*300*500 max_perc_cache_size:0.7];
     
@@ -3236,7 +3244,7 @@ static NSMutableArray* globalSearchResults;
 
 - (void)getThumbnail:(int)pageNumber completionHandler:(void (^)(NSString * _Nullable base64Str))completionHandler
 {
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
     int pageCount = [pdfDoc GetPageCount];
     
@@ -3250,12 +3258,9 @@ static NSMutableArray* globalSearchResults;
     
 }
 
-
-
-
 - (void)abortGetThumbnail
 {
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
     [pdfViewCtrl ClearThumbCache];
     [pdfViewCtrl CancelAllThumbRequests];
 }
@@ -3266,7 +3271,7 @@ static NSMutableArray* globalSearchResults;
 // Custom Search
 - (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString case:(BOOL)isCase whole:(BOOL)isWhole
 {
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
     
     PTTextSearch *search = [[PTTextSearch alloc] init];
@@ -3353,37 +3358,30 @@ static NSMutableArray* globalSearchResults;
 
 - (void)clearSearch
 {
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
     [pdfViewCtrl removeFloatingViews:globalSearchResults];
 }
 
 
 
-- (void)findTextIOS
+- (void)findTextIOS:(NSString *)searchString direction:(BOOL)direction
 {
-    PTDocumentViewController *docViewCtrl = self.documentViewController;
-    [docViewCtrl showSearchViewController];
-}
-
-
-//- (void)findTextIOS:(NSString *)searchString direction:(BOOL)direction
-//{
 //    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
 //    [pdfViewCtrl FindText:searchString MatchCase:NO MatchWholeWord:NO SearchUp:direction RegExp:NO];
-//}
+}
 
 
 
 
 - (void)toggleSlider:(BOOL)toggle;
 {
-    PTDocumentViewController *docViewCtrl = self.documentViewController;
-    
-    if (toggle) {
-        [docViewCtrl setThumbnailSliderHidden:NO animated:YES];
-    } else {
-        [docViewCtrl setThumbnailSliderHidden:YES animated:YES];
-    }
+//    PTDocumentViewController *docViewCtrl = self.documentViewController;
+//
+//    if (toggle) {
+//        [docViewCtrl setThumbnailSliderHidden:NO animated:YES];
+//    } else {
+//        [docViewCtrl setThumbnailSliderHidden:YES animated:YES];
+//    }
 }
 
 
@@ -3441,7 +3439,7 @@ static NSMutableArray* globalSearchResults;
 
 - (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex
 {
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
     int pages = [pdfDoc GetPageCount];
     
@@ -3504,7 +3502,7 @@ static NSMutableArray* globalSearchResults;
 // Return dimensions
 - (NSDictionary<NSString *, NSNumber *> *)getDimensions
 {
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
     PTPage *firstPage = [pdfDoc GetPage:1];
     
@@ -3524,7 +3522,7 @@ static NSMutableArray* globalSearchResults;
 // Jump To Page
 - (void)jumpTo:(int)page_num
 {
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
     [pdfViewCtrl SetCurrentPage:page_num];
 }
 
@@ -3533,7 +3531,7 @@ static NSMutableArray* globalSearchResults;
 // Rotate Page
 - (void)rotate:(BOOL)ccw
 {
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
     
     int page_number = [pdfViewCtrl GetCurrentPage];
@@ -3604,7 +3602,7 @@ static NSMutableArray* globalSearchResults;
 
 - (NSArray<NSDictionary<NSString *, id> *> *)getOutline
 {
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
 
     PTBookmark *root = [pdfDoc GetFirstBookmark];
@@ -3617,7 +3615,7 @@ static NSMutableArray* globalSearchResults;
 
 - (void)addBookmark
 {
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
     
     PTBookmarkManager *bookmarks = [[PTBookmarkManager alloc] init];
@@ -3631,14 +3629,14 @@ static NSMutableArray* globalSearchResults;
 
 - (int)currentPage
 {
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
     return [pdfViewCtrl GetCurrentPage];
 }
 
 
 - (void)changeBackground:(int)r green:(int)g blue:(int)b
 {
-    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
     [pdfViewCtrl SetBackgroundColor:(char)r g:(char)g b:(char)b a:255];
 }
 
@@ -3648,7 +3646,11 @@ static NSMutableArray* globalSearchResults;
     [self setContinuousAnnotationEditing:toggle];
 }
 
+#pragma mark - !Custom CAT
+
 @end
+
+
 
 #pragma mark - RNTPTThumbnailsViewController
 
