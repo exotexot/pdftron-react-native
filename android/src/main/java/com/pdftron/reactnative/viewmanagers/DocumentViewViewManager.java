@@ -19,7 +19,7 @@ import com.pdftron.pdf.utils.PdfViewCtrlSettingsManager;
 import com.pdftron.reactnative.views.DocumentView;
 
 
-// CAT IMPORTS
+// CUSTOM IMPORTS
 import com.facebook.react.bridge.Promise;
 import com.pdftron.pdf.PDFViewCtrl;
 import java.util.ArrayList;
@@ -506,7 +506,7 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
 
 
 
-    // CAT Europe
+    // CUSTOM ACTIONS
 
     public int currentPage(int tag) throws PDFNetException {
         DocumentView documentView = mDocumentViews.get(tag);
