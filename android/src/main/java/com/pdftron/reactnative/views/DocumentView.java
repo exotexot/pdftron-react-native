@@ -2690,66 +2690,65 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
         View v = mPdfViewCtrlTabHostFragment.getView();
         FragmentManager m = mPdfViewCtrlTabHostFragment.getFragmentManager();
 
-        if (v != null) {
-            ThumbnailSlider slider = v.findViewById(R.id.thumbseekbar);
-            slider.setMenuItem(R.drawable.ic_sidebar, ThumbnailSlider.POSITION_LEFT);
-            slider.setMenuItem(R.drawable.ic_settings, ThumbnailSlider.POSITION_RIGHT);
-            slider.setOnMenuItemClickedListener(new ThumbnailSlider.OnMenuItemClickedListener() {
-                @Override
-                public void onMenuItemClicked(int i) {
-                    if (i == ThumbnailSlider.POSITION_LEFT) {
-                        onReceiveNativeEvent("onToggleSidebar", "onToggleSidebar");
-                    } else {
-                        ArrayList<Integer> hiddenViewModeItems = new ArrayList<>();
-                        hiddenViewModeItems.add(ViewModePickerDialogFragment.ViewModePickerItems.ITEM_ID_REFLOW.getValue());
-                        ViewModePickerDialogFragment dialog = ViewModePickerDialogFragment.newInstance(
-                                pdfViewCtrl.getPagePresentationMode(), false, false, 0, hiddenViewModeItems);
-                        dialog.setViewModePickerDialogFragmentListener(new ViewModePickerDialogFragment.ViewModePickerDialogFragmentListener() {
-                            @Override
-                            public void onViewModeSelected(String s) {
-                                mPdfViewCtrlTabHostFragment.onViewModeSelected(s);
-                            }
+        // if (v != null) {
+        //     ThumbnailSlider slider = v.findViewById(R.id.thumbseekbar);
+        //     slider.setMenuItem(R.drawable.ic_sidebar, ThumbnailSlider.POSITION_LEFT);
+        //     slider.setMenuItem(R.drawable.ic_settings, ThumbnailSlider.POSITION_RIGHT);
+        //     slider.setOnMenuItemClickedListener(new ThumbnailSlider.OnMenuItemClickedListener() {
+        //         @Override
+        //         public void onMenuItemClicked(int i) {
+        //             if (i == ThumbnailSlider.POSITION_LEFT) {
+        //                 onReceiveNativeEvent("onToggleSidebar", "onToggleSidebar");
+        //             } else {
+        //                 ArrayList<Integer> hiddenViewModeItems = new ArrayList<>();
+        //                 hiddenViewModeItems.add(ViewModePickerDialogFragment.ViewModePickerItems.ITEM_ID_REFLOW.getValue());
+        //                 ViewModePickerDialogFragment dialog = ViewModePickerDialogFragment.newInstance(
+        //                         pdfViewCtrl.getPagePresentationMode(), false, false, 0, hiddenViewModeItems);
+        //                 dialog.setViewModePickerDialogFragmentListener(new ViewModePickerDialogFragment.ViewModePickerDialogFragmentListener() {
+        //                     @Override
+        //                     public void onViewModeSelected(String s) {
+        //                         mPdfViewCtrlTabHostFragment.onViewModeSelected(s);
+        //                     }
 
-                            @Override
-                            public boolean onViewModeColorSelected(int i) {
-                                return mPdfViewCtrlTabHostFragment.onViewModeColorSelected(i);
-                            }
+        //                     @Override
+        //                     public boolean onViewModeColorSelected(int i) {
+        //                         return mPdfViewCtrlTabHostFragment.onViewModeColorSelected(i);
+        //                     }
 
-                            @Override
-                            public boolean onCustomColorModeSelected(int i, int i1) {
-                                return mPdfViewCtrlTabHostFragment.onCustomColorModeSelected(i, i1);
-                            }
+        //                     @Override
+        //                     public boolean onCustomColorModeSelected(int i, int i1) {
+        //                         return mPdfViewCtrlTabHostFragment.onCustomColorModeSelected(i, i1);
+        //                     }
 
-                            @Override
-                            public void onViewModePickerDialogFragmentDismiss() {
-                                mPdfViewCtrlTabHostFragment.onViewModePickerDialogFragmentDismiss();
+        //                     @Override
+        //                     public void onViewModePickerDialogFragmentDismiss() {
+        //                         mPdfViewCtrlTabHostFragment.onViewModePickerDialogFragmentDismiss();
 
-                                //hideSystemUI();
-                            }
+        //                         //hideSystemUI();
+        //                     }
 
-                            @Override
-                            public int onReflowZoomInOut(boolean b) {
-                                return mPdfViewCtrlTabHostFragment.onReflowZoomInOut(b);
-                            }
+        //                     @Override
+        //                     public int onReflowZoomInOut(boolean b) {
+        //                         return mPdfViewCtrlTabHostFragment.onReflowZoomInOut(b);
+        //                     }
 
-                            @Override
-                            public boolean checkTabConversionAndAlert(int i, boolean b) {
-                                return mPdfViewCtrlTabHostFragment.checkTabConversionAndAlert(i, b);
-                            }
-                        });
-                        dialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.CustomAppTheme);
-                        dialog.show(m, "view_mode_picker");
-                    }
-                }
-            });
-        }
+        //                     @Override
+        //                     public boolean checkTabConversionAndAlert(int i, boolean b) {
+        //                         return mPdfViewCtrlTabHostFragment.checkTabConversionAndAlert(i, b);
+        //                     }
+        //                 });
+        //                 dialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.CustomAppTheme);
+        //                 dialog.show(m, "view_mode_picker");
+        //             }
+        //         }
+        //     });
+        // }
 
     }
 
     protected void hideSystemUI() {
-        final PdfViewCtrlTabFragment currentFragment = getPdfViewCtrlTabFragment();
         View view = mPdfViewCtrlTabHostFragment.getView();
-        if (currentFragment == null || view == null) {
+        if (getPdfViewCtrlTabFragment() == null || view == null) {
             return;
         }
 
