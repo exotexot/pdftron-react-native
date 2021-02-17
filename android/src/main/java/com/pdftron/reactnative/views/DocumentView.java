@@ -204,7 +204,18 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
             setSupportFragmentManager(fragmentManager);
             mFragmentManagerSave = fragmentManager;
             mCacheDir = currentActivity.getCacheDir().getAbsolutePath();
-            mPDFViewCtrlConfig = PDFViewCtrlConfig.getDefaultConfig(currentActivity);
+
+            // CUSTOM ACTION - Changing Background Color
+            PdfViewCtrlSettingsManager.setFollowSystemDarkMode(getContext(), false);
+            int darkBG = android.graphics.Color.rgb(0, 0, 0);
+            int lightBG = android.graphics.Color.rgb(216, 216, 216);
+
+            int nightModeFlags = getContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+
+            mPDFViewCtrlConfig = PDFViewCtrlConfig.getDefaultConfig(currentActivity)
+                    .setClientBackgroundColor(nightModeFlags == Configuration.UI_MODE_NIGHT_YES ? darkBG : lightBG )
+                    .setClientBackgroundColorDark(darkBG);
+
         } else {
             throw new IllegalStateException("FragmentActivity required.");
         }
