@@ -1440,6 +1440,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
         if (getPdfViewCtrl() != null) {
             getPdfViewCtrl().removePageChangeListener(mPageChangeListener);
             getPdfViewCtrl().removeOnCanvasSizeChangeListener(mOnCanvasSizeChangeListener);
+            getPdfViewCtrl().removeThumbAsyncListener(mThumbAsyncListener);
         }
         if (getToolManager() != null) {
             getToolManager().removeAnnotationModificationListener(mAnnotationModificationListener);
@@ -1993,6 +1994,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
 
         getPdfViewCtrl().addPageChangeListener(mPageChangeListener);
         getPdfViewCtrl().addOnCanvasSizeChangeListener(mOnCanvasSizeChangeListener);
+        getPdfViewCtrl().addThumbAsyncListener(mThumbAsyncListener);
 
         getToolManager().addAnnotationModificationListener(mAnnotationModificationListener);
         getToolManager().addAnnotationsSelectionListener(mAnnotationsSelectionListener);
@@ -2688,73 +2690,39 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
 
     // CUSTOM ACTIONS
 
+    private PDFViewCtrl.ThumbAsyncListener mThumbAsyncListener = new PDFViewCtrl.ThumbAsyncListener() {
+        @Override
+        public void onThumbReceived(int i, int[] buf, int width, int height) {
+            try {
+
+                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                bitmap.setPixels(buf, 0, width, 0, 0, width, height);
+
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 10, byteArrayOutputStream);
+                byte[] byteArray = byteArrayOutputStream.toByteArray();
+
+                String base64str = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+                // resolve promise
+                Promise promise = mThumbnailsMap.get(i);
+                if (promise!=null) {
+                    promise.resolve(base64str);
+                }
+            } catch (OutOfMemoryError oom) {
+                // error
+            }
+        }
+    };
+
     public void customInit() throws PDFNetException {
 
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
-        pdfViewCtrl.setPageSpacing(10,10,0,100);
-        pdfViewCtrl.setupThumbnails(false, true, true, 200, 200 * 200 * 500, 0.7);
+        pdfViewCtrl.setPageSpacing(10,10,0,50);
+        pdfViewCtrl.setupThumbnails(false, true, true, 300, 200 * 200 * 500, 0.7);
 
         // Setting Eraser Type
         getToolManager().setEraserType(Eraser.EraserType.INK_ERASER);
-
-        // Replace Buttons in Thumbnail Slider
-        View v = mPdfViewCtrlTabHostFragment.getView();
-        FragmentManager m = mPdfViewCtrlTabHostFragment.getFragmentManager();
-
-        // if (v != null) {
-        //     ThumbnailSlider slider = v.findViewById(R.id.thumbseekbar);
-        //     slider.setMenuItem(R.drawable.ic_sidebar, ThumbnailSlider.POSITION_LEFT);
-        //     slider.setMenuItem(R.drawable.ic_settings, ThumbnailSlider.POSITION_RIGHT);
-        //     slider.setOnMenuItemClickedListener(new ThumbnailSlider.OnMenuItemClickedListener() {
-        //         @Override
-        //         public void onMenuItemClicked(int i) {
-        //             if (i == ThumbnailSlider.POSITION_LEFT) {
-        //                 onReceiveNativeEvent("onToggleSidebar", "onToggleSidebar");
-        //             } else {
-        //                 ArrayList<Integer> hiddenViewModeItems = new ArrayList<>();
-        //                 hiddenViewModeItems.add(ViewModePickerDialogFragment.ViewModePickerItems.ITEM_ID_REFLOW.getValue());
-        //                 ViewModePickerDialogFragment dialog = ViewModePickerDialogFragment.newInstance(
-        //                         pdfViewCtrl.getPagePresentationMode(), false, false, 0, hiddenViewModeItems);
-        //                 dialog.setViewModePickerDialogFragmentListener(new ViewModePickerDialogFragment.ViewModePickerDialogFragmentListener() {
-        //                     @Override
-        //                     public void onViewModeSelected(String s) {
-        //                         mPdfViewCtrlTabHostFragment.onViewModeSelected(s);
-        //                     }
-
-        //                     @Override
-        //                     public boolean onViewModeColorSelected(int i) {
-        //                         return mPdfViewCtrlTabHostFragment.onViewModeColorSelected(i);
-        //                     }
-
-        //                     @Override
-        //                     public boolean onCustomColorModeSelected(int i, int i1) {
-        //                         return mPdfViewCtrlTabHostFragment.onCustomColorModeSelected(i, i1);
-        //                     }
-
-        //                     @Override
-        //                     public void onViewModePickerDialogFragmentDismiss() {
-        //                         mPdfViewCtrlTabHostFragment.onViewModePickerDialogFragmentDismiss();
-
-        //                         //hideSystemUI();
-        //                     }
-
-        //                     @Override
-        //                     public int onReflowZoomInOut(boolean b) {
-        //                         return mPdfViewCtrlTabHostFragment.onReflowZoomInOut(b);
-        //                     }
-
-        //                     @Override
-        //                     public boolean checkTabConversionAndAlert(int i, boolean b) {
-        //                         return mPdfViewCtrlTabHostFragment.checkTabConversionAndAlert(i, b);
-        //                     }
-        //                 });
-        //                 dialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.CustomAppTheme);
-        //                 dialog.show(m, "view_mode_picker");
-        //             }
-        //         }
-        //     });
-        // }
-
     }
 
     protected void hideSystemUI() {
@@ -2859,40 +2827,22 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
 
 
 
-
-    public void toggleSlider(boolean toggle) throws PDFNetException {
-        getPdfViewCtrlTabFragment().setThumbSliderVisible(toggle, true);
-    }
-
-
-
     public void findText(String searchString) throws PDFNetException {
-
-        //hideSystemUI();
-
         if (getPdfViewCtrlTabFragment()!=null) {
-            toggleSlider(false);
             getPdfViewCtrlTabFragment().queryTextSubmit(searchString);
             getPdfViewCtrlTabFragment().setSearchNavButtonsVisible(true);
         }
-
     }
 
 
 
     public void cancelFindText() throws PDFNetException {
-
-
         if (getPdfViewCtrlTabFragment()!=null) {
             getPdfViewCtrlTabFragment().setSearchNavButtonsVisible(false);
             getPdfViewCtrlTabFragment().cancelFindText();
             getPdfViewCtrlTabFragment().exitSearchMode();
         }
-
-        //hideSystemUI();
-
     }
-
 
     public void findTextResult(boolean nextprev) throws PDFNetException {
 
@@ -2901,13 +2851,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
         } else {
             getPdfViewCtrlTabFragment().gotoPreviousSearch();
         }
-
     }
-
-
-
-
-
 
 
 

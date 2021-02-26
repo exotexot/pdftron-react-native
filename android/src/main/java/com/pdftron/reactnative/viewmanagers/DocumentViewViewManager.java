@@ -547,15 +547,6 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
         }
     }
 
-    public void toggleSlider(int tag, boolean toggle) throws PDFNetException {
-        DocumentView documentView = mDocumentViews.get(tag);
-        if (documentView != null) {
-            documentView.toggleSlider(toggle);
-        } else {
-            throw new PDFNetException("", 0L, getName(), "toggleSlider", "Unable to find DocumentView.");
-        }
-    }
-
 
     public ReadableArray search(int tag, String searchString, boolean isCase, boolean isWhole) throws PDFNetException {
         DocumentView documentView = mDocumentViews.get(tag);
@@ -585,17 +576,6 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
             throw new PDFNetException("", 0L, getName(), "getThumbnail", "Unable to find DocumentView.");
         }
     }
-
-
-    public void abortGetThumbnail(int tag) throws PDFNetException {
-        DocumentView documentView = mDocumentViews.get(tag);
-        if (documentView != null) {
-            documentView.abortGetThumbnail();
-        } else {
-            throw new PDFNetException("", 0L, getName(), "abortGetThumb", "Unable to find DocumentView.");
-        }
-    }
-
 
 
     public void findText(int tag, String serachString) throws PDFNetException {

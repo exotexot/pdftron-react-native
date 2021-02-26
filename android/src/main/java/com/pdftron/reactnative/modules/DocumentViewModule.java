@@ -379,6 +379,7 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
 
 
 
+
     // CUSTOM ACTIONS
 
     @ReactMethod
@@ -428,7 +429,6 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
         });
     }
 
-
     @ReactMethod
     public void rotate(final int tag, boolean ccw, final Promise promise) {
         getReactApplicationContext().runOnUiQueueThread(new Runnable() {
@@ -437,24 +437,6 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
 
                 try {
                     mDocumentViewInstance.rotate(tag, ccw);
-                    promise.resolve(null);
-                } catch (Exception ex) {
-                    promise.reject(ex);
-                }
-
-            }
-        });
-    }
-
-
-    @ReactMethod
-    public void toggleSlider(final int tag, boolean toggle, final Promise promise) {
-        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
-            @Override
-            public void run() {
-
-                try {
-                    mDocumentViewInstance.toggleSlider(tag, toggle);
                     promise.resolve(null);
                 } catch (Exception ex) {
                     promise.reject(ex);
@@ -503,22 +485,6 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
             public void run() {
                 try {
                     mDocumentViewInstance.getThumbnail(tag, page, promise);
-                } catch (Exception ex) {
-                    promise.reject(ex);
-                }
-
-            }
-        });
-    }
-
-    @ReactMethod
-    public void abortGetThumbnail(final int tag, final Promise promise) {
-        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mDocumentViewInstance.abortGetThumbnail(tag);
-                    promise.resolve(null);
                 } catch (Exception ex) {
                     promise.reject(ex);
                 }
