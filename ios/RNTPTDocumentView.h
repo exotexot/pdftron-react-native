@@ -361,8 +361,6 @@ static const PTAnnotationToolbarKey PTAnnotationToolbarKeyItems = @"items";
 
 - (void)thumbnailCreated:(RNTPTDocumentView *)sender page:(int)page base64String:(NSString *)base64String;
 
-- (void)toggleSidebar:(RNTPTDocumentView *)sender;
-
 
 
 // Custom Methods
@@ -387,11 +385,7 @@ static const PTAnnotationToolbarKey PTAnnotationToolbarKeyItems = @"items";
 
 - (void)showSettings;
 
-- (void)toggleSlider:(BOOL)toggle;
-
 - (void)getThumbnail:(int)pageNumber completionHandler:(void (^)(NSString * _Nullable base64String))completionHandler;
-
-- (void)abortGetThumbnail;
 
 - (int)currentPage;
 

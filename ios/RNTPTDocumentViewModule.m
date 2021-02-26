@@ -386,20 +386,6 @@ RCT_REMAP_METHOD(findTextIOS,
     }
 }
 
-RCT_REMAP_METHOD(toggleSlider,
-                 toggleSliderForDocumentViewTag:(nonnull NSNumber *)tag
-                 toggle:(BOOL)toggle
-                 resolver:(RCTPromiseResolveBlock)resolve
-                 rejecter:(RCTPromiseRejectBlock)reject)
-{
-    @try {
-        [[self documentViewManager] toggleSliderForDocumentViewTag:tag toggleSlider:toggle];
-        resolve(nil);
-    }
-    @catch (NSException *exception) {
-        reject(@"rotate_failed", @"TOGGLE SLIDER PAGE FAILED MISERABLY", [self errorFromException:exception]);
-    }
-}
 
 RCT_REMAP_METHOD(getDimensions,
                  getDimensionsForDocumentViewTag:(nonnull NSNumber *)tag
@@ -506,20 +492,6 @@ RCT_REMAP_METHOD(getThumbnail,
     }
     @catch (NSException *exception) {
         reject(@"thumbnail_failed", @"THUMBNAILS FAILED MISERABLY", [self errorFromException:exception]);
-    }
-}
-
-RCT_REMAP_METHOD(abortGetThumbnail,
-                 abortGetThumbnailForDocumentViewTag:(nonnull NSNumber *)tag
-                 resolver:(RCTPromiseResolveBlock)resolve
-                 rejecter:(RCTPromiseRejectBlock)reject)
-{
-    @try {
-        [[self documentViewManager] abortGetThumbnailForDocumentViewTag:tag];
-        resolve(nil);
-    }
-    @catch (NSException *exception) {
-        reject(@"abort_get_thumb", @"ABORT THUMBNAILS FAILED MISERABLY", [self errorFromException:exception]);
     }
 }
 

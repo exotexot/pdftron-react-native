@@ -77,8 +77,6 @@
 
 - (void)getThumbnailForDocumentViewTag:(NSNumber *)tag getThumbnail:(int)pageNumber completionHandler:(void (^)(NSString * _Nullable baser64String))completionHandler;
 
-- (void)abortGetThumbnailForDocumentViewTag:(NSNumber *)tag;
-
 - (NSArray<NSDictionary<NSString *, id> *> *)getOutlineForDocumentViewTag:(NSNumber *)tag;
 
 - (int)currentPageForDocumentViewTag:(NSNumber *)tag;

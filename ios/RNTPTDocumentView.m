@@ -152,7 +152,7 @@ NS_ASSUME_NONNULL_END
         [self applyLayoutMode:self.documentViewController.pdfViewCtrl];
     }
     
-    //[self customInit];
+    [self customInit];
 }
 
 - (void)setDocument:(NSString *)document
@@ -3177,68 +3177,19 @@ NS_ASSUME_NONNULL_END
 
 
 
-
-
-
-
-
 #pragma mark - Custom CAT
 
 static NSMutableArray* globalSearchResults;
 
-- (void)toggleSidebar
-{
-//    if([self.delegate respondsToSelector:@selector(toggleSidebar:)]) {
-//        [self.delegate toggleSidebar:self];
-//    }
-}
 
 - (void)customInit
 {
     PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
-    [pdfViewCtrl SetPageSpacing:10 vert_col_space:10 horiz_pad:0 vert_pad:100];
+    [pdfViewCtrl SetPageSpacing:10 vert_col_space:10 horiz_pad:0 vert_pad:50];
     [pdfViewCtrl SetupThumbnails:YES generate_at_runtime:YES use_disk_cache:YES thumb_max_side_length:300 max_abs_cache_size:300*300*500 max_perc_cache_size:0.7];
-    
-    
-    // Gesture Control
-    self.documentViewController.hidesControlsOnTap = NO;
 
-
-    // Settings Button
-    self.documentViewController.viewerSettingsButtonHidden = YES;
-    self.documentViewController.settingsViewController.popoverPresentationController.permittedArrowDirections = (UIPopoverArrowDirectionUp|UIPopoverArrowDirectionDown);
-    self.documentViewController.thumbnailSliderController.trailingToolbarItem = self.documentViewController.settingsButtonItem;
-    
-    self.documentViewController.settingsButtonItem.tintColor = [UIColor colorWithRed: 0.98 green: 0.46 blue: 0.08 alpha: 1.00];
-    
     globalSearchResults = [NSMutableArray array];
-    
-    
-    
-    // Custom Sidebar Button
-    UIImage *sidebarIcon = [UIImage imageNamed:@"sidebarIcon"];
-    UIBarButtonItem *sidebarButton = [[UIBarButtonItem alloc] initWithImage:sidebarIcon
-                                                                  style:UIBarButtonItemStylePlain
-                                                                 target:self
-                                                                 action:@selector(toggleSidebar)];
-    
-    sidebarButton.tintColor = [UIColor colorWithRed: 0.98 green: 0.46 blue: 0.08 alpha: 1.00];
-    
-    UIImage *eyeIcon = [UIImage imageNamed:@"eyeIcon"];
-    UIBarButtonItem *eyeButton = [[UIBarButtonItem alloc] initWithImage:eyeIcon
-                                                                  style:UIBarButtonItemStylePlain
-                                                                 target:self
-                                                                 action:@selector(toggleSidebar)];
-   
-                               
-    // UIBarButtonItem *testButton = [[UIBarButtonItem alloc] initWithTitle:@"SIDEBAR" style:UIBarButtonItemStylePlain target:self action:@selector(toggleSidebar)];
-    self.documentViewController.thumbnailSliderController.leadingToolbarItem = sidebarButton;
-    
-    
-    // Force one refresh after document loaded
-    [pdfViewCtrl Update:YES];
 }
-
 
 
 
@@ -3258,15 +3209,6 @@ static NSMutableArray* globalSearchResults;
     
 }
 
-- (void)abortGetThumbnail
-{
-    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
-    [pdfViewCtrl ClearThumbCache];
-    [pdfViewCtrl CancelAllThumbRequests];
-}
-
-
-
 
 // Custom Search
 - (NSArray<NSDictionary<NSString *, NSString *> *> *)search:(NSString *)searchString case:(BOOL)isCase whole:(BOOL)isWhole
@@ -3275,7 +3217,6 @@ static NSMutableArray* globalSearchResults;
     PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
     
     PTTextSearch *search = [[PTTextSearch alloc] init];
-
     
     // Whack mode setting
     unsigned int mode = 0;
@@ -3289,11 +3230,8 @@ static NSMutableArray* globalSearchResults;
         mode = e_pthighlight|e_ptambient_string;
     }
     
-
-    
     NSString *pattern = searchString;
     [search Begin:pdfDoc pattern:pattern mode:mode start_page:-1 end_page:-1];
-    
     
     NSMutableArray *searchResults = [NSMutableArray new];
     bool moreToFind = true;
@@ -3364,76 +3302,12 @@ static NSMutableArray* globalSearchResults;
 
 
 
-- (void)findTextIOS:(NSString *)searchString direction:(BOOL)direction
+- (void)findTextIOS
 {
-//    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
-//    [pdfViewCtrl FindText:searchString MatchCase:NO MatchWholeWord:NO SearchUp:direction RegExp:NO];
+    PTDocumentBaseViewController *current = self.currentDocumentViewController;
+    [current showSearchViewController];
 }
 
-
-
-
-- (void)toggleSlider:(BOOL)toggle;
-{
-//    PTDocumentViewController *docViewCtrl = self.documentViewController;
-//
-//    if (toggle) {
-//        [docViewCtrl setThumbnailSliderHidden:NO animated:YES];
-//    } else {
-//        [docViewCtrl setThumbnailSliderHidden:YES animated:YES];
-//    }
-}
-
-
-
-
-//- (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex
-//{
-//    PTPDFViewCtrl *pdfViewCtrl = self.pdfViewCtrl;
-//    PTPDFDoc *pdfDoc = [pdfViewCtrl GetDoc];
-//
-//    int pages = [pdfDoc GetPageCount];
-//
-//    if (pages < 2) return;
-//
-//    NSURL *url = [NSURL URLWithString:[@"data:image/png;base64," stringByAppendingString:base64String]];
-//    NSData *imageData = [NSData dataWithContentsOfURL:url];
-//
-//
-//    int maxImageWidth = 120;
-//    int maxImageHeight = 37;
-//
-//    int offsetTop = 25;
-//    int offsetHorizontal = 60;
-//
-//
-//    for (int page = 2; page <= pages; page++)
-//    {
-//        UIImage *image = [UIImage imageWithData:imageData];
-//        UIImageView * imageView = [[UIImageView alloc] initWithImage:image];
-//        imageView.frame = CGRectMake(0, 0, maxImageWidth, maxImageHeight);
-//        imageView.contentMode = UIViewContentModeScaleAspectFit;
-//
-//        UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, maxImageWidth, maxImageHeight)];
-////        view.backgroundColor = [UIColor greenColor];
-//        [view addSubview:imageView];
-//
-//
-//        PTPage *pageObject = [pdfDoc GetPage:page];
-//
-//        double width = [pageObject GetPageWidth:e_pttrim];
-//        double height = [pageObject GetPageHeight:e_pttrim];
-//
-//        if (isDuplex) {
-//            PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0+offsetHorizontal y1:height-maxImageHeight-offsetTop x2:maxImageWidth+offsetHorizontal y2:height-offsetTop];
-//            PTPDFRect *topRight = [[PTPDFRect alloc] initWithX1:(width - maxImageWidth - offsetHorizontal) y1:height-maxImageHeight-offsetTop x2:width-offsetHorizontal y2:height-offsetTop];
-//            [pdfViewCtrl addFloatingView:view toPage:page withPageRect: (page % 2 ? topRight : topLeft) noZoom:NO];
-//        } else {
-//            PTPDFRect *topLeft = [[PTPDFRect alloc] initWithX1:0+offsetHorizontal y1:height-maxImageHeight-offsetTop x2:maxImageWidth+offsetHorizontal y2:height-offsetTop];
-//            [pdfViewCtrl addFloatingView:view toPage:page withPageRect:topLeft noZoom:NO];
-//        }
-//    }
-//}
 
 
 

@@ -892,17 +892,6 @@ RCT_CUSTOM_VIEW_PROPERTY(hideThumbnailFilterModes, NSArray, RNTPTDocumentView)
 }
 
 
-- (void)toggleSliderForDocumentViewTag:(NSNumber *)tag toggleSlider:(BOOL)toggle
-{
-    RNTPTDocumentView *documentView = self.documentViews[tag];
-    if (documentView) {
-        return [documentView toggleSlider:toggle];
-    } else {
-        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
-    }
-}
-
-
 - (void)getThumbnailForDocumentViewTag:(NSNumber *)tag getThumbnail:(int)pageNumber completionHandler:(void (^)(NSString * _Nullable base64string))completionHandler
 {
     RNTPTDocumentView *documentView = self.documentViews[tag];
@@ -917,17 +906,6 @@ RCT_CUSTOM_VIEW_PROPERTY(hideThumbnailFilterModes, NSArray, RNTPTDocumentView)
     }
 }
 
-- (void)abortGetThumbnailForDocumentViewTag:(NSNumber *)tag
-{
-    RNTPTDocumentView *documentView = self.documentViews[tag];
-    if (documentView) {
-        return [documentView abortGetThumbnail];
-    } else {
-        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
-    }
-}
-
-
 
 - (int)currentPageForDocumentViewTag:(NSNumber *)tag
 {
@@ -938,8 +916,6 @@ RCT_CUSTOM_VIEW_PROPERTY(hideThumbnailFilterModes, NSArray, RNTPTDocumentView)
         @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
     }
 }
-
-
 
 
 - (void)changeBackgroundForDocumentViewTag:(NSNumber *)tag changeBackground:(int)r green:(int)g blue:(int)b
