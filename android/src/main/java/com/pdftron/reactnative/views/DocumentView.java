@@ -1539,7 +1539,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView {
 
             PDFDoc pdfDoc = pdfViewCtrl.getDoc();
             if (null == options || !options.hasKey(KEY_annotList)) {
-                FDFDoc fdfDoc = pdfDoc.fdfExtract(PDFDoc.e_both);
+                FDFDoc fdfDoc = pdfDoc.fdfExtract(5);
                 return fdfDoc.saveAsXFDF();
             } else {
                 ReadableArray arr = options.getArray(KEY_annotList);

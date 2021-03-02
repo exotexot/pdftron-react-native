@@ -748,7 +748,7 @@ static NSMutableArray* globalSearchResults;
         shouldUnlock = YES;
         
         if (!options || !options[@"annotList"]) {
-            PTFDFDoc *fdfDoc = [[pdfViewCtrl GetDoc] FDFExtract:e_ptboth];
+            PTFDFDoc *fdfDoc = [[pdfViewCtrl GetDoc] FDFExtract:5];
             return [fdfDoc SaveAsXFDFToString];
         } else {
             PTVectorAnnot *annots = [[PTVectorAnnot alloc] init];
