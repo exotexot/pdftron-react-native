@@ -2722,7 +2722,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
         pdfViewCtrl.setupThumbnails(false, true, true, 300, 200 * 200 * 500, 0.7);
 
         // Setting Eraser Type
-        getToolManager().setEraserType(Eraser.EraserType.INK_ERASER);
+        getToolManager().setEraserType(Eraser.EraserType.HYBRID_ERASER);
     }
 
     protected void hideSystemUI() {
