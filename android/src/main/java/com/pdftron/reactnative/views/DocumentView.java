@@ -2196,7 +2196,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
 
             PDFDoc pdfDoc = pdfViewCtrl.getDoc();
             if (null == options || !options.hasKey(KEY_ANNOTATION_LIST)) {
-                FDFDoc fdfDoc = pdfDoc.fdfExtract(PDFDoc.e_both);
+                FDFDoc fdfDoc = pdfDoc.fdfExtract(5); // 5 = only annotations no links
                 return fdfDoc.saveAsXFDF();
             } else {
                 ReadableArray arr = options.getArray(KEY_ANNOTATION_LIST);

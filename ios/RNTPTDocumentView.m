@@ -901,7 +901,7 @@ NS_ASSUME_NONNULL_END
         shouldUnlock = YES;
         
         if (!options || !options[PTAnnotListArgumentKey]) {
-            PTFDFDoc *fdfDoc = [[pdfViewCtrl GetDoc] FDFExtract:e_ptannots_only_no_links];
+            PTFDFDoc *fdfDoc = [[pdfViewCtrl GetDoc] FDFExtract:5]; // e_ptannots_only_no_links = 5
             return [fdfDoc SaveAsXFDFToString];
         } else {
             PTVectorAnnot *annots = [[PTVectorAnnot alloc] init];
