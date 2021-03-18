@@ -404,6 +404,7 @@ export default class DocumentView extends PureComponent {
 		return Promise.resolve()
 	}
 
+
 	// FindText
 	findText = (searchString) => {
 		// console.log("Search event triggered")
@@ -540,6 +541,18 @@ export default class DocumentView extends PureComponent {
 		}
 		return Promise.resolve()
 	}
+
+
+	// Set Color Mode
+	setColorMode = (mode) => {
+		// console.log("Search event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.setColorMode(tag, mode)
+		}
+		return Promise.resolve()
+	}
+	
 
 	// continousAnnot
 	setContinuous = (toggle) => {

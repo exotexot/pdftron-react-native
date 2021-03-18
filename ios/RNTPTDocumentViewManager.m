@@ -929,6 +929,16 @@ RCT_CUSTOM_VIEW_PROPERTY(hideThumbnailFilterModes, NSArray, RNTPTDocumentView)
 }
 
 
+- (void)setColorModeForDocumentViewTag:(NSNumber *)tag setColorMode:(NSString *)mode;
+{
+    RNTPTDocumentView *documentView = self.documentViews[tag];
+    if (documentView) {
+        return [documentView setColorMode:mode];
+    } else {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
+    }
+}
+
 
 - (void)setContinuousForDocumentViewTag:(NSNumber *)tag setContinuous:(BOOL)toggle
 {

@@ -3310,7 +3310,6 @@ static NSMutableArray* globalSearchResults;
 
 
 
-
 - (void)appendSchoolLogo:(NSString *)base64String duplex:(BOOL)isDuplex
 {
     PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
@@ -3512,6 +3511,28 @@ static NSMutableArray* globalSearchResults;
 {
     PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
     [pdfViewCtrl SetBackgroundColor:(char)r g:(char)g b:(char)b a:255];
+}
+
+
+- (void)setColorMode:(NSString *)mode
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    
+    if([mode isEqualToString:@"dark"]) {
+        [pdfViewCtrl SetColorPostProcessMode:e_ptpostprocess_night_mode];
+    }
+    else if([mode isEqualToString:@"sepia"]) {
+        UIColor *lightBrown = [UIColor colorWithRed: 0.96 green: 0.88 blue: 0.79 alpha: 1.00];
+        UIColor *darkBrown = [UIColor colorWithRed: 0.24 green: 0.15 blue: 0.04 alpha: 1.00];
+        
+        [pdfViewCtrl SetColorPostProcessMode:e_ptpostprocess_gradient_map];
+        [pdfViewCtrl SetColorPostProcessColors:lightBrown black_color:darkBrown];
+    }
+    else {
+        [pdfViewCtrl SetColorPostProcessMode:e_ptpostprocess_none];
+    }
+    
+    [pdfViewCtrl Update:YES];
 }
 
 

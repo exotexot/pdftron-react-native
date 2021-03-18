@@ -527,6 +527,21 @@ RCT_REMAP_METHOD(changeBackground,
     }
 }
 
+RCT_REMAP_METHOD(setColorMode,
+                 setColorModeForDocumentViewTag:(nonnull NSNumber *)tag
+                 mode:(NSString *)mode
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        [[self documentViewManager] setColorModeForDocumentViewTag:tag setColorMode:mode];
+        resolve(nil);
+    }
+    @catch (NSException *exception) {
+        reject(@"changeBackground_failed", @"SET COLOR MODE FAILED MISERABLY", [self errorFromException:exception]);
+    }
+}
+
 RCT_REMAP_METHOD(setContinuous,
                  setContinuousForDocumentViewTag:(nonnull NSNumber *)tag
                  toggle:(int)toggle
@@ -541,7 +556,6 @@ RCT_REMAP_METHOD(setContinuous,
         reject(@"changeBackground_failed", @"CHANGE BACKRGOUND FAILED MISERABLY", [self errorFromException:exception]);
     }
 }
-
 
 
 @end

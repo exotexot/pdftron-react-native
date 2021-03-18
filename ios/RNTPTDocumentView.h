@@ -391,6 +391,8 @@ static const PTAnnotationToolbarKey PTAnnotationToolbarKeyItems = @"items";
 
 - (void)changeBackground:(int)r green:(int)g blue:(int)b;
 
+- (void)setColorMode:(NSString *)mode;
+
 - (void)setContinuous:(BOOL)toggle;
 
 @end
