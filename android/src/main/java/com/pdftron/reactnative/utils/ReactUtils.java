@@ -26,14 +26,14 @@ public class ReactUtils {
 
     private static final String TAG = ReactUtils.class.getName();
 
-    public static Uri getUri(Context context, String path, boolean isBase64) {
+    public static Uri getUri(Context context, String path, boolean isBase64, String base64Extension) {
         if (context == null || path == null) {
             return null;
         }
         try {
             if (isBase64) {
                 byte[] data = Base64.decode(path, Base64.DEFAULT);
-                File tempFile = File.createTempFile("tmp", ".pdf");
+                File tempFile = File.createTempFile("tmp", base64Extension);
                 FileOutputStream fos = null;
                 try {
                     fos = new FileOutputStream(tempFile);
@@ -61,13 +61,15 @@ public class ReactUtils {
                 fileUri = Uri.fromFile(file);
             } else if (URLUtil.isHttpUrl(path) || URLUtil.isHttpsUrl(path)) {
                 // this is a link uri, let's encode the file name
-                String filename = FilenameUtils.getName(path);
-                if (filename.contains("?")) {
-                    filename = filename.substring(0, filename.indexOf("?")); // remove query params
+                if (path.contains(" ")) {
+                    String filename = FilenameUtils.getName(path);
+                    if (filename.contains("?")) {
+                        filename = filename.substring(0, filename.indexOf("?")); // remove query params
+                    }
+                    String encodedName = URLEncoder.encode(filename, "UTF-8").replace("+", "%20");
+                    String newUrl = path.replace(filename, encodedName);
+                    return Uri.parse(newUrl);
                 }
-                String encodedName = URLEncoder.encode(filename, "UTF-8").replace("+", "%20");
-                String newUrl = path.replace(filename, encodedName);
-                return Uri.parse(newUrl);
             }
             return fileUri;
         } catch (Exception ex) {

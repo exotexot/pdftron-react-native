@@ -43,7 +43,7 @@ static NSString * const PTRectangleToolButtonKey = @"rectangleToolButton";
 static NSString * const PTEllipseToolButtonKey = @"ellipseToolButton";
 static NSString * const PTPolygonToolButtonKey = @"polygonToolButton";
 static NSString * const PTCloudToolButtonKey = @"cloudToolButton";
-
+static NSString * const PTEditToolButtonKey = @"editToolButton";
 
 static NSString * const PTAnnotationEditToolKey = @"AnnotationEdit";
 static NSString * const PTAnnotationCreateStickyToolKey = @"AnnotationCreateSticky";
@@ -118,6 +118,7 @@ static NSString * const PTAnnotationIdKey = @"id";
 static NSString * const PTAnnotationPageNumberKey = @"pageNumber";
 static NSString * const PTAnnotationFlagKey = @"flag";
 static NSString * const PTAnnotationFlagValueKey = @"flagValue";
+static NSString * const PTAnnotationTypeKey = @"type";
 
 static NSString * const PTContentRectAnnotationPropertyKey = @"contentRect";
 static NSString * const PTContentsAnnotationPropertyKey = @"contents";
@@ -127,11 +128,15 @@ static NSString * const PTTitleAnnotationPropertyKey = @"title";
 static NSString * const PTLinkPressLinkAnnotationKey = @"linkPress";
 static NSString * const PTURILinkAnnotationKey = @"URI";
 static NSString * const PTURLLinkAnnotationKey = @"url";
-static NSString * const PTDataLinkAnnotationKey = @"data";
-static NSString * const PTActionLinkAnnotationKey = @"action";
+
+static NSString * const PTStickyNoteShowPopUpKey = @"stickyNoteShowPopUp";
+
+static NSString * const PTDataBehaviorKey = @"data";
+static NSString * const PTActionBehaviorKey = @"action";
 
 static NSString * const PTStyleMenuItemTitleKey = @"Style";
 static NSString * const PTNoteMenuItemTitleKey = @"Note";
+static NSString * const PTCommentsMenuItemTitleKey = @"Comments";
 static NSString * const PTCopyMenuItemTitleKey = @"Copy";
 static NSString * const PTDeleteMenuItemTitleKey = @"Delete";
 static NSString * const PTTypeMenuItemTitleKey = @"Type";
@@ -173,8 +178,20 @@ static NSString * const PTRectY2Key = @"y2";
 static NSString * const PTRectWidthKey = @"width";
 static NSString * const PTRectHeightKey = @"height";
 
+static NSString * const PTScrollHorizontalKey = @"horizontal";
+static NSString * const PTScrollVerticalKey = @"vertical";
+
 static NSString * const PTFormFieldNameKey = @"fieldName";
 static NSString * const PTFormFieldValueKey = @"fieldValue";
+static NSString * const PTFormFieldTypeKey = @"fieldType";
+
+static NSString * const PTFieldTypeUnknownKey = @"unknown";
+static NSString * const PTFieldTypeButtonKey = @"button";
+static NSString * const PTFieldTypeCheckboxKey = @"checkbox";
+static NSString * const PTFieldTypeRadioKey = @"radio";
+static NSString * const PTFieldTypeTextKey = @"text";
+static NSString * const PTFieldTypeChoiceKey = @"choice";
+static NSString * const PTFieldTypeSignatureKey = @"signature";
 
 // Default annotation toolbar names.
 typedef NSString * PTDefaultAnnotationToolbarKey;
@@ -186,6 +203,7 @@ static const PTDefaultAnnotationToolbarKey PTAnnotationToolbarFillAndSign = @"PD
 static const PTDefaultAnnotationToolbarKey PTAnnotationToolbarPrepareForm = @"PDFTron_Prepare_Form";
 static const PTDefaultAnnotationToolbarKey PTAnnotationToolbarMeasure = @"PDFTron_Measure";
 static const PTDefaultAnnotationToolbarKey PTAnnotationToolbarPens = @"PDFTron_Pens";
+static const PTDefaultAnnotationToolbarKey PTAnnotationToolbarRedaction = @"PDFTron_Redact";
 static const PTDefaultAnnotationToolbarKey PTAnnotationToolbarFavorite = @"PDFTron_Favorite";
 
 // Custom annotation toolbar keys.
@@ -224,6 +242,8 @@ static const PTAnnotationToolbarKey PTAnnotationToolbarKeyItems = @"items";
 
 - (void)toolChanged:(RNTPTDocumentView *)sender previousTool:(NSString *)previousTool tool:(NSString *)tool;
 
+- (void)behaviorActivated:(RNTPTDocumentView *)sender action:(NSString *)action data:(NSDictionary *)data;
+
 @end
 
 @interface RNTPTDocumentView : UIView
@@ -255,6 +275,7 @@ static const PTAnnotationToolbarKey PTAnnotationToolbarKeyItems = @"items";
 @property (nonatomic, copy, nullable) NSString *password;
 @property (nonatomic, copy, nullable) NSString *document;
 @property (nonatomic, getter=isBase64String) BOOL base64String;
+@property (nonatomic, copy, nullable) NSString *base64Extension;
 @property (nonatomic) int initialPageNumber;
 @property (nonatomic) int pageNumber;
 @property (nonatomic, assign) BOOL showNavButton;
@@ -311,6 +332,12 @@ static const PTAnnotationToolbarKey PTAnnotationToolbarKeyItems = @"items";
 
 @property (nonatomic, copy, nullable) NSArray<NSString *> *hideThumbnailFilterModes;
 
+@property (nonatomic) double horizontalScrollPos;
+@property (nonatomic) double verticalScrollPos;
+
+@property (nonatomic) double canvasWidth;
+@property (nonatomic) double canvasHeight;
+
 #pragma mark - Methods
 
 - (void)setToolMode:(NSString *)toolMode;
@@ -337,6 +364,8 @@ static const PTAnnotationToolbarKey PTAnnotationToolbarKeyItems = @"items";
 
 - (void)setValuesForFields:(NSDictionary<NSString *, id> *)map;
 
+- (NSDictionary *)getField:(NSString *)fieldName;
+
 - (void)setFlagsForAnnotations:(NSArray *)annotationFlagList;
 
 - (void)selectAnnotation:(NSString *)annotationId pageNumber:(NSInteger)pageNumber;
@@ -350,6 +379,10 @@ static const PTAnnotationToolbarKey PTAnnotationToolbarKeyItems = @"items";
 - (void)closeAllTabs;
 
 - (double)getZoom;
+
+- (NSDictionary<NSString *, NSNumber *> *)getScrollPos;
+
+- (NSDictionary<NSString *, NSNumber *> *)getCanvasSize;
 
 - (void)importAnnotationCommand:(NSString *)xfdfCommand initialLoad:(BOOL)initialLoad;
 
