@@ -408,6 +408,192 @@ export default class DocumentView extends PureComponent {
   _setNativeRef = (ref) => {
     this._viewerRef = ref;
   };
+  
+  // Custom Search
+	search = (searchString, isCase, isWhole) => {
+		// console.log("Search event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.search(tag, searchString, isCase, isWhole)
+		}
+		return Promise.resolve()
+	}
+
+	// Clear Search
+	clearSearch = () => {
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.clearSearch(tag)
+		}
+		return Promise.resolve()
+	}
+
+	// FindText
+	findTextIOS = () => {
+		// console.log("Search event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.findTextIOS(tag)
+		}
+		return Promise.resolve()
+	}
+
+	// FindText
+	findText = (searchString) => {
+		// console.log("Search event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.findText(tag, searchString)
+		}
+		return Promise.resolve()
+	}
+
+	// FindText
+	cancelFindText = () => {
+		// console.log("Search event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.cancelFindText(tag)
+		}
+		return Promise.resolve()
+	}
+
+	findTextResult = (nextprev) => {
+		// console.log("Search event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.findTextResult(tag, nextprev)
+		}
+		return Promise.resolve()
+	}
+
+	// getDimensions
+	getDimensions = () => {
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.getDimensions(tag)
+		}
+		return Promise.resolve()
+	}
+
+	// jumpTo
+	jumpTo = (page) => {
+		// console.log("Jump event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.jumpTo(tag, page)
+		}
+		return Promise.resolve()
+	}
+
+	// Append School Logo
+	appendSchoolLogo = (base64String, duplex) => {
+		// console.log("Append School Logo event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.appendSchoolLogo(tag, base64String, duplex)
+		}
+		return Promise.resolve()
+	}
+
+	// Rotate manager
+	rotate = (ccw) => {
+		// console.log("Rotate Page event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.rotate(tag, ccw)
+		}
+		return Promise.resolve()
+	}
+
+	// get Outline
+	getOutline = () => {
+		// console.log("Outline event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.getOutline(tag)
+		}
+		return Promise.resolve()
+	}
+
+	// Bookmark
+	addBookmark = () => {
+		// console.log("Outline event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.addBookmark(tag)
+		}
+		return Promise.resolve()
+	}
+
+	// Slider Toggle
+	toggleSlider = (bool) => {
+		// console.log("Show Slider event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.toggleSlider(tag, bool)
+		}
+		return Promise.resolve()
+	}
+
+	getThumbnail = (page) => {
+		// console.log("Thumbnails event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.getThumbnail(tag, page)
+		}
+		return Promise.resolve()
+	}
+
+	// Abort get thumbnail
+	abortGetThumbnail = () => {
+		// console.log("Thumbnails event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.abortGetThumbnail(tag)
+		}
+		return Promise.resolve()
+	}
+
+	// Current Page Test
+	currentPage = () => {
+		// console.log("Current event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.currentPage(tag)
+		}
+		return Promise.resolve()
+	}
+
+	// Current Page Test
+	changeBackground = (r, g, b) => {
+		// console.log("Current event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.changeBackground(tag, r, g, b)
+		}
+		return Promise.resolve()
+	}
+
+	// Set Color Mode
+	setColorMode = (mode) => {
+		// console.log("Search event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.setColorMode(tag, mode)
+		}
+		return Promise.resolve()
+	}
+
+	// continousAnnot
+	setContinuous = (toggle) => {
+		// console.log("Current event triggered")
+		const tag = findNodeHandle(this._viewerRef)
+		if (tag != null) {
+			return DocumentViewManager.setContinuous(tag, toggle)
+		}
+		return Promise.resolve()
+	}
 
   render() {
     return (
