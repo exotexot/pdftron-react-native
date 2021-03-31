@@ -333,6 +333,10 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
         mBuilder = mBuilder.showBottomToolbar(bottomToolbarEnabled);
     }
 
+    public void setDocumentSliderEnabled(boolean documentSliderEnabled) {
+        mBuilder = mBuilder.showDocumentSlider(documentSliderEnabled);
+    }
+
     public void setPageIndicatorEnabled(boolean pageIndicatorEnabled) {
         mBuilder = mBuilder.showPageNumberIndicator(pageIndicatorEnabled);
     }
@@ -367,29 +371,44 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
                 mode = PDFViewCtrl.PageViewMode.ZOOM;
             }
             if (mode != null) {
-                mPDFViewCtrlConfig.setPageViewMode(mode);
+                if (getPdfViewCtrl() != null) {
+                    getPdfViewCtrl().setPageViewMode(mode);
+                } else {
+                    mPDFViewCtrlConfig.setPageViewMode(mode);
+                }
             }
         }
     }
 
     public void setLayoutMode(String layoutMode) {
         String mode = null;
+        PDFViewCtrl.PagePresentationMode presentationMode = null;
+
         if (LAYOUT_MODE_SINGLE.equals(layoutMode)) {
             mode = PdfViewCtrlSettingsManager.KEY_PREF_VIEWMODE_SINGLEPAGE_VALUE;
+            presentationMode = PDFViewCtrl.PagePresentationMode.SINGLE;
         } else if (LAYOUT_MODE_CONTINUOUS.equals(layoutMode)) {
             mode = PdfViewCtrlSettingsManager.KEY_PREF_VIEWMODE_CONTINUOUS_VALUE;
+            presentationMode = PDFViewCtrl.PagePresentationMode.SINGLE_CONT;
         } else if (LAYOUT_MODE_FACING.equals(layoutMode)) {
             mode = PdfViewCtrlSettingsManager.KEY_PREF_VIEWMODE_FACING_VALUE;
+            presentationMode = PDFViewCtrl.PagePresentationMode.FACING;
         } else if (LAYOUT_MODE_FACING_CONTINUOUS.equals(layoutMode)) {
             mode = PdfViewCtrlSettingsManager.KEY_PREF_VIEWMODE_FACING_CONT_VALUE;
+            presentationMode = PDFViewCtrl.PagePresentationMode.FACING_CONT;
         } else if (LAYOUT_MODE_FACING_COVER.equals(layoutMode)) {
             mode = PdfViewCtrlSettingsManager.KEY_PREF_VIEWMODE_FACINGCOVER_VALUE;
+            presentationMode = PDFViewCtrl.PagePresentationMode.FACING_COVER;
         } else if (LAYOUT_MODE_FACING_COVER_CONTINUOUS.equals(layoutMode)) {
             mode = PdfViewCtrlSettingsManager.KEY_PREF_VIEWMODE_FACINGCOVER_CONT_VALUE;
+            presentationMode = PDFViewCtrl.PagePresentationMode.FACING_COVER_CONT;
         }
         Context context = getContext();
-        if (mode != null && context != null) {
+        if (mode != null && context != null && presentationMode != null) {
             PdfViewCtrlSettingsManager.updateViewMode(context, mode);
+            if (getPdfViewCtrl() != null) {
+                getPdfViewCtrl().setPagePresentationMode(presentationMode);
+            }
         }
     }
 
@@ -1628,15 +1647,15 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
             WritableMap annotationData = getAnnotationData(entry.getKey(), entry.getValue());
 
             if (annotationData != null) {
-                annots.pushMap(annotationData);
                 if (overrideAction && isOverrideAction(KEY_CONFIG_STICKY_NOTE_SHOW_POP_UP)) {
+                    WritableMap annotationDataCopy = annotationData.copy();
                     try {
                         if (entry.getKey().getType() == Annot.e_Text) {
                             WritableMap params = Arguments.createMap();
 
                             params.putString(ON_BEHAVIOR_ACTIVATED, ON_BEHAVIOR_ACTIVATED);
                             params.putString(KEY_ACTION, KEY_CONFIG_STICKY_NOTE_SHOW_POP_UP);
-                            params.putMap(KEY_DATA, annotationData);
+                            params.putMap(KEY_DATA, annotationDataCopy);
 
                             onReceiveNativeEvent(params);
                         }
@@ -1644,6 +1663,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
                         e.printStackTrace();
                     }
                 }
+
+                annots.pushMap(annotationData);
             }
         }
         return annots;

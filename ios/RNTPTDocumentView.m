@@ -22,7 +22,7 @@ static BOOL RNTPT_addMethod(Class cls, SEL selector, void (^block)(id))
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface RNTPTDocumentView () <PTTabbedDocumentViewControllerDelegate, RNTPTDocumentViewControllerDelegate, RNTPTDocumentControllerDelegate, PTCollaborationServerCommunication, RNTPTNavigationControllerDelegate>
+@interface RNTPTDocumentView () <PTTabbedDocumentViewControllerDelegate, RNTPTDocumentViewControllerDelegate, RNTPTDocumentControllerDelegate, PTCollaborationServerCommunication, RNTPTNavigationControllerDelegate, PTBookmarkViewControllerDelegate>
 
 @property (nonatomic, strong, nullable) UIViewController *viewController;
 
@@ -54,6 +54,8 @@ NS_ASSUME_NONNULL_END
     
     _bottomToolbarEnabled = YES;
     _hideToolbarsOnTap = YES;
+    
+    _documentSliderEnabled = YES;
     
     _base64String = NO;
     _base64Extension = @".pdf";
@@ -1410,6 +1412,20 @@ NS_ASSUME_NONNULL_END
     [self applyViewerSettings];
 }
 
+- (void)setTopAppNavBarRightBar:(NSArray<NSString *> *)topAppNavBarRightBar
+{
+    _topAppNavBarRightBar = [topAppNavBarRightBar copy];
+    
+    [self applyViewerSettings];
+}
+
+- (void)setBottomToolbar:(NSArray<NSString *> *)bottomToolbar
+{
+    _bottomToolbar = [bottomToolbar copy];
+    
+    [self applyViewerSettings];
+}
+
 - (void)setHideAnnotationToolbarSwitcher:(BOOL)hideAnnotationToolbarSwitcher
 {
     _hideAnnotationToolbarSwitcher = hideAnnotationToolbarSwitcher;
@@ -1471,6 +1487,15 @@ NS_ASSUME_NONNULL_END
 - (void)setHideToolbarsOnTap:(BOOL)hideToolbarsOnTap
 {
     _hideToolbarsOnTap = hideToolbarsOnTap;
+    
+    [self applyViewerSettings];
+}
+
+#pragma mark - Document Slider
+
+- (void)setDocumentSliderEnabled:(BOOL)documentSliderEnabled
+{
+    _documentSliderEnabled = documentSliderEnabled;
     
     [self applyViewerSettings];
 }
@@ -1586,6 +1611,9 @@ NS_ASSUME_NONNULL_END
     
     documentViewController.hidesControlsOnTap = self.hideToolbarsOnTap;
     documentViewController.pageFitsBetweenBars = !self.hideToolbarsOnTap;
+    
+    // Document slider.
+    ((PTDocumentController*)documentViewController).documentSliderEnabled = self.documentSliderEnabled;
     
     // Page indicator.
     documentViewController.pageIndicatorEnabled = self.pageIndicatorEnabled;
@@ -1802,6 +1830,45 @@ NS_ASSUME_NONNULL_END
         } else {
             documentController.navigationItem.titleView = nil;
         }
+    }
+    
+    // Handle topAppNavBarRightBar.
+    if (self.topAppNavBarRightBar && self.topAppNavBarRightBar.count >= 0) {
+        
+        NSMutableArray *righBarItems = [[NSMutableArray alloc] init];
+        
+        for (NSString *rightBarItemString in self.topAppNavBarRightBar) {
+            UIBarButtonItem *rightBarItem = [self itemForButton:rightBarItemString];
+            if (rightBarItem) {
+                [righBarItems addObject:rightBarItem];
+            }
+        }
+        
+        documentController.navigationItem.rightBarButtonItems = [righBarItems copy];
+    }
+    
+    // Handle bottomToolbar.
+    if (self.bottomToolbar && self.bottomToolbar.count >= 0) {
+        
+        // the spacing item between elements
+        UIBarButtonItem *space = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+        
+        
+        NSMutableArray *bottomToolbarItems = [[NSMutableArray alloc] init];
+        
+        for (NSString *bottomToolbarString in self.bottomToolbar) {
+            UIBarButtonItem *bottomToolbarItem = [self itemForButton:bottomToolbarString];
+            if (bottomToolbarItem) {
+                [bottomToolbarItems addObject:bottomToolbarItem];
+                [bottomToolbarItems addObject:space];
+            }
+        }
+        
+        // remove last spacing if there is at least 1 element
+        if ([bottomToolbarItems count] > 0) {
+            [bottomToolbarItems removeLastObject];
+        }
+        documentController.toolbarItems = [bottomToolbarItems copy];
     }
 }
 
@@ -2817,17 +2884,44 @@ NS_ASSUME_NONNULL_END
 
 - (void)bookmarkViewController:(PTBookmarkViewController *)bookmarkViewController didModifyBookmark:(PTUserBookmark *)bookmark {
     PTDocumentBaseViewController *documentViewController = self.currentDocumentViewController;
+    
+    [documentViewController bookmarkViewController:bookmarkViewController
+                                 didModifyBookmark:bookmark];
+    
     [self bookmarksModified:documentViewController.pdfViewCtrl];
 }
 
 - (void)bookmarkViewController:(PTBookmarkViewController *)bookmarkViewController didAddBookmark:(PTUserBookmark *)bookmark {
     PTDocumentBaseViewController *documentViewController = self.currentDocumentViewController;
+    
+    [documentViewController bookmarkViewController:bookmarkViewController
+                                    didAddBookmark:bookmark];
+    
     [self bookmarksModified:documentViewController.pdfViewCtrl];
 }
 
 - (void)bookmarkViewController:(PTBookmarkViewController *)bookmarkViewController didRemoveBookmark:(nonnull PTUserBookmark *)bookmark {
     PTDocumentBaseViewController *documentViewController = self.currentDocumentViewController;
+    
+    [documentViewController bookmarkViewController:bookmarkViewController
+                                 didRemoveBookmark:bookmark];
+    
     [self bookmarksModified:documentViewController.pdfViewCtrl];
+}
+
+- (void)bookmarkViewController:(PTBookmarkViewController *)bookmarkViewController selectedBookmark:(PTUserBookmark *)bookmark
+{
+    PTDocumentBaseViewController *documentViewController = self.currentDocumentViewController;
+    
+    [documentViewController bookmarkViewController:bookmarkViewController
+                                  selectedBookmark:bookmark];
+}
+
+- (void)bookmarkViewControllerDidCancel:(PTBookmarkViewController *)bookmarkViewController
+{
+    PTDocumentBaseViewController *documentViewController = self.currentDocumentViewController;
+    
+    [documentViewController bookmarkViewControllerDidCancel:bookmarkViewController];
 }
 
 - (void)bookmarksModified:(PTPDFViewCtrl *)pdfViewCtrl
@@ -3076,6 +3170,23 @@ NS_ASSUME_NONNULL_END
 }
 
 
+- (UIBarButtonItem *)itemForButton:(NSString *)buttonString
+{
+    if ([buttonString isEqualToString:PTSearchButtonKey]) {
+        return self.documentViewController.searchButtonItem;
+    } else if ([buttonString isEqualToString:PTMoreItemsButtonKey]) {
+        return self.documentViewController.moreItemsButtonItem;
+    } else if ([buttonString isEqualToString:PTThumbNailsButtonKey]) {
+        return self.documentViewController.thumbnailsButtonItem;
+    } else if ([buttonString isEqualToString:PTOutlineListButtonKey]) {
+        return self.documentViewController.navigationListsButtonItem;
+    } else if ([buttonString isEqualToString:PTReflowButtonKey]) {
+        return self.documentViewController.readerModeButtonItem;
+    } else if ([buttonString isEqualToString:PTShareButtonKey]) {
+        return self.documentViewController.shareButtonItem;
+    }
+    return nil;
+}
 
 + (Class)toolClassForKey:(NSString *)key
 {
