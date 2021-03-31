@@ -3419,11 +3419,28 @@ static NSMutableArray* globalSearchResults;
     
     if (pageNumber > pageCount) return;
     
-    [pdfViewCtrl GetThumbAsync:pageNumber completion:^(UIImage *thumb) {
-        NSData *data = UIImagePNGRepresentation(thumb);
-        NSString *base64Str = [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
-        completionHandler(base64Str);
-    }];
+
+    BOOL shouldUnlock = NO;
+    @try {
+        [pdfViewCtrl DocLockRead];
+        shouldUnlock = YES;
+        
+        [pdfViewCtrl GetThumbAsync:pageNumber completion:^(UIImage *thumb) {
+            NSData *data = UIImagePNGRepresentation(thumb);
+            //UIImageJPEGRepresentation(thumb, 0.5);
+            NSString *base64Str = [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+            completionHandler(base64Str);
+        }];
+        
+    }
+    @catch (NSException *exception) {
+        NSLog(@"Exception: %@, %@", exception.name, exception.reason);
+    }
+    @finally {
+        if (shouldUnlock) {
+            [pdfViewCtrl DocUnlockRead];
+        }
+    }
     
 }
 

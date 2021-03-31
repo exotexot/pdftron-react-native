@@ -669,6 +669,15 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
         }
     }
 
+    public void setColorMode(int tag, String mode) throws PDFNetException {
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            documentView.setColorMode(mode);
+        } else {
+            throw new PDFNetException("", 0L, getName(), "setColorMode", "Unable to find DocumentView.");
+        }
+    }
+
 
     public void setContinuous(int tag, boolean toggle) throws PDFNetException {
         DocumentView documentView = mDocumentViews.get(tag);

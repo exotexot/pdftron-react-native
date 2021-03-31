@@ -38,6 +38,7 @@ import com.pdftron.pdf.ActionParameter;
 import com.pdftron.pdf.Annot;
 import com.pdftron.pdf.Field;
 import com.pdftron.pdf.PDFDoc;
+import com.pdftron.pdf.PDFRasterizer;
 import com.pdftron.pdf.PDFViewCtrl;
 import com.pdftron.pdf.Page;
 import com.pdftron.pdf.ViewChangeCollection;
@@ -3277,6 +3278,29 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
 
     }
 
+
+
+    public void setColorMode(String mode) throws PDFNetException {
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+
+        switch (mode) {
+            case "dark":
+                pdfViewCtrl.setColorPostProcessMode(PDFRasterizer.e_postprocess_night_mode);
+                break;
+            case "sepia":
+                int lightBrown = android.graphics.Color.rgb(245, 224, 202);
+                int darkBrown = android.graphics.Color.rgb(61, 38, 10);
+
+                pdfViewCtrl.setColorPostProcessMode(PDFRasterizer.e_postprocess_gradient_map);
+                pdfViewCtrl.setColorPostProcessColors(lightBrown, darkBrown);
+
+                break;
+            default:
+                pdfViewCtrl.setColorPostProcessMode(PDFRasterizer.e_postprocess_none);
+        }
+
+        pdfViewCtrl.update(true);
+    }
 
 
     public void setContinuous(boolean toggle) throws PDFNetException {
