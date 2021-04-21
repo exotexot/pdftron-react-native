@@ -336,6 +336,17 @@ Defines whether the document slider of the viewer is enabled.
 />
 ```
 
+#### hideViewModeItems
+array of string, optional, defaults to none. Android only.
+
+Defines view mode items to be hidden in the view mode dialog. Strings should be [Config.ViewModePickerItem](./src/Config/Config.js) constants. 
+
+```js
+<DocumentView
+  hideViewModeItems={[Config.ViewModePickerItem.Crop]}
+/>
+```
+
 ### Toolbar Customization
 
 #### topToolbarEnabled
@@ -440,7 +451,7 @@ Customizes the right bar section of the top app nav bar. If passed in, the defau
 ```
 
 #### bottomToolbar
-array of strings, optional, iOS only
+array of strings, optional, only the outline list, thumbnail list, share, view mode, search, and reflow buttons are supported on Android
 
 Defines a custom bottom toolbar. If passed in, the default bottom toolbar will not be used. Strings should be [Config.Buttons](./src/Config/Config.js) constants.
 
@@ -482,6 +493,19 @@ Defines the layout mode of the viewer. String should be one of [Config.LayoutMod
 ```js
 <DocumentView
   layoutMode={Config.LayoutMode.FacingContinuous}
+/>
+```
+
+#### onLayoutChanged
+function, optional
+
+This function is called when the layout of the viewer has been changed.
+
+```js
+<DocumentView
+  onLayoutChanged = {() => {
+    console.log('Layout has been updated.'); 
+  }}
 />
 ```
 
@@ -572,6 +596,24 @@ zoom | double | the current zoom ratio of the document
 />
 ```
 
+#### onZoomFinished
+function, optional
+
+This function is called when a zooming has been finished. For example, if zoom via gesture, this is called on gesture release.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+zoom | double | the current zoom ratio of the document
+
+```js
+<DocumentView
+  onZoomFinished = {(zoom) => {
+    console.log('Current zoom ratio is', zoom); 
+  }}
+```
+
 ### Scroll
 
 #### horizontalScrollPos
@@ -594,6 +636,25 @@ Defines the vertical scroll position in the current document viewer.
 <DocumentView
   verticalScrollPos={50}
 />
+```
+
+#### onScrollChanged
+function, optional
+
+This function is called when the scroll position has been changed.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+horizontal | number | the horizontal position of the scroll
+vertical | number | the vertical position of the scroll
+
+```js
+<DocumentView
+  onScrollChanged = {({horizontal, vertical}) => {
+    console.log('Current scroll position is', horizontal, 'horizontally, and', vertical, 'vertically.'); 
+  }}
 ```
 
 ### Annotation Menu
@@ -1045,6 +1106,52 @@ Defines whether user can modify the document using the thumbnail view (eg add/re
 />
 ```
 
+### TextSelection
+
+#### onTextSearchStart
+function, optional
+
+This function is called immediately before a text search begins, either through user actions, or function calls such as [`findText`](#findText).
+
+```js
+<DocumentView
+  onTextSearchStart = {() => {
+    console.log('Text search has started');
+  }}
+/>
+```
+
+#### onTextSearchResult
+function, optional
+
+This function is called after a text search is finished or canceled.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+found | bool | whether a result is found. If no, it could be caused by not finding a matching result in the document, invalid text input, or action cancellation (user actions or [`cancelFindText`](#cancelFindText))
+textSelection | object | the text selection, in the format `{html: string, unicode: string, pageNumber: number, quads: [[{x: number, y: number}, {x: number, y: number}, {x: number, y: number}, {x: number, y: number}], ...]}`. If no such selection could be found, this would be null
+
+quads indicate the quad boundary boxes for the selection, which could have a size larger than 1 if selection spans across different lines. Each quad have 4 points with x, y coordinates specified in number, representing a boundary box. The 4 points are in counter-clockwise order, though the first point is not guaranteed to be on lower-left relatively to the box.
+
+```js
+<DocumentView
+  onTextSearchResult = {({found, textSelection}) => {
+    if (found) {
+      console.log('Found selection on page', textSelection.pageNumber);
+      for (let i = 0; i < textSelection.quads.length; i ++) {
+        const quad = textSelection.quads[i];
+        console.log('selection boundary quad', i);
+        for (const quadPoint of quad) {
+          console.log('A quad point has coordinates', quadPoint.x, quadPoint.y);
+        }
+      }
+    }
+  }}
+/>
+```
+
 ### Others
 
 #### useStylusAsPen
@@ -1059,13 +1166,13 @@ Defines whether a stylus should act as a pen when in pan mode. If false, it will
 ```
 
 #### followSystemDarkMode
-bool, optional, Android only, defaults to true
+bool, optional, Android and iOS 13+ only, defaults to true
 
 Defines whether the UI will appear in a dark color when the system is dark mode. If false, it will use viewer setting instead.
 
 ```js
 <DocumentView
-  signSignatureFieldsWithStamps={false}
+  followSystemDarkMode={false}
 />
 ```
 
@@ -1100,6 +1207,19 @@ import { DocumentView, Config } from 'react-native-pdftron';
   onBookmarkChanged={({bookmarkJson}) => { console.log('bookmark changed'); }}
   hideThumbnailFilterModes={[Config.ThumbnailFilterMode.Annotated]}
   onToolChanged={({previousTool,tool}) => { console.log('tool changed'); }}
+/>
+```
+
+### Navigation
+
+#### pageStackEnabled
+bool, optional, defaults to true, Android only
+
+Defines whether the page stack navigation buttons will appear in the viewer.
+
+```js
+<DocumentView
+  pageStackEnabled={false}
 />
 ```
 
@@ -1139,6 +1259,37 @@ filePath | string | the location of the saved document, or the base64 string of 
 this._viewer.saveDocument().then((filePath) => {
   console.log('saveDocument:', filePath);
 });
+```
+
+### UI Customization
+
+#### setColorPostProcessMode
+Sets the color post processing transformation mode for the viewer.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+colorPostProcessMode | string | color post processing transformation mode, should be a [Config.ColorPostProcessMode](./src/Config/Config.js) constant
+
+```js
+this._viewer.setColorPostProcessMode(Config.ColorPostProcessMode.NightMode);
+```
+
+#### setColorPostProcessColors
+Sets the white and black color for the color post processing transformation.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+whiteColor | object | the white color for the color post processing transformation, in the format `{red: number, green: number, blue: number}`. `alpha` could be optionally included (only Android would apply alpha), and all numbers should be in range [0, 255]
+blackColor | object | the black color for the color post processing transformation, in the same format as whiteColor
+
+```js
+const whiteColor = {"red": 0, "green": 0, "blue": 255};
+const blackColor = {"red": 255, "green": 0, "blue": 0};
+this._viewer.setColorPostProcessColors(whiteColor, blackColor);
 ```
 
 ### Annotation Tools
@@ -1217,6 +1368,82 @@ this._viewer.setCurrentPage(4).then((success) => {
 });
 ```
 
+#### gotoPreviousPage
+Go to the previous page of the document. If on first page, it would stay on first page.
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+success | bool | whether the setting process was successful (no change due to staying in first page counts as being successful)
+
+```js
+this._viewer.gotoPreviousPage().then((success) => {
+  if (success) {
+    console.log("Go to previous page.");
+  }
+});
+```
+
+#### gotoNextPage
+Go to the next page of the document. If on last page, it would stay on last page.
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+success | bool | whether the setting process was successful (no change due to staying in last page counts as being successful)
+
+```js
+this._viewer.gotoNextPage().then((success) => {
+  if (success) {
+    console.log("Go to next page.");
+  }
+});
+```
+
+#### gotoFirstPage
+Go to the first page of the document.
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+success | bool | whether the setting process was successful
+
+```js
+this._viewer.gotoFirstPage().then((success) => {
+  if (success) {
+    console.log("Go to first page.");
+  }
+});
+```
+
+#### gotoLastPage
+Go to the last page of the document.
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+success | bool | whether the setting process was successful
+
+```js
+this._viewer.gotoLastPage().then((success) => {
+  if (success) {
+    console.log("Go to last page.");
+  }
+});
+```
+
 #### getPageCropBox
 Gets the crop box for specified page as a JSON object.
 
@@ -1242,6 +1469,60 @@ this._viewer.getPageCropBox(1).then((cropBox) => {
 });
 ```
 
+#### getVisiblePages
+Gets the visible pages in the current viewer as an array.
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+visiblePages | array | a list of visible pages in the current viewer
+
+```js
+this._viewer.getVisiblePages().then((visiblePages) => {
+  for (const page of visiblePages) {
+    console.log('page', page, 'is visible.')
+  }
+});
+```
+
+#### getPageRotation
+Gets the rotation value of all pages in the current document.
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+pageRotation | number | the rotation degree of all pages, one of 0, 90, 180 or 270 (clockwise).
+
+```js
+this._viewer.getPageRotation().then((pageRotation) => {
+  console.log('The current page rotation degree is' + pageRotation);
+});
+```
+
+#### rotateClockwise
+Rotates all pages in the current document in clockwise direction (by 90 degrees).
+
+Returns a Promise.
+
+```js
+this._viewer.rotateClockwise();
+```
+
+#### rotateCounterClockwise
+Rotates all pages in the current document in counter-clockwise direction (by 90 degrees).
+
+Returns a Promise.
+
+```js
+this._viewer.rotateCounterClockwise();
+```
+
 ### Import/Export Annotations
 
 #### importAnnotationCommand
@@ -1257,7 +1538,7 @@ initialLoad | bool | whether this is for initial load. Will be false by default
 Returns a Promise.
 
 ```js
-const xfdfCommand = 'xfdfCommand <?xml version="1.0" encoding="UTF-8"?><xfdf xmlns="http://ns.adobe.com/xfdf/" xml:space="preserve"><add><circle style="solid" width="5" color="#E44234" opacity="1" creationdate="D:20201218025606Z" flags="print" date="D:20201218025606Z" name="9d0f2d63-a0cc-4f06-b786-58178c4bd2b1" page="0" rect="56.4793,584.496,208.849,739.369" title="PDF" /></add><modify /><delete /><pdf-info import-version="3" version="2" xmlns="http://www.pdftron.com/pdfinfo" /></xfdf>';
+const xfdfCommand = '<?xml version="1.0" encoding="UTF-8"?><xfdf xmlns="http://ns.adobe.com/xfdf/" xml:space="preserve"><add><circle style="solid" width="5" color="#E44234" opacity="1" creationdate="D:20201218025606Z" flags="print" date="D:20201218025606Z" name="9d0f2d63-a0cc-4f06-b786-58178c4bd2b1" page="0" rect="56.4793,584.496,208.849,739.369" title="PDF" /></add><modify /><delete /><pdf-info import-version="3" version="2" xmlns="http://www.pdftron.com/pdfinfo" /></xfdf>';
 this._viewer.importAnnotationCommand(xfdf);
 
 ```
@@ -1444,6 +1725,133 @@ this._viewer.setPropertiesForAnnotation('Pdftron', 1, {
 });
 ```
 
+#### setDrawAnnotations
+Sets whether all annotations and forms should be rendered in the viewer.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+drawAnnotations | bool | whether all annotations and forms should be rendered
+
+Returns a promise.
+
+```js
+this._viewer.setDrawAnnotations(false);
+```
+
+#### setVisibilityForAnnotation
+Sets visibility for specified annotation in the current document, if it is valid. Note that if [drawAnnotations](#drawAnnotations) is set to false in the viewer, this function would not render the annotation even if visibility is true.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+annotationId | string | the unique id of the annotation
+pageNumber | integer | the page number where annotation is located. It is 1-indexed
+visibility | bool | whether the annotation should be visible
+
+Returns a promise.
+
+```js
+this._viewer.setVisibilityForAnnotation('Pdftron', 1, true);
+```
+
+#### setHighlightFields
+Enables or disables highlighting form fields. It is disabled by default.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+highlightFields | bool | whether form fields should be highlighted
+
+```js
+this._viewer.setHighlightFields(true);
+```
+
+
+#### getAnnotationAt
+Gets an annotation at the (x, y) position in screen coordinates, if any.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+x | integer | the x-coordinate of the point
+y | integer | the y-coordinate of the point
+distanceThreshold | double | maximum distance from the point (x, y) to the annotation for it to be considered a hit (in dp)
+minimumLineWeight | double | For very thin lines, it is almost impossible to hit the actual line. This specifies a minimum line thickness (in screen coordinates) for the purpose of calculating whether a point is inside the annotation or not (in dp)
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+annotation | object | the annotation found in the format of `{id: string, pageNumber: number, type: string, rect: {x1: number, y1: number, x2: number, y2: number}}`
+
+```js
+this._viewer.getAnnotationAt(167, 287, 100, 10).then((annotation) => {
+  if (annotation) {
+    console.log('Annotation found at point (167, 287) has id:', annotation.id);
+  }
+})
+```
+
+#### getAnnotationListAt
+Gets the list of annotations at a given line in screen coordinates. Note that this is not an area selection. It should be used similar to [getAnnotationAt](#getAnnotationAt), except that this should be used when you want to get multiple annotations which are overlaying with each other.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+x1 | integer | the x-coordinate of an endpoint on the line
+y1 | integer | the y-coordinate of an endpoint on the line
+x2 | integer | the x-coordinate of the other endpoint on the line, usually used as a threshold
+y2 | integer | the y-coordinate of the other endpoint on the line, usually used as a threshold
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+annotations | array | list of annotations at the target line, each in the format of `{id: string, pageNumber: number, type: string, rect: {x1: number, y1: number, x2: number, y2: number}}`
+
+```js
+this._viewer.getAnnotationListAt(0, 0, 200, 200).then((annotations) => {
+  for (const annotation of annotations) {
+    console.log('Annotation found at line has id:', annotation.id);
+  }
+})
+```
+
+#### getAnnotationListOnPage
+Gets the list of annotations on a given page.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+pageNumber | integer | the page number where annotations are located. It is 1-indexed
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+annotations | array | list of annotations on the target page, each in the format of `{id: string, pageNumber: number, type: string, rect: {x1: number, y1: number, x2: number, y2: number}}`
+
+```js
+this._viewer.getAnnotationListOnPage(2).then((annotations) => {
+  for (const annotation of annotations) {
+    console.log('Annotation found on page 2 has id:', annotation.id);
+  }
+})
+```
+
 #### setFlagForFields
 Sets a field flag value on one or more form fields.
 
@@ -1581,6 +1989,73 @@ this._viewer.getZoom().then((zoom) => {
 });
 ```
 
+#### setZoomLimits
+Sets the minimum and maximum zoom bounds of current viewer.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+zoomLimitMode | String | one of the constants in `Config.ZoomLimitMode`, defines whether bounds are relative to the standard zoom scale in the current viewer or absolute
+minimum | double | the lower bound of the zoom limit range
+maximum | double | the upper bound of the zoom limit range
+
+Returns a Promise.
+
+```js
+this._viewer.setZoomLimits(Config.ZoomLimitMode.Absolute, 1.0, 3.5);
+```
+
+#### zoomWithCenter
+Sets the zoom scale in the current document viewer with a zoom center.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+zoom | double | the zoom ratio to be set
+x | int | the x-coordinate of the zoom center
+y | int | the y-coordinate of the zoom center
+
+Returns a Promise.
+
+```js
+this._viewer.zoomWithCenter(3.0, 100, 300);
+```
+
+#### zoomToRect
+Zoom the viewer to a specific rectangular area in a page.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+pageNumber | int | the page number of the zooming area (1-indexed)
+rect | map | The rectangular area with keys x1 (left), y1(bottom), y1(right), y2(top). Coordinates are in double
+
+Returns a Promise.
+
+```js
+this._viewer.zoomToRect(3, {'x1': 1.0, 'y1': 2.0, 'x2': 3.0, 'y2': 4.0});
+```
+
+#### smartZoom
+Zoom to a paragraph that contains the specified coordinate. If no paragraph contains the coordinate, the zooming would not happen.
+
+Parameters:
+
+Name | Type | Description
+-- | -- | --
+x | int | the x-coordinate of the target coordinate
+y | int | the y-coordinate of the target coordinate
+animated | bool | whether the transition is animated
+
+Returns a Promise.
+
+```js
+this._viewer.smartZoom(100, 200, true);
+```
+
 ### Scroll
 
 #### getScrollPos
@@ -1620,5 +2095,387 @@ height | number | current height of canvas
 this._viewer.getCanvasSize().then(({width, height}) => {
   console.log('Current canvas width is:', width);
   console.log('Current canvas height is:', height);
+});
+```
+
+### Coordinate
+
+#### convertPagePointsToScreenPoints
+Converts points from page coordinates to screen coordinates in the viewer.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+points | array | list of points, each in the format `{x: number, y: number}`. You could optionally have a `pageNumber: number` in the object. Without specifying, the page system is referring to the current page
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+convertedPoints | array | list of converted points in screen system, each in the format `{x: number, y: number}`. It would be empty if conversion is unsuccessful
+
+```js
+// convert (50, 50) on current page and (100, 100) on page 1 from page system to screen system
+this._viewer.convertPagePointsToScreenPoints([{x: 50, y: 50}, {x: 100, y:100, pageNumber: 1}]).then((convertedPoints) => {
+  convertedPoints.forEach(point => {
+    console.log(point);
+  })
+});
+```
+
+#### convertScreenPointsToPagePoints
+Converts points from screen coordinates to page coordinates in the viewer.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+points | array | list of points, each in the format `{x: number, y: number}`. You could optionally have a `pageNumber: number` in the object. Without specifying, the page system is referring to the current page
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+convertedPoints | array | list of converted points in page system, each in the format `{x: number, y: number}`. It would be empty if conversion is unsuccessful
+
+```js
+// convert (50, 50) and (100, 100) from screen system to page system, on current page and page 1 respectively
+this._viewer.convertScreenPointsToPagePoints([{x: 50, y: 50}, {x: 100, y:100, pageNumber: 1}]).then((convertedPoints) => {
+  convertedPoints.forEach(point => {
+    console.log(point);
+  })
+});
+```
+
+#### getPageNumberFromScreenPoint
+Returns the page number that contains the point on screen.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+x | number | the x-coordinate of the screen point
+y | number | the y-coordinate of the screen point
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+pageNumber | number | the page number of the screen point
+
+```js
+this._viewer.getPageNumberFromScreenPoint(10.0,50.5).then((pageNumber) => {
+  console.log('The page number of the screen point is', pageNumber);
+});
+```
+
+### Rendering Options
+
+#### setProgressiveRendering
+Sets whether the control will render progressively or will just draw once the entire view has been rendered.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+progressiveRendering | bool | whether to render progressively
+initialDelay | number | delay before the progressive rendering timer is started, in milliseconds
+interval | number | delay between refreshes, in milliseconds
+
+Returns a Promise.
+
+```js
+// delay for 10s before start, and refresh every 1s
+this._viewer.setProgressiveRendering(true, 10000, 1000);
+```
+
+#### setImageSmoothing
+Enables or disables image smoothing. The rasterizer allows a trade-off between rendering quality and rendering speed. This function can be used to indicate the preference between rendering speed and quality.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+imageSmoothing | bool | whether to enable image smoothing
+
+Returns a Promise.
+
+```js
+this._viewer.setImageSmoothing(false);
+```
+
+#### setOverprint
+Enables or disables support for overprint and overprint simulation. Overprint is a device dependent feature and the results will vary depending on the output color space and supported colorants (i.e. CMYK, CMYK+spot, RGB, etc).
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+overprint | string | the mode of overprint, should be a [`Config.OverprintMode`](./src/Config/Config.js) constant
+
+Returns a Promise.
+
+```js
+this._viewer.setOverprint(Config.OverprintMode.Off);
+```
+
+### Viewer Options
+
+#### setUrlExtraction
+Sets whether to extract urls from the current document, which is disabled by default. It is recommended to set this value before document is opened.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+urlExtraction | bool | whether to extract urls from the current document
+
+```js
+this._viewer.setUrlExtraction(true);
+```
+
+#### setPageBorderVisibility
+Sets whether borders of each page are visible in the viewer, which is disabled by default.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+pageBorderVisibility | bool | whether borders of each page are visible in the viewer
+
+```js
+this._viewer.setPageBorderVisibility(true);
+```
+
+#### setPageTransparencyGrid
+Enables or disables transparency grid (check board pattern) to reflect page transparency, which is disabled by default.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+pageTransparencyGrid | bool | whether to use the transpareny grid
+
+```js
+this._viewer.setPageTransparencyGrid(true);
+```
+
+#### setBackgroundColor
+Sets the background color of the viewer.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+backgroundColor | object | the background color, in the format `{red: number, green: number, blue: number}`, each number in range [0, 255]
+
+```js
+this._viewer.setBackgroundColor({red: 0, green: 0, blue: 255}); // blue color
+```
+
+#### setDefaultPageColor
+Sets the default page color of the viewer.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+defaultPageColor | object | the default page color, in the format `{red: number, green: number, blue: number}`, each number in range [0, 255]
+
+```js
+this._viewer.setDefaultPageColor({red: 0, green: 255, blue: 0}); // green color
+```
+
+### Text Selection
+
+#### findText
+Searches asynchronously, starting from the current page, for the given text. PDFViewCtrl automatically scrolls to the position so that the found text is visible.
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+searchString | string | the text to search for
+matchCase | bool | indicates if it is case sensitive
+matchWholeWord | bool | indicates if it matches an entire word only
+searchUp | bool | indicates if it searches upward
+regExp | bool | indicates if searchString is a regular expression
+
+```js
+this._viewer.findText('PDFTron', false, false, true, false);
+```
+
+#### cancelFindText
+Cancels the current text search thread, if exists.
+
+Returns a Promise.
+
+```js
+this._viewer.cancelFindText();
+```
+
+#### getSelection
+Returns the text selection on a given page, if any.
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+selection | object | the text selection, in the format `{html: string, unicode: string, pageNumber: number, quads: [[{x: number, y: number}, {x: number, y: number}, {x: number, y: number}, {x: number, y: number}], ...]}`. If no such selection could be found, this would be null
+
+quads indicate the quad boundary boxes for the selection, which could have a size larger than 1 if selection spans across different lines. Each quad have 4 points with x, y coordinates specified in number, representing a boundary box. The 4 points are in counter-clockwise order, though the first point is not guaranteed to be on lower-left relatively to the box.
+
+```js
+this._viewer.getSelection(2).then((selection) => {
+  if (selection) {
+    console.log('Found selection on page', selection.pageNumber);
+    for (let i = 0; i < selection.quads.length; i ++) {
+      const quad = selection.quads[i];
+      console.log('selection boundary quad', i);
+      for (const quadPoint of quad) {
+        console.log('A quad point has coordinates', quadPoint.x, quadPoint.y);
+      }
+    }
+  }
+});
+```
+
+#### hasSelection
+Returns whether there is a text selection in the current document.
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+hasSelection | bool | whether a text selection exists
+
+```js
+this._viewer.hasSelection().then((hasSelection) => {
+  console.log('There is a selection in the document.');
+});
+```
+
+#### clearSelection
+Clears any text selection in the current document.
+
+Returns a Promise.
+
+```js
+this._viewer.clearSelection();
+```
+
+#### getPageSelectionRange
+Returns the page range (beginning and end) that has text selection on it.
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+begin | number | the first page to have selection, -1 if there are no selections
+end | number | the last page to have selection,  -1 if there are no selections
+
+```js
+this._viewer.getPageSelectionRange().then(({begin, end}) => {
+  if (begin === -1) {
+    console.log('There is no selection');
+  } else {
+    console.log('The selection range is from', begin, 'to', end);
+  }
+});
+```
+
+#### hasSelectionOnPage
+Returns whether there is a text selection on the specified page in the current document.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+pageNumber | number | the specified page number. It is 1-indexed
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+hasSelection | bool | whether a text selection exists on the specified page
+
+```js
+this._viewer.hasSelectionOnPage(5).then((hasSelection) => {
+  if (hasSelection) {
+    console.log('There is a selection on page 5 in the document.');
+  }
+});
+```
+
+#### selectInRect
+Selects the text within the given rectangle region.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+rect | object | the rectangle region in the format of `x1: number, x2: number, y1: number, y2: number`
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+selected | bool | whether there is text selected
+
+```js
+this._viewer.selectInRect({x1: 0, y1: 0, x2: 200.5, y2: 200.5}).then((selected) => {
+        console.log(selected);
+});
+```
+
+#### isThereTextInRect
+Returns whether there is text in given rectangle region.
+
+Parameters:
+
+Name | Type | Description
+--- | --- | ---
+rect | object | the rectangle region in the format of `x1: number, x2: number, y1: number, y2: number`
+
+Returns a Promise.
+
+Promise Parameters:
+
+Name | Type | Description
+--- | --- | ---
+hasText | bool | whether there is text in the region
+
+```js
+this._viewer.isThereTextInRect({x1: 0, y1: 0, x2: 200, y2: 200}).then((hasText) => {
+        console.log(hasText);
+});
+```
+
+#### selectAll
+Selects all text on the page.
+
+Returns a Promise.
+
+```js
+this._viewer.selectAll();
 });
 ```

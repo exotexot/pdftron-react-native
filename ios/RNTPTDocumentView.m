@@ -69,6 +69,8 @@ NS_ASSUME_NONNULL_END
     _pageChangeOnTap = NO;
     _thumbnailViewEditingEnabled = YES;
     _selectAnnotationAfterCreation = YES;
+    
+    _followSystemDarkMode = YES;
 
     _useStylusAsPen = YES;
     _longPressMenuEnabled = YES;
@@ -261,6 +263,21 @@ NS_ASSUME_NONNULL_END
     [navigationController didMoveToParentViewController:parentController];
     
     navigationController.navigationBarHidden = (self.hideTopAppNavBar || self.hideTopToolbars);
+    
+    // Follow System Dark Mode
+    if (@available(iOS 13.0, *)) {
+        UIViewController * const viewController = navigationController;
+        viewController.overrideUserInterfaceStyle = (self.followSystemDarkMode ?
+                                                     UIUserInterfaceStyleUnspecified :
+                                                     UIUserInterfaceStyleLight);
+        
+        UIWindow * const window = self.window;
+        if (window) {
+            window.overrideUserInterfaceStyle = (self.followSystemDarkMode ?
+                                                 UIUserInterfaceStyleUnspecified :
+                                                 UIUserInterfaceStyleLight);
+        }
+    }
     
     [self openDocument];
 }
@@ -1565,8 +1582,7 @@ NS_ASSUME_NONNULL_END
     self.hideAnnotMenuToolsAnnotTypes = [hideMenuTools copy];
 }
 
-
-#pragma mark -
+#pragma mark - viewer settings
 
 - (void)applyViewerSettings
 {
@@ -1655,6 +1671,21 @@ NS_ASSUME_NONNULL_END
 
     // Annotation permission check
     toolManager.annotationPermissionCheckEnabled = self.annotationPermissionCheckEnabled;
+    
+    // Follow system dark mode.
+    if (@available(iOS 13.0, *)) {
+        UIViewController * const viewController = self.viewController.navigationController;
+        viewController.overrideUserInterfaceStyle = (self.followSystemDarkMode ?
+                                                     UIUserInterfaceStyleUnspecified :
+                                                     UIUserInterfaceStyleLight);
+        
+        UIWindow * const window = self.window;
+        if (window) {
+            window.overrideUserInterfaceStyle = (self.followSystemDarkMode ?
+                                                 UIUserInterfaceStyleUnspecified :
+                                                 UIUserInterfaceStyleLight);
+        }
+    }
 
     // Use Apple Pencil as a pen
     Class pencilTool = [PTFreeHandCreate class];
@@ -1952,6 +1983,71 @@ NS_ASSUME_NONNULL_END
     }
 }
 
+- (void)setUrlExtraction:(BOOL)urlExtraction
+{
+    [self.documentViewController.pdfViewCtrl SetUrlExtraction:urlExtraction];
+}
+
+- (void)setPageBorderVisibility:(BOOL)pageBorderVisibility
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.documentViewController.pdfViewCtrl;
+    [pdfViewCtrl SetPageBorderVisibility:pageBorderVisibility];
+    [pdfViewCtrl Update:YES];
+}
+
+- (void)setPageTransparencyGrid:(BOOL)pageTransparencyGrid
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.documentViewController.pdfViewCtrl;
+    [pdfViewCtrl SetPageTransparencyGrid:pageTransparencyGrid];
+    [pdfViewCtrl Update:YES];
+}
+
+- (void)setDefaultPageColor:(NSDictionary *)defaultPageColor
+{
+    if (defaultPageColor) {
+        NSArray *keyList = defaultPageColor.allKeys;
+        
+        BOOL containsValidKeys = [keyList containsObject:PTColorRedKey] &&
+        [keyList containsObject:PTColorGreenKey] &&
+        [keyList containsObject:PTColorBlueKey];
+        NSAssert(containsValidKeys,
+                 @"default page color does not have red, green or blue keys");
+        
+        if (!containsValidKeys) {
+            return;
+        }
+         
+        PTPDFViewCtrl *pdfViewCtrl = self.documentViewController.pdfViewCtrl;
+            
+        [pdfViewCtrl SetDefaultPageColor:[defaultPageColor[PTColorRedKey] unsignedCharValue] g:[defaultPageColor[PTColorGreenKey] unsignedCharValue]
+                b:[defaultPageColor[PTColorBlueKey] unsignedCharValue]];
+            
+        [pdfViewCtrl Update:YES];
+    }
+}
+
+- (void)setBackgroundColor:(NSDictionary *)backgroundColor
+{
+    if (backgroundColor) {
+        NSArray *keyList = backgroundColor.allKeys;
+        
+        BOOL containsValidKeys = [keyList containsObject:PTColorRedKey] &&
+        [keyList containsObject:PTColorGreenKey] &&
+        [keyList containsObject:PTColorBlueKey];
+        NSAssert(containsValidKeys,
+                 @"background color does not have red, green or blue keys");
+        
+        if (!containsValidKeys) {
+            return;
+        }
+            
+        PTPDFViewCtrl *pdfViewCtrl = self.documentViewController.pdfViewCtrl;
+            
+        [pdfViewCtrl
+         SetBackgroundColor:[backgroundColor[PTColorRedKey] unsignedCharValue] g:[backgroundColor[PTColorGreenKey] unsignedCharValue] b:[backgroundColor[PTColorBlueKey] unsignedCharValue] a:255];
+    }
+}
+
 #pragma mark - Custom headers
 
 - (void)setCustomHeaders:(NSDictionary<NSString *, NSString *> *)customHeaders
@@ -2044,6 +2140,15 @@ NS_ASSUME_NONNULL_END
     [self applyViewerSettings];
 }
 
+# pragma mark - Dark Mode
+
+- (void)setFollowSystemDarkMode:(BOOL)followSystemDarkMode
+{
+    _followSystemDarkMode = followSystemDarkMode;
+
+    [self applyViewerSettings];
+}
+
 #pragma mark - Stylus
 
 - (void)setUseStylusAsPen:(BOOL)useStylusAsPen
@@ -2069,6 +2174,132 @@ NS_ASSUME_NONNULL_END
     _signSignatureFieldsWithStamps = signSignatureFieldsWithStamps;
     
     [self applyViewerSettings];
+}
+
+#pragma mark - zoom
+
+- (void)setZoom:(double)zoom
+{
+    _zoom = zoom;
+    PTPDFViewCtrl* pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    if (pdfViewCtrl) {
+        [pdfViewCtrl SetZoom:zoom];
+    }
+}
+
+- (void)setZoomLimits:(NSString *)zoomLimitMode minimum:(double)minimum maximum:(double)maximum
+{
+    PTDocumentBaseViewController *documentViewController = self.currentDocumentViewController;
+    PTPDFViewCtrl *pdfViewCtrl = documentViewController.pdfViewCtrl;
+    
+    if ([zoomLimitMode isEqualToString:PTZoomLimitAbsoluteKey]) {
+        [pdfViewCtrl SetZoomLimits:e_trn_zoom_limit_absolute Minimum:minimum Maxiumum:maximum];
+    } else if ([zoomLimitMode isEqualToString:PTZoomLimitRelativeKey]) {
+        [pdfViewCtrl SetZoomLimits:e_trn_zoom_limit_relative Minimum:minimum Maxiumum:maximum];
+    } else if ([zoomLimitMode isEqualToString:PTZoomLimitNoneKey]) {
+        [pdfViewCtrl SetZoomLimits:e_trn_zoom_limit_none Minimum:minimum Maxiumum:maximum];
+    }
+}
+
+- (void)zoomWithCenter:(double)zoom x:(int)x y:(int)y
+{
+    PTDocumentBaseViewController *documentViewController = self.currentDocumentViewController;
+    PTPDFViewCtrl *pdfViewCtrl = documentViewController.pdfViewCtrl;
+    
+    [pdfViewCtrl SetZoomX:x Y:y Zoom:zoom];
+}
+
+- (void)zoomToRect:(int)pageNumber rect:(NSDictionary *)rect
+{
+    PTDocumentBaseViewController *documentViewController = self.currentDocumentViewController;
+    PTPDFViewCtrl *pdfViewCtrl = documentViewController.pdfViewCtrl;
+    
+    NSNumber *rectX1 = [RNTPTDocumentView PT_idAsNSNumber:rect[PTRectX1Key]];
+    NSNumber *rectY1 = [RNTPTDocumentView PT_idAsNSNumber:rect[PTRectY1Key]];
+    NSNumber *rectX2 = [RNTPTDocumentView PT_idAsNSNumber:rect[PTRectX2Key]];
+    NSNumber *rectY2 = [RNTPTDocumentView PT_idAsNSNumber:rect[PTRectY2Key]];
+    
+    if (rectX1 && rectY1 && rectX2 && rectY2) {
+        PTPDFRect* rect = [[PTPDFRect alloc] initWithX1:[rectX1 doubleValue] y1:[rectY1 doubleValue] x2:[rectX2 doubleValue] y2:[rectY2 doubleValue]];
+        [pdfViewCtrl ShowRect:pageNumber rect:rect];
+    }
+}
+
+- (void)smartZoom:(int)x y:(int)y animated:(BOOL)animated
+{
+    PTDocumentBaseViewController *documentViewController = self.currentDocumentViewController;
+    PTPDFViewCtrl *pdfViewCtrl = documentViewController.pdfViewCtrl;
+    
+    [pdfViewCtrl SmartZoomX:(double)x y:(double)y animated:animated];
+}
+
+# pragma mark - Color Post Process
+- (void)setColorPostProcessMode:(NSString *)colorPostProcessMode
+{
+    PTPDFViewCtrl *pdfViewCtrl = [[self documentViewController] pdfViewCtrl];
+    if (pdfViewCtrl) {
+        
+        if ([colorPostProcessMode isEqualToString:PTColorPostProcessModeNoneKey]) {
+            [pdfViewCtrl SetColorPostProcessMode:e_ptpostprocess_none];
+        } else if ([colorPostProcessMode isEqualToString:PTColorPostProcessModeInvertKey]) {
+            [pdfViewCtrl SetColorPostProcessMode:e_ptpostprocess_invert];
+        } else if ([colorPostProcessMode isEqualToString:PTColorPostProcessModeGradientMapKey]) {
+            [pdfViewCtrl SetColorPostProcessMode:e_ptpostprocess_gradient_map];
+        } else if ([colorPostProcessMode isEqualToString:PTColorPostProcessModeNightModeKey]) {
+            [pdfViewCtrl SetColorPostProcessMode:e_ptpostprocess_night_mode];
+        }
+    }
+}
+
+- (void)setColorPostProcessColors:(NSDictionary *)whiteColor blackColor:(NSDictionary *)blackColor
+{
+    PTPDFViewCtrl *pdfViewCtrl = [[self documentViewController] pdfViewCtrl];
+    if (pdfViewCtrl) {
+        
+        UIColor *whiteUIColor = [self convertRGBAToUIColor:whiteColor];
+        NSAssert(whiteUIColor, @"white color is not valid for setting post process colors");
+        
+        if (!whiteUIColor) {
+            return;
+        }
+        
+        UIColor *blackUIColor = [self convertRGBAToUIColor:blackColor];
+        NSAssert(blackUIColor, @"black color is not valid for setting post process colors");
+        
+        if (!blackUIColor) {
+            return;
+        }
+        
+        [pdfViewCtrl SetColorPostProcessColors:whiteUIColor black_color:blackUIColor];
+    }
+}
+
+- (UIColor *)convertRGBAToUIColor:(NSDictionary *)colorMap
+{
+    NSString *requiredColorKeys[4] = {PTColorRedKey, PTColorGreenKey, PTColorBlueKey, PTColorAlphaKey};
+    double colorValues[4];
+    NSArray *colorKeys = [colorMap allKeys];
+    
+    for (int i = 0; i < 4; i ++) {
+        if (![colorKeys containsObject:requiredColorKeys[i]]) {
+            // not alpha
+            if (![requiredColorKeys[i] isEqualToString:PTColorAlphaKey]) {
+                return nil;
+            }
+            // alpha
+            colorValues[i] = (double)1;
+            continue;
+        }
+        
+        double value = (double)[colorMap[requiredColorKeys[i]] intValue] / 255;
+        if (value < 0 || value > 1) {
+            return nil;
+        }
+        
+        colorValues[i] = value;
+    }
+    
+    return [UIColor colorWithRed:colorValues[0] green:colorValues[1] blue:colorValues[2] alpha:colorValues[3]];
 }
 
 #pragma mark - Convenience
@@ -2271,12 +2502,13 @@ NS_ASSUME_NONNULL_END
     if (self.initialPageNumber > 0) {
         [documentViewController.pdfViewCtrl SetCurrentPage:self.initialPageNumber];
     }
-    
+        
     if ([self isReadOnly] && ![documentViewController.toolManager isReadonly]) {
         documentViewController.toolManager.readonly = YES;
     }
     
     [self applyLayoutMode:documentViewController.pdfViewCtrl];
+    
     
     if (self.tabbedDocumentViewController) {
         [self.tabbedDocumentViewController.tabManager saveItems];
@@ -2284,6 +2516,18 @@ NS_ASSUME_NONNULL_END
     
     if ([self.delegate respondsToSelector:@selector(documentLoaded:)]) {
         [self.delegate documentLoaded:self];
+    }
+}
+
+- (void)rnt_documentViewControllerDidScroll:(PTDocumentBaseViewController *)documentViewController
+{
+    PTPDFViewCtrl *pdfViewCtrl = documentViewController.pdfViewCtrl;
+    
+    double horizontal = [pdfViewCtrl GetHScrollPos];
+    double vertical = [pdfViewCtrl GetVScrollPos];
+    
+    if ([self.delegate respondsToSelector:@selector(zoomChanged:zoom:)]) {
+        [self.delegate scrollChanged:self horizontal:horizontal vertical:vertical];
     }
 }
 
@@ -2295,6 +2539,26 @@ NS_ASSUME_NONNULL_END
     
     if ([self.delegate respondsToSelector:@selector(zoomChanged:zoom:)]) {
         [self.delegate zoomChanged:self zoom:zoom];
+    }
+}
+
+- (void)rnt_documentViewControllerDidFinishZoom:(PTDocumentBaseViewController *)documentViewController
+{
+    PTPDFViewCtrl *pdfViewCtrl = documentViewController.pdfViewCtrl;
+    
+    const double zoom = pdfViewCtrl.zoom * pdfViewCtrl.zoomScale;
+    
+    if ([self.delegate respondsToSelector:@selector(zoomChanged:zoom:)]) {
+        [self.delegate zoomFinished:self zoom:zoom];
+    }
+}
+
+- (void)rnt_documentViewControllerLayoutDidChange:(PTDocumentBaseViewController *)documentViewController
+{
+    PTPDFViewCtrl *pdfViewCtrl = documentViewController.pdfViewCtrl;
+    
+    if ([self.delegate respondsToSelector:@selector(layoutChanged:)]) {
+        [self.delegate layoutChanged:self];
     }
 }
 
@@ -2316,6 +2580,24 @@ NS_ASSUME_NONNULL_END
 - (BOOL)rnt_documentViewControllerIsNavigationBarEnabled:(PTDocumentBaseViewController *)documentViewController
 {
     return !self.hideTopAppNavBar;
+}
+
+- (void)rnt_documentViewControllerTextSearchDidStart:(PTDocumentBaseViewController *)documentViewController
+{
+    if ([self.delegate respondsToSelector:@selector(textSearchStart:)]) {
+        [self.delegate textSearchStart:self];
+    }
+}
+
+- (void)rnt_documentViewControllerTextSearchDidFindResult:(PTDocumentBaseViewController *)documentViewController selection:(PTSelection *)selection
+{
+    if ([self.delegate respondsToSelector:@selector(textSearchResult:found:textSelection:)]) {
+        if ([selection GetPageNum] > 0) {
+            [self.delegate textSearchResult:self found:YES textSelection:[self getMapFromSelection:selection]];
+        } else {
+            [self.delegate textSearchResult:self found:NO textSelection:nil];
+        }
+    }
 }
 
 - (NSDictionary<NSString *, id> *)getAnnotationData:(PTAnnot *)annot pageNumber:(int)pageNumber pdfViewCtrl:(PTPDFViewCtrl *)pdfViewCtrl {
@@ -2992,6 +3274,15 @@ NS_ASSUME_NONNULL_END
             }
         }
         
+        NSDictionary *customData = [RNTPTDocumentView PT_idAsNSDictionary:propertyMap[PTAnnotationCustomDataKey]];
+        if (customData) {
+            [customData enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL* stop) {
+                if ([key isKindOfClass:[NSString class]] && [value isKindOfClass:[NSString class]]) {
+                    [annot SetCustomData:key value:value];
+                }
+            }];
+        }
+        
         if ([annot IsMarkup]) {
             PTMarkup *markupAnnot = [[PTMarkup alloc] initWithAnn:annot];
             
@@ -3029,7 +3320,140 @@ NS_ASSUME_NONNULL_END
     }
 }
 
-#pragma mark - Get Crop Box
+#pragma mark - Annotation Visibility
+
+- (void)setDrawAnnotations:(BOOL)drawAnnotations
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    [pdfViewCtrl SetDrawAnnotations:drawAnnotations];
+}
+
+- (void)setVisibilityForAnnotation:(NSString *)annotationId pageNumber:(NSInteger)pageNumber visibility:(BOOL)visibility
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+
+    NSError *error;
+    
+    [pdfViewCtrl DocLockReadWithBlock:^(PTPDFDoc * _Nullable doc) {
+        
+        PTAnnot *annot = [self findAnnotWithUniqueID:annotationId onPageNumber:(int)pageNumber pdfViewCtrl:pdfViewCtrl];
+        if (![annot IsValid]) {
+            NSLog(@"Failed to find annotation with id \"%@\" on page number %d",
+                  annotationId, (int)pageNumber);
+            annot = nil;
+            return;
+        }
+        
+        if (visibility) {
+            [pdfViewCtrl ShowAnnotation:annot];
+        } else {
+            [pdfViewCtrl HideAnnotation:annot];
+        }
+        
+        [pdfViewCtrl UpdateWithAnnot:annot page_num:(int)pageNumber];
+        
+    } error:&error];
+    
+    // Throw error as exception to reject promise.
+    if (error) {
+        @throw [NSException exceptionWithName:NSGenericException reason:error.localizedFailureReason userInfo:error.userInfo];
+    }
+}
+
+- (void)setHighlightFields:(BOOL)highlightFields
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    [pdfViewCtrl SetHighlightFields:highlightFields];
+    [pdfViewCtrl Update];
+}
+
+#pragma mark - Get Annotation(s)
+
+- (NSDictionary *)getAnnotationAt:(NSInteger)x y:(NSInteger)y distanceThreshold:(double)distanceThreshold minimumLineWeight:(double)minimumLineWeight
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = self.currentDocumentViewController.document;
+    
+    __block NSDictionary *annotation;
+    if (pdfViewCtrl && pdfDoc) {
+        NSError *error;
+        
+        [pdfViewCtrl DocLockReadWithBlock:^(PTPDFDoc * _Nullable doc) {
+            PTAnnot *annot = [pdfViewCtrl GetAnnotationAt:(int)x y:(int)y distanceThreshold:distanceThreshold minimumLineWeight:minimumLineWeight];
+            
+            if (annot && [annot IsValid]) {
+                annotation = [self getAnnotationData:annot pageNumber:[pdfViewCtrl GetPageNumberFromScreenPt:(double)x y:(double)y] pdfViewCtrl:pdfViewCtrl];
+            }
+        } error:&error];
+        
+        // Throw error as exception to reject promise.
+        if (error) {
+            @throw [NSException exceptionWithName:NSGenericException reason:error.localizedFailureReason userInfo:error.userInfo];
+        }
+    }
+    
+    return annotation ? [annotation copy] : nil;
+}
+
+- (NSArray *)getAnnotationListAt:(NSInteger)x1 y1:(NSInteger)y1 x2:(NSInteger)x2 y2:(NSInteger)y2
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = self.currentDocumentViewController.document;
+    
+    __block NSMutableArray *annotations = [[NSMutableArray alloc] init];
+    if (pdfViewCtrl && pdfDoc) {
+        NSError *error;
+        
+        [pdfViewCtrl DocLockReadWithBlock:^(PTPDFDoc * _Nullable doc) {
+            NSArray <PTAnnot *> *annots = [pdfViewCtrl GetAnnotationListAt:(int)x1 y1:(int)y1 x2:(int)x2 y2:(int)y2];
+            
+            int pageNumber = [pdfViewCtrl GetPageNumberFromScreenPt:(double)x1 y:(double)y1];
+            
+            for (PTAnnot *annot in annots) {
+                if ([annot IsValid]) {
+                    [annotations addObject:[self getAnnotationData:annot pageNumber:pageNumber pdfViewCtrl:pdfViewCtrl]];
+                }
+            }
+        } error:&error];
+        
+        // Throw error as exception to reject promise.
+        if (error) {
+            @throw [NSException exceptionWithName:NSGenericException reason:error.localizedFailureReason userInfo:error.userInfo];
+        }
+    }
+    
+    return [annotations copy];
+}
+
+- (NSArray *)getAnnotationListOnPage:(NSInteger)pageNumber
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    PTPDFDoc *pdfDoc = self.currentDocumentViewController.document;
+    
+    __block NSMutableArray *annotations = [[NSMutableArray alloc] init];
+    if (pdfViewCtrl && pdfDoc) {
+        NSError *error;
+        
+        [pdfViewCtrl DocLockReadWithBlock:^(PTPDFDoc * _Nullable doc) {
+            NSArray <PTAnnot *> *annots = [pdfViewCtrl GetAnnotationsOnPage:(int)pageNumber];
+            
+            for (PTAnnot *annot in annots) {
+                if ([annot IsValid]) {
+                    [annotations addObject:[self getAnnotationData:annot pageNumber:(int)pageNumber pdfViewCtrl:pdfViewCtrl]];
+                }
+            }
+        } error:&error];
+        
+        // Throw error as exception to reject promise.
+        if (error) {
+            @throw [NSException exceptionWithName:NSGenericException reason:error.localizedFailureReason userInfo:error.userInfo];
+        }
+    }
+    
+    return [annotations copy];
+}
+
+#pragma mark - Page
 
 - (NSDictionary<NSString *, NSNumber *> *)getPageCropBox:(NSInteger)pageNumber
 {
@@ -3059,11 +3483,34 @@ NS_ASSUME_NONNULL_END
     return map;
 }
 
-#pragma mark - Set Current Page
-
 - (bool)setCurrentPage:(NSInteger)pageNumber {
     PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
     return [pdfViewCtrl SetCurrentPage:(int)pageNumber];
+}
+
+- (NSArray *)getVisiblePages {
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    return [pdfViewCtrl GetVisiblePages];
+}
+
+- (bool)gotoPreviousPage {
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    return [pdfViewCtrl GotoPreviousPage];
+}
+
+- (bool)gotoNextPage {
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    return [pdfViewCtrl GotoNextPage];
+}
+
+- (bool)gotoFirstPage {
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    return [pdfViewCtrl GotoFirstPage];
+}
+
+- (bool)gotoLastPage {
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    return [pdfViewCtrl GotoLastPage];
 }
 
 #pragma mark - Get Document Path
@@ -3093,6 +3540,34 @@ NS_ASSUME_NONNULL_END
     if (tabManager.selectedItem) {
         [tabManager removeItem:tabManager.selectedItem];
     }
+}
+
+#pragma mark - Page Rotation
+
+- (int)getPageRotation
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    PTRotate rotation = [pdfViewCtrl GetRotation];
+    
+    if (rotation == e_pt0) {
+        return 0;
+    } else if (rotation == e_pt90) {
+        return 90;
+    } else if (rotation == e_pt180) {
+        return 180;
+    } else {
+        return 270;
+    }
+}
+
+- (void)rotateClockwise
+{
+    [self.currentDocumentViewController.pdfViewCtrl RotateClockwise];
+}
+
+- (void)rotateCounterClockwise
+{
+    [self.currentDocumentViewController.pdfViewCtrl RotateCounterClockwise];
 }
 
 #pragma mark - Get Zoom
@@ -3129,7 +3604,7 @@ NS_ASSUME_NONNULL_END
     return scrollPos;
 }
 
-# pragma mark - Canvas Size
+#pragma mark - Canvas Size
 
 - (NSDictionary<NSString *, NSNumber *> *)getCanvasSize
 {
@@ -3141,6 +3616,239 @@ NS_ASSUME_NONNULL_END
     };
     
     return canvasSize;
+}
+
+#pragma mark - Coordinate
+
+- (NSArray *)convertScreenPointsToPagePoints:(NSArray *)points
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    NSMutableArray <NSDictionary *> *convertedPoints = [[NSMutableArray alloc] init];
+    
+    if (pdfViewCtrl) {
+        int currentPage = [pdfViewCtrl GetCurrentPage];
+        
+        PTPDFPoint *pdfPoint = [[PTPDFPoint alloc] initWithPx:0 py:0];
+        PTPDFPoint *convertedPdfPoint;
+        
+        for (NSDictionary *point in points) {
+            [pdfPoint setX:[point[PTCoordinatePointX] doubleValue]];
+            [pdfPoint setY:[point[PTCoordinatePointY] doubleValue]];
+            int pageNumber = currentPage;
+            
+            if ([[point allKeys] containsObject:PTCoordinatePointPageNumber]) {
+                pageNumber = [point[PTCoordinatePointPageNumber] intValue];
+            }
+            convertedPdfPoint = [pdfViewCtrl ConvScreenPtToPagePt:pdfPoint page_num:pageNumber];
+            
+            [convertedPoints addObject:@{
+                PTCoordinatePointX: @([convertedPdfPoint getX]),
+                PTCoordinatePointY: @([convertedPdfPoint getY]),
+            }];
+        }
+    }
+    
+    return [convertedPoints copy];
+}
+
+- (NSArray *)convertPagePointsToScreenPoints:(NSArray *)points
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    NSMutableArray <NSDictionary *> *convertedPoints = [[NSMutableArray alloc] init];
+    
+    if (pdfViewCtrl) {
+        int currentPage = [pdfViewCtrl GetCurrentPage];
+        
+        PTPDFPoint *pdfPoint = [[PTPDFPoint alloc] initWithPx:0 py:0];
+        PTPDFPoint *convertedPdfPoint;
+        
+        for (NSDictionary *point in points) {
+            [pdfPoint setX:[point[PTCoordinatePointX] doubleValue]];
+            [pdfPoint setY:[point[PTCoordinatePointY] doubleValue]];
+            int pageNumber = currentPage;
+            
+            if ([[point allKeys] containsObject:PTCoordinatePointPageNumber]) {
+                pageNumber = [point[PTCoordinatePointPageNumber] intValue];
+            }
+            convertedPdfPoint = [pdfViewCtrl ConvPagePtToScreenPt:pdfPoint page_num:pageNumber];
+            
+            [convertedPoints addObject:@{
+                PTCoordinatePointX: @([convertedPdfPoint getX]),
+                PTCoordinatePointY: @([convertedPdfPoint getY]),
+            }];
+        }
+    }
+    
+    return [convertedPoints copy];
+}
+
+- (int)getPageNumberFromScreenPoint:(double)x y:(double)y
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    return [pdfViewCtrl GetPageNumberFromScreenPt:x y:y];
+}
+
+#pragma mark - Rendering Options
+
+- (void)setProgressiveRendering:(BOOL)progressiveRendering initialDelay:(NSInteger)initialDelay interval:(NSInteger)interval
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    [pdfViewCtrl SetProgressiveRendering:progressiveRendering withInitialDelay:(int)initialDelay withInterval:(int)interval];
+}
+
+
+- (void)setImageSmoothing:(BOOL)imageSmoothing
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    [pdfViewCtrl SetImageSmoothing:imageSmoothing];
+}
+
+- (void)setOverprint:(NSString *)overprint {
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    
+    if ([overprint isEqualToString:PTOverprintModeOnKey]) {
+        [pdfViewCtrl SetOverprint:e_ptop_on];
+    } else if ([overprint isEqualToString:PTOverprintModeOffKey]) {
+        [pdfViewCtrl SetOverprint:e_ptop_off];
+    } else if ([overprint isEqualToString:PTOverprintModePdfxKey]) {
+        [pdfViewCtrl SetOverprint:e_ptop_pdfx_on];
+    }
+}
+
+# pragma mark - Text Search
+
+- (void)findText:(NSString *)searchString matchCase:(BOOL)matchCase matchWholeWord:(BOOL)matchWholeWord searchUp:(BOOL)searchUp regExp:(BOOL)regExp
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    
+    [pdfViewCtrl FindText:searchString MatchCase:matchCase MatchWholeWord:matchWholeWord SearchUp:searchUp RegExp:regExp];
+}
+
+- (void)cancelFindText
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    
+    [pdfViewCtrl CancelFindText];
+}
+
+- (NSDictionary *)getSelection:(NSInteger)pageNumber
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    
+    PTSelection *selection = [pdfViewCtrl GetSelection:(int)pageNumber];
+    
+    if ([selection GetPageNum] != -1 && pdfViewCtrl) {
+        return [self getMapFromSelection:selection];
+    }
+    
+    return nil;
+}
+
+- (NSDictionary *)getMapFromSelection:(PTSelection *)selection
+{
+    NSMutableDictionary *selectionMap = [[NSMutableDictionary alloc] initWithCapacity:4];
+    [selectionMap setValue:[NSNumber numberWithInt:[selection GetPageNum]] forKey:PTTextSelectionPageNumberKey];
+    [selectionMap setValue:[selection GetAsUnicode] forKey:PTTextSelectionUnicodekey];
+    [selectionMap setValue:[selection GetAsHtml] forKey:PTTextSelectionHtmlKey];
+    
+    PTVectorQuadPoint *vectorQuads = [selection GetQuads];
+    NSMutableArray *quads = [[NSMutableArray alloc] initWithCapacity:[vectorQuads size]];
+    
+    for (int i = 0; i < [vectorQuads size]; i ++) {
+        PTQuadPoint *quad = [vectorQuads get:i];
+        NSMutableArray *points = [[NSMutableArray alloc] initWithCapacity:4];
+        for (int j = 0; j < 4; j ++) {
+            PTPDFPoint *point;
+            if (j == 0) {
+                point = [quad getP1];
+            } else if (j == 1) {
+                point = [quad getP2];
+            } else if (j == 2) {
+                point = [quad getP3];
+            } else if (j == 3) {
+                point = [quad getP4];
+            }
+            
+            [points addObject:@{PTTextSelectionQuadPointXKey: [NSNumber numberWithDouble:[point getX]], PTTextSelectionQuadPointYKey: [NSNumber numberWithDouble:[point getY]]}];
+        }
+        
+        [quads addObject:[points copy]];
+    }
+    
+    
+    [selectionMap setValue:[quads copy] forKey:PTTextSelectionQuadsKey];
+    return selectionMap;
+}
+
+- (BOOL)hasSelection
+{
+    return [self.currentDocumentViewController.pdfViewCtrl HasSelection];
+}
+
+- (void)clearSelection
+{
+    [self.currentDocumentViewController.pdfViewCtrl ClearSelection];
+}
+
+- (NSDictionary *)getSelectionPageRange
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    
+    if (pdfViewCtrl) {
+        return @{PTTextSelectionPageRangeBeginKey: [NSNumber numberWithInt:(int)[pdfViewCtrl GetSelectionBeginPage]],
+                 PTTextSelectionPageRangeEndKey: [NSNumber numberWithInt:(int)[pdfViewCtrl GetSelectionEndPage]]
+        };
+    }
+    
+    return nil;
+}
+
+- (bool)hasSelectionOnPage:(NSInteger)pageNumber
+{
+    return [self.currentDocumentViewController.pdfViewCtrl HasSelectionOnPage:(int)pageNumber];
+}
+
+- (BOOL)selectInRect:(NSDictionary *)rect
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    
+    if (pdfViewCtrl && rect) {
+        NSNumber *rectX1 = [RNTPTDocumentView PT_idAsNSNumber:rect[PTRectX1Key]];
+        NSNumber *rectY1 = [RNTPTDocumentView PT_idAsNSNumber:rect[PTRectY1Key]];
+        NSNumber *rectX2 = [RNTPTDocumentView PT_idAsNSNumber:rect[PTRectX2Key]];
+        NSNumber *rectY2 = [RNTPTDocumentView PT_idAsNSNumber:rect[PTRectY2Key]];
+        if (rectX1 && rectY1 && rectX2 && rectY2) {
+            return [pdfViewCtrl SelectX1:[rectX1 doubleValue] Y1:[rectY1 doubleValue] X2:[rectX2 doubleValue] Y2:[rectY2 doubleValue]];
+        }
+    }
+    
+    return NO;
+}
+
+- (BOOL)isThereTextInRect:(NSDictionary *)rect
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    
+    if (pdfViewCtrl && rect) {
+        NSNumber *rectX1 = [RNTPTDocumentView PT_idAsNSNumber:rect[PTRectX1Key]];
+        NSNumber *rectY1 = [RNTPTDocumentView PT_idAsNSNumber:rect[PTRectY1Key]];
+        NSNumber *rectX2 = [RNTPTDocumentView PT_idAsNSNumber:rect[PTRectX2Key]];
+        NSNumber *rectY2 = [RNTPTDocumentView PT_idAsNSNumber:rect[PTRectY2Key]];
+        if (rectX1 && rectY1 && rectX2 && rectY2) {
+            return [pdfViewCtrl IsThereTextInRect:[rectX1 doubleValue] y1:[rectY1 doubleValue] x2:[rectX2 doubleValue] y2:[rectY2 doubleValue]];
+        }
+    }
+    
+    return NO;
+}
+
+- (void)selectAll
+{
+    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
+    
+    if (pdfViewCtrl) {
+        [pdfViewCtrl SelectAll];
+    }
 }
 
 #pragma mark - Helper
@@ -3178,12 +3886,14 @@ NS_ASSUME_NONNULL_END
         return self.documentViewController.moreItemsButtonItem;
     } else if ([buttonString isEqualToString:PTThumbNailsButtonKey]) {
         return self.documentViewController.thumbnailsButtonItem;
-    } else if ([buttonString isEqualToString:PTOutlineListButtonKey]) {
+    } else if ([buttonString isEqualToString:PTListsButtonKey]) {
         return self.documentViewController.navigationListsButtonItem;
     } else if ([buttonString isEqualToString:PTReflowButtonKey]) {
         return self.documentViewController.readerModeButtonItem;
     } else if ([buttonString isEqualToString:PTShareButtonKey]) {
         return self.documentViewController.shareButtonItem;
+    } else if ([buttonString isEqualToString:PTViewControlsButtonKey]) {
+        return self.documentViewController.settingsButtonItem;
     }
     return nil;
 }
