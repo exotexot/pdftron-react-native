@@ -1155,53 +1155,6 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
         });
     }
 
-    @ReactMethod
-    public void findText(final int tag, String searchString, final Promise promise) {
-        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mDocumentViewInstance.findText(tag, searchString);
-                    promise.resolve(null);
-                } catch (Exception ex) {
-                    promise.reject(ex);
-                }
-
-            }
-        });
-    }
-
-    @ReactMethod
-    public void cancelFindText(final int tag, final Promise promise) {
-        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mDocumentViewInstance.cancelFindText(tag);
-                    promise.resolve(null);
-                } catch (Exception ex) {
-                    promise.reject(ex);
-                }
-
-            }
-        });
-    }
-
-    @ReactMethod
-    public void findTextResult(final int tag, boolean nextprev, final Promise promise) {
-        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mDocumentViewInstance.findTextResult(tag, nextprev);
-                    promise.resolve(null);
-                } catch (Exception ex) {
-                    promise.reject(ex);
-                }
-
-            }
-        });
-    }
 
     @ReactMethod
     public void appendSchoolLogo(final int tag, String base64str, boolean isDuplex, final Promise promise) {
@@ -1219,21 +1172,6 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
         });
     }
 
-    @ReactMethod
-    public void changeBackground(final int tag, int r, int g, int b, final Promise promise) {
-        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mDocumentViewInstance.changeBackground(tag, r, g, b);
-                    promise.resolve(null);
-                } catch (Exception ex) {
-                    promise.reject(ex);
-                }
-
-            }
-        });
-    }
 
     @ReactMethod
     public void setColorMode(final int tag, String mode, final Promise promise) {

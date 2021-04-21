@@ -4224,7 +4224,7 @@ static NSMutableArray* globalSearchResults;
 - (void)customInit
 {
     PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
-    [pdfViewCtrl SetPageSpacing:10 vert_col_space:10 horiz_pad:0 vert_pad:50];
+    [pdfViewCtrl SetPageSpacing:5 vert_col_space:5 horiz_pad:0 vert_pad:0];
     [pdfViewCtrl SetupThumbnails:YES generate_at_runtime:YES use_disk_cache:YES thumb_max_side_length:300 max_abs_cache_size:300*300*500 max_perc_cache_size:0.7];
 
     globalSearchResults = [NSMutableArray array];
@@ -4562,12 +4562,6 @@ static NSMutableArray* globalSearchResults;
     return [pdfViewCtrl GetCurrentPage];
 }
 
-
-- (void)changeBackground:(int)r green:(int)g blue:(int)b
-{
-    PTPDFViewCtrl *pdfViewCtrl = self.currentDocumentViewController.pdfViewCtrl;
-    [pdfViewCtrl SetBackgroundColor:(char)r g:(char)g b:(char)b a:255];
-}
 
 
 - (void)setColorMode:(NSString *)mode

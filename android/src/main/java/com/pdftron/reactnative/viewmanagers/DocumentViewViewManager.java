@@ -1027,35 +1027,6 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
     }
 
 
-    public void findText(int tag, String serachString) throws PDFNetException {
-        DocumentView documentView = mDocumentViews.get(tag);
-        if (documentView != null) {
-            documentView.findText(serachString);
-        } else {
-            throw new PDFNetException("", 0L, getName(), "findText", "Unable to find DocumentView.");
-        }
-    }
-
-
-    public void cancelFindText(int tag) throws PDFNetException {
-        DocumentView documentView = mDocumentViews.get(tag);
-        if (documentView != null) {
-            documentView.cancelFindText();
-        } else {
-            throw new PDFNetException("", 0L, getName(), "CancelfindText", "Unable to find DocumentView.");
-        }
-    }
-
-    public void findTextResult(int tag, boolean nextprev) throws PDFNetException {
-        DocumentView documentView = mDocumentViews.get(tag);
-        if (documentView != null) {
-            documentView.findTextResult(nextprev);
-        } else {
-            throw new PDFNetException("", 0L, getName(), "FindTextResult", "Unable to find DocumentView.");
-        }
-    }
-
-
     public void appendSchoolLogo(int tag, String base64str, boolean isDuplex) throws PDFNetException, InterruptedException {
         DocumentView documentView = mDocumentViews.get(tag);
         if (documentView != null) {
@@ -1065,15 +1036,6 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
         }
     }
 
-
-    public void changeBackground(int tag, int r, int g, int b) throws PDFNetException {
-        DocumentView documentView = mDocumentViews.get(tag);
-        if (documentView != null) {
-            documentView.changeBackground(r, g, b);
-        } else {
-            throw new PDFNetException("", 0L, getName(), "changeBackground", "Unable to find DocumentView.");
-        }
-    }
 
     public void setColorMode(int tag, String mode) throws PDFNetException {
         DocumentView documentView = mDocumentViews.get(tag);

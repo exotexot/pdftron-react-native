@@ -1177,22 +1177,6 @@ RCT_REMAP_METHOD(currentPage,
     }
 }
 
-RCT_REMAP_METHOD(changeBackground,
-                 changeBackgroundForDocumentViewTag:(nonnull NSNumber *)tag
-                 red:(int)r
-                 green:(int)g
-                 blue:(int)b
-                 resolver:(RCTPromiseResolveBlock)resolve
-                 rejecter:(RCTPromiseRejectBlock)reject)
-{
-    @try {
-        [[self documentViewManager] changeBackgroundForDocumentViewTag:tag changeBackground:r green:g blue:b];
-        resolve(nil);
-    }
-    @catch (NSException *exception) {
-        reject(@"changeBackground_failed", @"CHANGE BACKRGOUND FAILED MISERABLY", [self errorFromException:exception]);
-    }
-}
 
 RCT_REMAP_METHOD(setColorMode,
                  setColorModeForDocumentViewTag:(nonnull NSNumber *)tag

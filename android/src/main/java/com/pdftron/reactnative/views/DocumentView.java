@@ -3664,7 +3664,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
     public void customInit() throws PDFNetException {
 
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
-        pdfViewCtrl.setPageSpacing(10,10,0,50);
+        pdfViewCtrl.setPageSpacing(5,5,0,0);
         pdfViewCtrl.setupThumbnails(false, true, true, 300, 200 * 200 * 500, 0.7);
 
         // Setting Eraser Type
@@ -3762,35 +3762,6 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
         page.setRotation(newRotation);
         pdfViewCtrl.updatePageLayout();
     }
-
-
-
-    public void findText(String searchString) throws PDFNetException {
-        if (getPdfViewCtrlTabFragment()!=null) {
-            getPdfViewCtrlTabFragment().queryTextSubmit(searchString);
-            getPdfViewCtrlTabFragment().setSearchNavButtonsVisible(true);
-        }
-    }
-
-
-
-    public void cancelFindText() throws PDFNetException {
-        if (getPdfViewCtrlTabFragment()!=null) {
-            getPdfViewCtrlTabFragment().setSearchNavButtonsVisible(false);
-            getPdfViewCtrlTabFragment().cancelFindText();
-            getPdfViewCtrlTabFragment().exitSearchMode();
-        }
-    }
-
-    public void findTextResult(boolean nextprev) throws PDFNetException {
-
-        if (nextprev) {
-            getPdfViewCtrlTabFragment().gotoNextSearch();
-        } else {
-            getPdfViewCtrlTabFragment().gotoPreviousSearch();
-        }
-    }
-
 
 
     public ReadableArray search(String searchString, boolean isCase, boolean isWhole) throws PDFNetException {

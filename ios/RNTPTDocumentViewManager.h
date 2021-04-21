@@ -170,8 +170,6 @@
 
 - (int)currentPageForDocumentViewTag:(NSNumber *)tag;
 
-- (void)changeBackgroundForDocumentViewTag:(NSNumber *)tag changeBackground:(int)r green:(int)g blue:(int)b;
-
 - (void)setColorModeForDocumentViewTag:(NSNumber *)tag setColorMode:(NSString *)mode;
 
 - (void)setContinuousForDocumentViewTag:(NSNumber *)tag setContinuous:(BOOL)toggle;
