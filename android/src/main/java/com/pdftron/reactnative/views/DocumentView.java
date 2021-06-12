@@ -3810,6 +3810,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
 
         if (pdfViewCtrl != null) {
             pdfViewCtrl.cancelFindText();
+            getPdfViewCtrlTabFragment().setSearchNavButtonsVisible(false);
+            getPdfViewCtrlTabFragment().exitSearchMode();
         }
     }
 
