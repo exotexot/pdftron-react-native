@@ -871,6 +871,35 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
         });
     }
 
+    @ReactMethod
+    public void findText(final int tag, final String searchString, final boolean matchCase, boolean matchWholeWord, boolean searchUp, boolean regExp, final Promise promise) {
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mDocumentViewInstance.findText(tag, searchString, matchCase, matchWholeWord, searchUp, regExp);
+                    promise.resolve(null);
+                } catch (Exception ex) {
+                    promise.reject(ex);
+                }
+            }
+        });
+    }
+
+    @ReactMethod
+    public void cancelFindText(final int tag, final Promise promise) {
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mDocumentViewInstance.cancelFindText(tag);
+                    promise.resolve(null);
+                } catch (Exception ex) {
+                    promise.reject(ex);
+                }
+            }
+        });
+    }
 
     @ReactMethod
     public void getSelection(final int tag, final int pageNumber, final Promise promise) {
@@ -1085,37 +1114,6 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
                     promise.reject(ex);
                 }
 
-            }
-        });
-    }
-
-    @ReactMethod
-    public void findText(final int tag, String searchString, final Promise promise) {
-        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mDocumentViewInstance.findText(tag, searchString);
-                    promise.resolve(null);
-                } catch (Exception ex) {
-                    promise.reject(ex);
-                }
-
-            }
-        });
-    }
-
-    @ReactMethod
-    public void cancelFindText(final int tag, final Promise promise) {
-        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mDocumentViewInstance.cancelFindText(tag);
-                    promise.resolve(null);
-                } catch (Exception ex) {
-                    promise.reject(ex);
-                }
             }
         });
     }

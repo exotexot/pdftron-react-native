@@ -36,7 +36,6 @@ import com.pdftron.pdf.Action;
 import com.pdftron.pdf.ActionParameter;
 import com.pdftron.pdf.Annot;
 import com.pdftron.pdf.Field;
-import com.pdftron.pdf.Highlights;
 import com.pdftron.pdf.PDFDoc;
 import com.pdftron.pdf.PDFRasterizer;
 import com.pdftron.pdf.PDFDraw;
@@ -3465,13 +3464,21 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
         return colorNumber;
     }
 
-//    public void findText(String searchString, boolean matchCase, boolean matchWholeWord, boolean searchUp, boolean regExp) {
-//        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
-//
-//        if (pdfViewCtrl != null) {
-//            pdfViewCtrl.findText(searchString, matchCase, matchWholeWord, searchUp, regExp);
-//        }
-//    }
+    public void findText(String searchString, boolean matchCase, boolean matchWholeWord, boolean searchUp, boolean regExp) {
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+
+        if (pdfViewCtrl != null) {
+            pdfViewCtrl.findText(searchString, matchCase, matchWholeWord, searchUp, regExp);
+        }
+    }
+
+    public void cancelFindText() {
+        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
+
+        if (pdfViewCtrl != null) {
+            pdfViewCtrl.cancelFindText();
+        }
+    }
 
     public WritableMap getSelection(int pageNumber) {
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
@@ -3798,22 +3805,6 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
     }
 
 
-    public void findText(String searchString) throws PDFNetException {
-        if (getPdfViewCtrlTabFragment()!=null) {
-            getPdfViewCtrlTabFragment().queryTextSubmit(searchString);
-            getPdfViewCtrlTabFragment().setSearchNavButtonsVisible(true);
-        }
-    }
-
-    public void cancelFindText() {
-        PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
-
-        if (pdfViewCtrl != null) {
-            pdfViewCtrl.cancelFindText();
-        }
-    }
-
-
     public ReadableArray search(String searchString, boolean isCase, boolean isWhole) throws PDFNetException {
 
         PDFViewCtrl pdfViewCtrl = getPdfViewCtrl();
@@ -3854,13 +3845,10 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
 
                 searchResults.pushMap(readableMap);
 
-
             } else {
                 // this may be wrong
                 moreToFind = false;
             }
-
-
 
         }
         pdfDoc.unlock();
