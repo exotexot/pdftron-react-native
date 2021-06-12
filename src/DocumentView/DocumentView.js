@@ -651,21 +651,21 @@ export default class DocumentView extends PureComponent {
     return Promise.resolve();
   }    
 
-  findText = (searchString, matchCase, matchWholeWord, searchUp, regExp) => {
-    const tag = findNodeHandle(this._viewerRef);
-    if (tag != null) {
-      DocumentViewManager.findText(tag, searchString, matchCase, matchWholeWord, searchUp, regExp);
-    }
-    return Promise.resolve();
-  }
+  // findText = (searchString, matchCase, matchWholeWord, searchUp, regExp) => {
+  //   const tag = findNodeHandle(this._viewerRef);
+  //   if (tag != null) {
+  //     DocumentViewManager.findText(tag, searchString, matchCase, matchWholeWord, searchUp, regExp);
+  //   }
+  //   return Promise.resolve();
+  // }
 
-  cancelFindText = () => {
-    const tag = findNodeHandle(this._viewerRef);
-    if (tag != null) {
-      DocumentViewManager.cancelFindText(tag);
-    }
-    return Promise.resolve();
-  }
+  // cancelFindText = () => {
+  //   const tag = findNodeHandle(this._viewerRef);
+  //   if (tag != null) {
+  //     DocumentViewManager.cancelFindText(tag);
+  //   }
+  //   return Promise.resolve();
+  // }
 
   getSelection = (pageNumber) => {
     const tag = findNodeHandle(this._viewerRef);
